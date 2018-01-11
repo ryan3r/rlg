@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Get the assignment number
+read -p "Assignment number: " assignment
+
+# Remove any binaries
+make clean
+
+# Make the change log
+git log > CHANGELOG
+
+# Create a copy with the correct name
+cd ..
+cp -R /workspace /tmp/Ray_Ryan.assignment-$assignment
+
+# Make the tar ball
+cd /tmp
+tar cvfz Ray_Ryan.assignment-$assignment.tar.gz Ray_Ryan.assignment-$assignment \
+	--exclude=".*" --exclude="deploy" --exclude="Vagrantfile" --exclude="*.tar.gz"
+
+# Move the tar ball to the workspace
+cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz /workspace/Ray_Ryan.assignment-$assignment.tar.gz
+
+# Clean up
+rm -rf Ray_Ryan.assignment-$assignment
+rm -rf Ray_Ryan.assignment-$assignment.tar.gz
