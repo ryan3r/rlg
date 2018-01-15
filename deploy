@@ -27,7 +27,8 @@ cd ..
 
 # Make the tar ball
 tar cfz Ray_Ryan.assignment-$assignment.tar.gz Ray_Ryan.assignment-$assignment \
-	--exclude=".*" --exclude="deploy*" --exclude="Vagrantfile" --exclude="*.tar.gz"
+	--exclude=".*" --exclude="deploy" --exclude="Vagrantfile" --exclude="*.tar.gz" \
+	--exclude="*.ps1"
 
 # Move the tar ball to the workspace
 cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz /workspace/Ray_Ryan.assignment-$assignment.tar.gz

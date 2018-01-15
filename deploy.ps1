@@ -26,3 +26,6 @@ pscp -q Ray_Ryan.assignment-$assignment.tar.gz ryan@zoom.pi:/home/ryan/cs327-rel
 if(!$?) {
 	exit 1
 }
+
+# Update the latest link
+plink ryan@zoom.pi "ln -s /home/ryan/cs327-releases/Ray_Ryan.assignment-$assignment.tar.gz /home/ryan/cs327-releases/latest"
