@@ -1,10 +1,17 @@
 #!/bin/bash
 
+# Make sure we are in the right place
+cd /workspace
+
 # Get the assignment number
-read -p "Assignment number: " assignment
+if [ -z "$1" ]; then
+	read -p "Assignment number: " assignment
+else
+	assignment=$1
+fi
 
 # Remove any binaries
-make clean
+make clean -s
 
 # Make the change log
 git log > CHANGELOG
@@ -13,10 +20,14 @@ git log > CHANGELOG
 cd ..
 cp -R /workspace /tmp/Ray_Ryan.assignment-$assignment
 
+# Remove any empty folders
+cd /tmp/Ray_Ryan.assignment-$assignment
+find . -type d -empty -delete
+cd ..
+
 # Make the tar ball
-cd /tmp
-tar cvfz Ray_Ryan.assignment-$assignment.tar.gz Ray_Ryan.assignment-$assignment \
-	--exclude=".*" --exclude="deploy" --exclude="Vagrantfile" --exclude="*.tar.gz"
+tar cfz Ray_Ryan.assignment-$assignment.tar.gz Ray_Ryan.assignment-$assignment \
+	--exclude=".*" --exclude="deploy*" --exclude="Vagrantfile" --exclude="*.tar.gz"
 
 # Move the tar ball to the workspace
 cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz /workspace/Ray_Ryan.assignment-$assignment.tar.gz
@@ -24,3 +35,6 @@ cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz /workspace/Ray_Ryan.assignment-$a
 # Clean up
 rm -rf Ray_Ryan.assignment-$assignment
 rm -rf Ray_Ryan.assignment-$assignment.tar.gz
+
+# Tell the user that we are done
+echo "Build complete"
