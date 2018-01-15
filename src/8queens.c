@@ -78,7 +78,7 @@ void placeQueen() {
 
 	// check every spot in then board for an open space
 	for(i = 0; i < size; ++i) {
-		// already a queen here
+		// already a queen in this column
 		if(hasQueen(i)) continue;
 
 		for(; j < size; ++j) {
