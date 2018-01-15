@@ -5,8 +5,6 @@ queen() {
 	# tell the user what were doing
 	echo -n "[ .. ]: $1 queens"
 
-	# recompile for this many queens
-	gcc src/8queens.c -DSIZE=$1 -o build/8queens
 	# count the number of results
 	count=$(build/8queens $1 | wc -l)
 

@@ -4,16 +4,15 @@
 #include <math.h>
 #include <string.h>
 
-// make default to 8 queens
-#ifndef SIZE
-#define SIZE 8
-#endif
-
 // track how many queens we have
 int numQueens = 0;
+// the number of queens we want to get
+int size;
+// the list of queens
+int **queens;
 
 // check if there is a queen in this row
-bool hasQueen(int queens[][2], int i) {
+bool hasQueen(int i) {
 	int k;
 
 	for(k = 0; k < numQueens; ++k) {
@@ -26,7 +25,7 @@ bool hasQueen(int queens[][2], int i) {
 }
 
 // check if a queen can be placed here
-bool isOpen(int queens[][2], int i, int j) {
+bool isOpen(int i, int j) {
 	int k;
 
 	for(k = 0; k < numQueens; ++k) {
@@ -41,12 +40,12 @@ bool isOpen(int queens[][2], int i, int j) {
 }
 
 // place/remove a queen in a spot
-bool updateQueen(int queens[][2], int i, int j, bool place) {
+bool updateQueen(int i, int j, bool place) {
 	int k;
 	int variant = place ? 1 : -1;
 
 	// we can place a queen
-	if(isOpen(queens, i, j) || !place) {
+	if(isOpen(i, j) || !place) {
 		numQueens += variant;
 
 		if(place) {
@@ -61,7 +60,7 @@ bool updateQueen(int queens[][2], int i, int j, bool place) {
 }
 
 // print the queen locations
-void printPlacements(int queens[][2]) {
+void printPlacements() {
 	int i;
 
 	// convert queens to string points
@@ -73,31 +72,31 @@ void printPlacements(int queens[][2]) {
 }
 
 // find a place for a queen
-void placeQueen(int queens[][2]) {
+void placeQueen() {
 	int i, j = 0;
 	bool queenPlaced = false;
 
 	// check every spot in then board for an open space
-	for(i = 0; i < SIZE; ++i) {
+	for(i = 0; i < size; ++i) {
 		// already a queen here
-		if(hasQueen(queens, i)) continue;
+		if(hasQueen(i)) continue;
 
-		for(; j < SIZE; ++j) {
+		for(; j < size; ++j) {
 			// try to place a queen in this spot
-			bool placed = updateQueen(queens, i, j, true);
+			bool placed = updateQueen(i, j, true);
 
 			if(placed) {
 				// we have reached the number of queens
-				if(numQueens == SIZE) {
-					printPlacements(queens);
+				if(numQueens == size) {
+					printPlacements();
 				}
 				// start another queen
 				else {
-					placeQueen(queens);
+					placeQueen();
 				}
 
 				// remove this queen
-				updateQueen(queens, i, j, false);
+				updateQueen(i, j, false);
 			}
 		}
 	}
@@ -105,7 +104,23 @@ void placeQueen(int queens[][2]) {
 
 // initialize the queens and start
 int main(int argc, char **argv) {
-	int queens[SIZE][2];
+	int i;
 
-	placeQueen(queens);
+	// use the number of queens we are given
+	if(argc > 1) {
+		size = atoi(argv[1]);
+	}
+	// default to 8 queens
+	else {
+		size = 8;
+	}
+
+	// allocate the queens array
+	queens = malloc(size * sizeof(int*));
+
+	for(i = 0; i < size; ++i) {
+		queens[i] = malloc(2 * sizeof(int));
+	}
+
+	placeQueen();
 }
