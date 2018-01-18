@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Make sure we are in the right place
-cd /workspace
-
 # Get the assignment number
 if [ -z "$1" ]; then
 	read -p "Assignment number: " assignment
@@ -18,7 +15,7 @@ git log > CHANGELOG
 
 # Create a copy with the correct name
 cd ..
-cp -R /workspace /tmp/Ray_Ryan.assignment-$assignment
+cp -R ~/workspace /tmp/Ray_Ryan.assignment-$assignment
 
 # Remove any empty folders
 cd /tmp/Ray_Ryan.assignment-$assignment
@@ -27,11 +24,10 @@ cd ..
 
 # Make the tar ball
 tar cfz Ray_Ryan.assignment-$assignment.tar.gz Ray_Ryan.assignment-$assignment \
-	--exclude=".*" --exclude="deploy" --exclude="Vagrantfile" --exclude="*.tar.gz" \
-	--exclude="*.ps1"
+	--exclude=".*" --exclude="deploy" --exclude="*.tar.gz"
 
 # Move the tar ball to the workspace
-cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz /workspace/Ray_Ryan.assignment-$assignment.tar.gz
+cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz ~/workspace/Ray_Ryan.assignment-$assignment.tar.gz
 
 # Clean up
 rm -rf Ray_Ryan.assignment-$assignment
