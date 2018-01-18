@@ -9,7 +9,7 @@ test: build/8queens
 
 clean:
 	rm -f *.tar.gz
-	rm -f build/*
+	rm -rf build
 
 buildDir:
 	@mkdir -p build
