@@ -1,11 +1,10 @@
-all: build/8queens
+all: build/dungeon
 
+build/dungeon: src/*.c include/*.h buildDir
+	gcc -std=c11 src/*.c -o build/dungeon -I include -Wall -Werror -g
 
-build/8queens: buildDir src/8queens.c
-	gcc src/8queens.c -o build/8queens
+test: build/dungeon
 
-test: build/8queens
-	tests/queens
 
 clean:
 	rm -f *.tar.gz
