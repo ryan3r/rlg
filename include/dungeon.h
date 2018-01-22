@@ -8,6 +8,12 @@
 #define DUNGEON_WIDTH 80
 #define DUNGEON_HEIGHT 21
 
+// the percentage of the dungeon that can be rooms [0, 1]
+#define PERCENT_OF_DUNGON_ROOMS .2
+#define MAX_FAILED_PLACEMENTS 5000
+#define MIN_ROOM_SIZE 5
+#define MAX_ROOM_SIZE 10
+
 // the location and size of a room
 typedef struct {
 	int x;

@@ -30,17 +30,20 @@ void generate_hardness_matrix() {
 	(b <= a && a <= b + bWidth) || \
 	(b <= a + aWidth && a + aWidth <= b + bWidth))
 
+int __total_room_area = 0;
+
 bool create_room(int fails) {
 	// too many failed attempts
-	if(fails > 500) return false;
+	if(fails > MAX_FAILED_PLACEMENTS ||
+		__total_room_area > (DUNGEON_WIDTH * DUNGEON_HEIGHT) * PERCENT_OF_DUNGON_ROOMS) return false;
 
 	room_t newRoom;
 
 	// initialize the new room
 	newRoom.x = rand() % DUNGEON_WIDTH;
 	newRoom.y = rand() % DUNGEON_HEIGHT;
-	newRoom.height = rand() % 7 + 3;
-	newRoom.width = rand() % 7 + 3;
+	newRoom.height = rand() % (MAX_ROOM_SIZE - MIN_ROOM_SIZE + 1) + MIN_ROOM_SIZE;
+	newRoom.width = rand() % (MAX_ROOM_SIZE - MIN_ROOM_SIZE + 1) + MIN_ROOM_SIZE;
 
 	// check if it intersects with other rooms
 	bool isOk = true;
@@ -66,6 +69,9 @@ bool create_room(int fails) {
 
 		// add this to the list of rooms
 		vector_add(&room_vector, &newRoom);
+
+		// track the area of the dungeon that is taken up by the rooms
+		__total_room_area += newRoom.width * newRoom.height;
 
 		return true;
 	}
