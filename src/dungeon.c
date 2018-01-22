@@ -9,8 +9,8 @@ bool is_boundary(unsigned int x, unsigned int y) {
 }
 
 void generate_hardness_matrix() {
-	foreach(y, DUNGEON_HEIGHT) {
-		foreach(x, DUNGEON_WIDTH) {
+	FOR(y, DUNGEON_HEIGHT) {
+		FOR(x, DUNGEON_WIDTH) {
 			// set outer wall harness to 255
 			if(is_boundary(x, y)) {
 				hardness_matrix[y][x] = 255;

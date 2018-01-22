@@ -22,7 +22,7 @@ typedef unsigned char hardness_t;
 hardness_t hardness_matrix[DUNGEON_HEIGHT][DUNGEON_WIDTH];
 
 // the rooms in the dungeon
-//room_t *room_vector = NULL;
+//vector_t *room_vector = NULL;
 
 // generate the harnesses for the dungeon
 void generate_hardness_matrix();

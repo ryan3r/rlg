@@ -11,8 +11,8 @@ int main() {
 
 	create_room();
 
-	foreach(y, DUNGEON_HEIGHT) {
-		foreach(x, DUNGEON_WIDTH) {
+	FOR(y, DUNGEON_HEIGHT) {
+		FOR(x, DUNGEON_WIDTH) {
 			printf("%3d ", hardness_matrix[y][x]);
 		}
 
