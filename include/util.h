@@ -1,3 +1,8 @@
+#ifndef UTIL_HEADER_DEFINED
+#define UTIL_HEADER_DEFINED
+
+#include <stdlib.h>
+
 // the typical for each loop
 #define FOR(var, end) \
 	for(unsigned int var = 0; var < end; ++var)
@@ -34,3 +39,5 @@ void* vector_end(vector_t *vector);
 
 #define vector_for(type, var, vector) \
 	for(type *var = (vector)->begin, *__end_ ## var = vector_end(vector); var < __end_ ## var; ++var)
+
+#endif
