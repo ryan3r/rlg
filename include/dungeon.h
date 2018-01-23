@@ -37,4 +37,7 @@ void generate_hardness_matrix();
 // create a new room
 bool create_room(int fails);
 
+// create a hall way between two rooms
+void connect_rooms(room_t *roomA, room_t *roomB);
+
 #endif
