@@ -45,7 +45,7 @@ bool is_valid_room(room_t newRoom) {
 				break;
 		}
 	}
-
+	
 	return isOk &&
 		// check walls
 		!OUT_OF_BOUNDS(newRoom.x - 1, newRoom.y - 1) &&

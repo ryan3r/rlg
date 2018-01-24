@@ -1,14 +1,27 @@
-all: build/dungeon
+GCC_FLAGS = -std=c11 -I include -Wall -Werror -g
 
-build/dungeon: src/*.c include/*.h buildDir
-	gcc -std=c11 src/*.c -o build/dungeon -I include -Wall -Werror -g
+# objects for the program
+SRC_OBJECTS = build/dungeon.o build/util.o
+# objects for the tests
+TEST_OBJECTS = build/dungeon_test.o
 
-test: tests/*.c src/*.c include/*.h buildDir
-	gcc -std=c11 tests/*.c src/dungeon.c src/util.c -o build/tests -I include -Wall -Werror -g
-	build/tests
 
+# build the program
+build/dungeon: src/main.c $(SRC_OBJECTS)
+	@gcc $^ -o $@ $(GCC_FLAGS)
+
+# build the tests
+test: $(TEST_OBJECTS) $(SRC_OBJECTS)
+	@gcc $^ -o build/tests $(GCC_FLAGS)
+	@build/tests
+
+# build individual files
+build/%.o: tests/%.c
+	@gcc -c $^ -o $@ $(GCC_FLAGS)
+
+build/%.o: src/%.c
+	@gcc -c $^ -o $@ $(GCC_FLAGS)
+
+# clean up build artifacts
 clean:
-	rm -rf build
-
-buildDir:
-	@mkdir -p build
+	@rm -rf build/*
