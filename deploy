@@ -15,7 +15,7 @@ git log > CHANGELOG
 
 # Create a copy with the correct name
 cd ..
-cp -R ~/workspace /tmp/Ray_Ryan.assignment-$assignment
+cp -R  /media/sf_cs327/ /tmp/Ray_Ryan.assignment-$assignment
 
 # Remove any empty folders
 cd /tmp/Ray_Ryan.assignment-$assignment
@@ -27,7 +27,7 @@ tar cfz Ray_Ryan.assignment-$assignment.tar.gz Ray_Ryan.assignment-$assignment \
 	--exclude=".*" --exclude="deploy" --exclude="*.tar.gz"
 
 # Move the tar ball to the workspace
-cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz ~/workspace/Ray_Ryan.assignment-$assignment.tar.gz
+cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz  /media/sf_cs327/Ray_Ryan.assignment-$assignment.tar.gz
 
 # Clean up
 rm -rf Ray_Ryan.assignment-$assignment
