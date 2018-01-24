@@ -8,7 +8,7 @@ test: tests/*.c src/*.c include/*.h buildDir
 	build/tests
 
 clean:
-	rm -rf build *.tar.gz
+	rm -rf build
 
 buildDir:
 	@mkdir -p build

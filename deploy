@@ -24,10 +24,10 @@ cd ..
 
 # Make the tar ball
 tar cfz Ray_Ryan.assignment-$assignment.tar.gz Ray_Ryan.assignment-$assignment \
-	--exclude=".*" --exclude="deploy" --exclude="*.tar.gz"
+	--exclude=".*" --exclude="deploy" --exclude="*.tar.gz" --exclude="submissions"
 
 # Move the tar ball to the workspace
-cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz  /media/sf_cs327/Ray_Ryan.assignment-$assignment.tar.gz
+cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz  /media/sf_cs327/submissions/Ray_Ryan.assignment-$assignment.tar.gz
 
 # Clean up
 rm -rf Ray_Ryan.assignment-$assignment
