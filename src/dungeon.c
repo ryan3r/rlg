@@ -3,9 +3,11 @@
 #include <dungeon.h>
 #include <util.h>
 #include <stdbool.h>
+#include <math.h>
+#include <unistd.h>
 
 // check if a point is in bounds
-#define INBOUNDS(x, y) \
+#define OUT_OF_BOUNDS(x, y) \
 	(x <= 0 || y <= 0 || x >= DUNGEON_WIDTH - 1 || y >= DUNGEON_HEIGHT - 1)
 
 // generate the harnesses for the dungeon
@@ -13,7 +15,7 @@ void generate_hardness_matrix() {
 	FOR(y, DUNGEON_HEIGHT) {
 		FOR(x, DUNGEON_WIDTH) {
 			// set outer wall harness to 255
-			if(INBOUNDS(x, y)) {
+			if(OUT_OF_BOUNDS(x, y)) {
 				hardness_matrix[y][x] = 255;
 
 				continue;
@@ -46,8 +48,8 @@ bool is_valid_room(room_t newRoom) {
 
 	return isOk &&
 		// check walls
-		!INBOUNDS(newRoom.x - 1, newRoom.y - 1) &&
-		!INBOUNDS(newRoom.x + newRoom.width + 1, newRoom.y + newRoom.height + 1);
+		!OUT_OF_BOUNDS(newRoom.x - 1, newRoom.y - 1) &&
+		!OUT_OF_BOUNDS(newRoom.x + newRoom.width + 1, newRoom.y + newRoom.height + 1);
 }
 
 int __total_room_area = 0;
@@ -89,10 +91,142 @@ bool create_room(int fails) {
 	}
 }
 
-#undef INTERSECTS
-#undef INBOUNDS
+#define IS_END(m, n) \
+	((roomB.x <= m && m <= roomB.x + roomB.width) && \
+	 (roomB.y <= n && n <= roomB.y + roomB.height))
+
+#define CAN_MOVE_FORWARD(x, y) \
+	(\
+		!OUT_OF_BOUNDS(x + x_move * x_direction, y + !x_move * y_direction) && \
+		!OUT_OF_BOUNDS(x + x_move * x_direction * 2, y + !x_move * y_direction * 2) && \
+		(\
+			(hardness_matrix[y + !x_move * y_direction][x + x_move * x_direction] || \
+				IS_END(x + x_move * x_direction, y + !x_move * y_direction)) && \
+			 (hardness_matrix[y + !x_move * y_direction * 2][x + x_move * x_direction * 2] || \
+				 IS_END(x + x_move * x_direction * 2, y + !x_move * y_direction * 2)) \
+		 ) \
+	 )
 
 // create a hall way between two rooms
-void connect_rooms(room_t *roomA, room_t *roomB) {
+void connect_rooms(room_t roomA, room_t roomB) {
+	// get the direction we want to go in
+	int x_direction = roomB.x - roomA.x;
+	int y_direction = roomB.y - roomA.y;
 
+	// choose a starting point
+	int x = roomA.x,
+		y = roomA.y;
+
+	bool movedX = true;
+	bool movedY = true;
+
+	// move to the part of this room that is closest to the other room
+	if(x_direction >= roomA.width) {
+		x += roomA.width;
+	}
+	else if(x_direction > 0) {
+		x += x_direction;
+		x_direction = 0;
+	}
+	else {
+		movedX = false;
+	}
+
+	if(y_direction >= roomA.height) {
+		y += roomA.height;
+	}
+	else if(y_direction > 0) {
+		y += y_direction;
+		y_direction = 0;
+	}
+	else {
+		movedY = false;
+	}
+
+	// convert the directions to +-1
+	if(x_direction != 0) x_direction /= abs(x_direction);
+	if(y_direction != 0) y_direction /= abs(y_direction);
+
+	// move out of the room
+	if(!movedX && !movedY) x += x_direction;
+
+	int iter = 0;
+
+	bool x_move = true;
+
+	// draw the line
+	while(!IS_END(x, y) && ++iter < 100000) {
+		// place part of the path
+		hardness_matrix[y][x] = 255;
+
+		// try moving up and down and take the fastest
+		if(!CAN_MOVE_FORWARD(x, y)) {
+			int up = x_move ? y : x;
+			int down = x_move ? y : x;
+
+			// go up
+			while(!CAN_MOVE_FORWARD((x_move ? x : up), (x_move ? up : y)) &&
+				up < (x_move ? DUNGEON_HEIGHT : DUNGEON_WIDTH))
+					++up;
+
+			// go down
+			while(!CAN_MOVE_FORWARD((x_move ? x : down), (x_move ? down : y)) &&
+				down >= 0)
+				--down;
+
+			// choose the shotest path
+			bool goUp = up - (x_move ? x : y) > (x_move ? x : y) - down;
+
+			// draw the path
+			while((x_move ? y : x) != (goUp ? up : down)) {
+				*(x_move ? &y : &x) += goUp ? 1 : -1;
+				hardness_matrix[y][x] = 255;
+			}
+		}
+
+		// move to the next spot in the path
+		*(x_move ? &x : &y) += x_move ? x_direction : y_direction;
+
+		// change directions
+		if(roomB.x <= x && x <= roomB.x + roomB.width) {
+			x_move = false;
+			y_direction = roomB.y == y ? 0 : (roomB.y - y) / abs(roomB.y - y);
+		}
+
+		if(roomB.y <= y && y <= roomB.y + roomB.height) {
+			x_move = true;
+			x_direction = roomB.x == x ? 0 : (roomB.x - x) / abs(roomB.x - x);
+		}
+
+		/*
+		FOR(m, DUNGEON_HEIGHT) {
+			FOR(n, DUNGEON_WIDTH) {
+				if(m == y + !x_move * y_direction && n == x + x_move * x_direction) {
+					printf("#");
+					continue;
+				}
+
+				if(m == y + !x_move * y_direction * 2 && n == x + x_move * x_direction * 2) {
+					printf("#");
+					continue;
+				}
+
+				printf(hardness_matrix[m][n] == 0 ? "." : hardness_matrix[m][n] == 255 ? "x" : " ");
+			}
+
+			printf("\n");
+		}
+
+		sleep(1);
+		*/
+	}
+
+	if(hardness_matrix[y][x]) {
+		hardness_matrix[y][x] = 255;
+	}
 }
+
+#undef OUT_OF_BOUNDS
+#undef INTERSECTS
+#undef CAN_MOVE_FORWARD
+#undef IS_END

@@ -23,7 +23,7 @@ void vector_add(vector_t *vector, void *value);
 
 // get a value in a vector
 #define vector_get(vector, type, index) \
-	*(type*) ((vector)->values + index * (vector)->elementSize)
+	*(type*) ((vector)->begin + index * (vector)->elementSize)
 
 // remove the last value from a vector
 void vector_remove_last(vector_t *vector);
