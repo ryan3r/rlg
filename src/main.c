@@ -24,13 +24,14 @@ int main(int argc, char **argv) {
 
 	while(create_room(0));
 
-	//FOR(i, room_vector.length)
-		//for(int j = i - 1; j >= 0; --j)
-			connect_rooms(vector_get(&room_vector, room_t, 0), vector_get(&room_vector, room_t, 1));
+	FOR(i, room_vector.length)
+		for(int j = i - 1; j >= 0; --j)
+			connect_rooms(vector_get(&room_vector, room_t, i), vector_get(&room_vector, room_t, j));
 
 	FOR(y, DUNGEON_HEIGHT) {
 		FOR(x, DUNGEON_WIDTH) {
-			printf(hardness_matrix[y][x] == 0 ? "m" : hardness_matrix[y][x] == 255 ? "x" : " ");
+			printf(hardness_matrix[y][x] == ROOM ? "." :
+				hardness_matrix[y][x] == CORRIDOR ? "#"  : " ");
 		}
 
 		printf("\n");

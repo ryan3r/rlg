@@ -14,6 +14,11 @@
 #define MIN_ROOM_SIZE 5
 #define MAX_ROOM_SIZE 10
 
+// the values for different spots
+#define CORRIDOR 1
+#define ROOM 0
+#define BOUNDARY 255
+
 // the location and size of a room
 typedef struct {
 	int x;

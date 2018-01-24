@@ -16,12 +16,12 @@ void generate_hardness_matrix() {
 		FOR(x, DUNGEON_WIDTH) {
 			// set outer wall harness to 255
 			if(OUT_OF_BOUNDS(x, y)) {
-				hardness_matrix[y][x] = 255;
+				hardness_matrix[y][x] = BOUNDARY;
 
 				continue;
 			}
 
-			hardness_matrix[y][x] = rand() % 254 + 1;
+			hardness_matrix[y][x] = rand() % 253 + 2;
 		}
 	}
 }
@@ -73,7 +73,7 @@ bool create_room(int fails) {
 		// add the room to the harness matrix
 		for(int m = newRoom.y; m < newRoom.y + newRoom.height; ++m) {
 			for(int n = newRoom.x; n < newRoom.x + newRoom.width; ++n) {
-				hardness_matrix[m][n] = 0;
+				hardness_matrix[m][n] = ROOM;
 			}
 		}
 
@@ -91,21 +91,21 @@ bool create_room(int fails) {
 	}
 }
 
+// check if we are in the ending room
 #define IS_END(m, n) \
 	((roomB.x <= m && m <= roomB.x + roomB.width) && \
 	 (roomB.y <= n && n <= roomB.y + roomB.height))
 
+// check if we can move forward one space
 #define CAN_MOVE_FORWARD(x, y) \
+	(!OUT_OF_BOUNDS(x + x_move * x_direction, y + !x_move * y_direction) && \
+	!OUT_OF_BOUNDS(x + x_move * x_direction * 2, y + !x_move * y_direction * 2) && \
 	(\
-		!OUT_OF_BOUNDS(x + x_move * x_direction, y + !x_move * y_direction) && \
-		!OUT_OF_BOUNDS(x + x_move * x_direction * 2, y + !x_move * y_direction * 2) && \
-		(\
-			(hardness_matrix[y + !x_move * y_direction][x + x_move * x_direction] || \
-				IS_END(x + x_move * x_direction, y + !x_move * y_direction)) && \
-			 (hardness_matrix[y + !x_move * y_direction * 2][x + x_move * x_direction * 2] || \
-				 IS_END(x + x_move * x_direction * 2, y + !x_move * y_direction * 2)) \
-		 ) \
-	 )
+		(hardness_matrix[y + !x_move * y_direction][x + x_move * x_direction] || \
+			IS_END(x + x_move * x_direction, y + !x_move * y_direction)) && \
+		 (hardness_matrix[y + !x_move * y_direction * 2][x + x_move * x_direction * 2] || \
+			 IS_END(x + x_move * x_direction * 2, y + !x_move * y_direction * 2)) \
+	 ))
 
 // create a hall way between two rooms
 void connect_rooms(room_t roomA, room_t roomB) {
@@ -150,14 +150,12 @@ void connect_rooms(room_t roomA, room_t roomB) {
 	// move out of the room
 	if(!movedX && !movedY) x += x_direction;
 
-	int iter = 0;
-
 	bool x_move = true;
 
 	// draw the line
-	while(!IS_END(x, y) && ++iter < 100000) {
+	while(!IS_END(x, y)) {
 		// place part of the path
-		hardness_matrix[y][x] = 255;
+		hardness_matrix[y][x] = CORRIDOR;
 
 		// try moving up and down and take the fastest
 		if(!CAN_MOVE_FORWARD(x, y)) {
@@ -180,7 +178,7 @@ void connect_rooms(room_t roomA, room_t roomB) {
 			// draw the path
 			while((x_move ? y : x) != (goUp ? up : down)) {
 				*(x_move ? &y : &x) += goUp ? 1 : -1;
-				hardness_matrix[y][x] = 255;
+				hardness_matrix[y][x] = CORRIDOR;
 			}
 		}
 
@@ -197,32 +195,11 @@ void connect_rooms(room_t roomA, room_t roomB) {
 			x_move = true;
 			x_direction = roomB.x == x ? 0 : (roomB.x - x) / abs(roomB.x - x);
 		}
-
-		/*
-		FOR(m, DUNGEON_HEIGHT) {
-			FOR(n, DUNGEON_WIDTH) {
-				if(m == y + !x_move * y_direction && n == x + x_move * x_direction) {
-					printf("#");
-					continue;
-				}
-
-				if(m == y + !x_move * y_direction * 2 && n == x + x_move * x_direction * 2) {
-					printf("#");
-					continue;
-				}
-
-				printf(hardness_matrix[m][n] == 0 ? "." : hardness_matrix[m][n] == 255 ? "x" : " ");
-			}
-
-			printf("\n");
-		}
-
-		sleep(1);
-		*/
 	}
 
+	// draw the final hash if we don't have one yet
 	if(hardness_matrix[y][x]) {
-		hardness_matrix[y][x] = 255;
+		hardness_matrix[y][x] = CORRIDOR;
 	}
 }
 
