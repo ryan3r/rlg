@@ -11,7 +11,7 @@ build/dungeon: src/main.c $(SRC_OBJECTS)
 	@gcc $^ -o $@ $(GCC_FLAGS)
 
 # build the tests
-test: $(TEST_OBJECTS) $(SRC_OBJECTS)
+test: $(TEST_OBJECTS) $(SRC_OBJECTS) tests/main.c
 	@gcc $^ -o build/tests $(GCC_FLAGS)
 	@build/tests
 

@@ -6,6 +6,12 @@
 #include <math.h>
 #include <unistd.h>
 
+// the hardness of the rock in the dungeon
+hardness_t hardness_matrix[DUNGEON_HEIGHT][DUNGEON_WIDTH];
+
+// the rooms in the dungeon
+vector_t room_vector;
+
 // check if a point is in bounds
 #define OUT_OF_BOUNDS(x, y) \
 	(x <= 0 || y <= 0 || x >= DUNGEON_WIDTH - 1 || y >= DUNGEON_HEIGHT - 1)
@@ -45,7 +51,7 @@ bool is_valid_room(room_t newRoom) {
 				break;
 		}
 	}
-	
+
 	return isOk &&
 		// check walls
 		!OUT_OF_BOUNDS(newRoom.x - 1, newRoom.y - 1) &&

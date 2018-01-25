@@ -1,6 +1,5 @@
 #include <dungeon.h>
 #include <util.h>
-#include <stdio.h>
 #include <test_util.h>
 
 bool is_valid_room(room_t newRoom);
@@ -17,9 +16,7 @@ room_t build_room(int x, int y, int width, int height) {
 	return room;
 }
 
-int main() {
-	bool test_failed = false;
-
+void dungeon_test() {
 	vector_init(&room_vector, sizeof(room_t));
 
 	// put in a room to conflict with
@@ -40,11 +37,4 @@ int main() {
 	ASSERT(is_valid_room(build_room(2, 14, 12, 2)), "Away");
 
 	vector_destroy(&room_vector);
-
-	if(test_failed) return 1;
-
-	// if we reached here all tests passed
-	printf("All tests passed\n");
-
-	return 0;
 }

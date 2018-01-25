@@ -31,10 +31,10 @@ typedef struct {
 typedef unsigned char hardness_t;
 
 // the hardness of the rock in the dungeon
-hardness_t hardness_matrix[DUNGEON_HEIGHT][DUNGEON_WIDTH];
+extern hardness_t hardness_matrix[DUNGEON_HEIGHT][DUNGEON_WIDTH];
 
 // the rooms in the dungeon
-vector_t room_vector;
+extern vector_t room_vector;
 
 // generate the harnesses for the dungeon
 void generate_hardness_matrix();
