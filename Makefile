@@ -1,4 +1,4 @@
-GCC_FLAGS = -std=c11 -I include -Wall -Werror -g
+GCC_FLAGS = -std=c11 -I include -Wall -Werror -ggdb
 
 # objects for the program
 SRC_OBJECTS = build/dungeon.o build/util.o
@@ -25,3 +25,6 @@ build/%.o: src/%.c
 # clean up build artifacts
 clean:
 	@rm -rf build/*
+
+# build everything from scratch
+rebuild: clean build/dungeon
