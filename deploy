@@ -7,31 +7,41 @@ else
 	assignment=$1
 fi
 
+package_name="Ray_Ryan.assignment-$assignment"
+workspace="/media/sf_cs327"
+
+cd $workspace
+
 # Remove any binaries
 make clean -s
 
 # Make the change log
-git log > CHANGELOG
+if [ -d ".git" ]; then
+	git log > CHANGELOG
+fi
+
+# Create the submissions directory
+mkdir -p $workspace/submissions
 
 # Create a copy with the correct name
 cd ..
-cp -R  /media/sf_cs327/ /tmp/Ray_Ryan.assignment-$assignment
+cp -r  $workspace /tmp/$package_name
 
 # Remove any empty folders
-cd /tmp/Ray_Ryan.assignment-$assignment
+cd /tmp/$package_name
 find . -type d -empty -delete
 cd ..
 
 # Make the tar ball
-tar cfz Ray_Ryan.assignment-$assignment.tar.gz Ray_Ryan.assignment-$assignment \
-	--exclude=".*" --exclude="deploy" --exclude="*.tar.gz" --exclude="submissions"
+tar cfz $package_name.tar.gz $package_name \
+	--exclude=".*" --exclude="submissions" --exclude="deploy"
 
 # Move the tar ball to the workspace
-cp /tmp/Ray_Ryan.assignment-$assignment.tar.gz  /media/sf_cs327/submissions/Ray_Ryan.assignment-$assignment.tar.gz
+cp /tmp/$package_name.tar.gz  $workspace/submissions/$package_name.tar.gz
 
 # Clean up
-rm -rf Ray_Ryan.assignment-$assignment
-rm -rf Ray_Ryan.assignment-$assignment.tar.gz
+rm -rf $package_name
+rm -f $package_name.tar.gz
 
 # Tell the user that we are done
 echo "Build complete"
