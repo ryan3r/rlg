@@ -1,41 +1,34 @@
-#include <dungeon.h>
 #include <stdio.h>
-#include <util.h>
-#include <time.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
+#include <endian.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <limits.h>
+#include <sys/time.h>
+#include <dungeon.h>
 
-int main(int argc, char **argv) {
-	time_t seed;
+int main(int argc, char *argv[])
+{
+	dungeon_t d;
+	struct timeval tv;
+	uint32_t seed;
 
-	if(argc < 2) {
-		seed = time(NULL);
-	}
-	else {
+	if (argc == 2) {
 		seed = atoi(argv[1]);
+	} else {
+		gettimeofday(&tv, NULL);
+		seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
 	}
 
+	printf("Using seed: %u\n", seed);
 	srand(seed);
 
-	printf("Seed: %ld\n", seed);
+	init_dungeon(&d);
+	gen_dungeon(&d);
+	render_dungeon(&d);
+	delete_dungeon(&d);
 
-	vector_init(&room_vector, sizeof(room_t));
-
-	generate_hardness_matrix(1);
-
-	while(create_room(0));
-
-	FOR(i, room_vector.length)
-		for(int j = i - 1; j >= 0; --j)
-			connect_rooms(vector_get(&room_vector, room_t, i), vector_get(&room_vector, room_t, j));
-
-	FOR(y, DUNGEON_HEIGHT) {
-		FOR(x, DUNGEON_WIDTH) {
-			printf(hardness_matrix[y][x] == ROOM ? "." :
-				hardness_matrix[y][x] == CORRIDOR ? "#"  : " ");
-		}
-
-		printf("\n");
-	}
-
-	vector_destroy(&room_vector);
+	return 0;
 }

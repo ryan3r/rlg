@@ -1,215 +1,611 @@
+// Copied from Dr. Sheaffer's solution (rlg327)
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
-#include <dungeon.h>
+#include <string.h>
+#include <endian.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <limits.h>
+
+/* Very slow seed: 686846853 */
+
+#include <heap.h>
 #include <util.h>
-#include <stdbool.h>
-#include <math.h>
-#include <unistd.h>
+#include <dungeon.h>
 
-// the hardness of the rock in the dungeon
-hardness_t hardness_matrix[DUNGEON_HEIGHT][DUNGEON_WIDTH];
+static uint32_t in_room(dungeon_t *d, int16_t y, int16_t x)
+{
+	int i;
 
-// the rooms in the dungeon
-vector_t room_vector;
+	for (i = 0; i < d->rooms.length; i++) {
+		if ((x >= vector_get(&d->rooms, room_t, i).position[dim_x]) &&
+				(x < (vector_get(&d->rooms, room_t, i).position[dim_x] + vector_get(&d->rooms, room_t, i).size[dim_x])) &&
+				(y >= vector_get(&d->rooms, room_t, i).position[dim_y]) &&
+				(y < (vector_get(&d->rooms, room_t, i).position[dim_y] + vector_get(&d->rooms, room_t, i).size[dim_y]))) {
+			return 1;
+		}
+	}
 
-// check if a point is in bounds
-#define OUT_OF_BOUNDS(x, y) \
-	(x <= 0 || y <= 0 || x >= DUNGEON_WIDTH - 1 || y >= DUNGEON_HEIGHT - 1)
+	return 0;
+}
 
-// generate the harnesses for the dungeon
-void generate_hardness_matrix() {
-	FOR(y, DUNGEON_HEIGHT) {
-		FOR(x, DUNGEON_WIDTH) {
-			// set outer wall harness to 255
-			if(OUT_OF_BOUNDS(x, y)) {
-				hardness_matrix[y][x] = BOUNDARY;
+static uint32_t adjacent_to_room(dungeon_t *d, int16_t y, int16_t x)
+{
+	return (mapxy(x - 1, y) == ter_floor_room ||
+					mapxy(x + 1, y) == ter_floor_room ||
+					mapxy(x, y - 1) == ter_floor_room ||
+					mapxy(x, y + 1) == ter_floor_room);
+}
 
-				continue;
+static uint32_t is_open_space(dungeon_t *d, int16_t y, int16_t x)
+{
+	return !hardnessxy(x, y);
+}
+
+static int32_t corridor_path_cmp(const void *key, const void *with) {
+	return ((corridor_path_t *) key)->cost - ((corridor_path_t *) with)->cost;
+}
+
+static void dijkstra_corridor(dungeon_t *d, pair_t from, pair_t to)
+{
+	static corridor_path_t path[DUNGEON_Y][DUNGEON_X], *p;
+	static uint32_t initialized = 0;
+	heap_t h;
+	uint32_t x, y;
+
+	if (!initialized) {
+		for (y = 0; y < DUNGEON_Y; y++) {
+			for (x = 0; x < DUNGEON_X; x++) {
+				path[y][x].pos[dim_y] = y;
+				path[y][x].pos[dim_x] = x;
 			}
+		}
+		initialized = 1;
+	}
 
-			hardness_matrix[y][x] = rand() % 253 + 2;
+	for (y = 0; y < DUNGEON_Y; y++) {
+		for (x = 0; x < DUNGEON_X; x++) {
+			path[y][x].cost = INT_MAX;
+		}
+	}
+
+	path[from[dim_y]][from[dim_x]].cost = 0;
+
+	heap_init(&h, corridor_path_cmp, NULL);
+
+	for (y = 0; y < DUNGEON_Y; y++) {
+		for (x = 0; x < DUNGEON_X; x++) {
+			if (mapxy(x, y) != ter_wall_immutable) {
+				path[y][x].hn = heap_insert(&h, &path[y][x]);
+			} else {
+				path[y][x].hn = NULL;
+			}
+		}
+	}
+
+	while ((p = heap_remove_min(&h))) {
+		p->hn = NULL;
+
+		if ((p->pos[dim_y] == to[dim_y]) && p->pos[dim_x] == to[dim_x]) {
+			for (x = to[dim_x], y = to[dim_y];
+					 (x != from[dim_x]) || (y != from[dim_y]);
+					 p = &path[y][x], x = p->from[dim_x], y = p->from[dim_y]) {
+				if (mapxy(x, y) != ter_floor_room) {
+					mapxy(x, y) = ter_floor_hall;
+					hardnessxy(x, y) = 0;
+				}
+			}
+			heap_delete(&h);
+			return;
+		}
+
+		if ((path[p->pos[dim_y] - 1][p->pos[dim_x]].hn) &&
+				(path[p->pos[dim_y] - 1][p->pos[dim_x]].cost >
+				 p->cost + hardnesspair(p->pos))) {
+			path[p->pos[dim_y] - 1][p->pos[dim_x]].cost =
+				p->cost + hardnesspair(p->pos);
+			path[p->pos[dim_y] - 1][p->pos[dim_x]].from[dim_y] = p->pos[dim_y];
+			path[p->pos[dim_y] - 1][p->pos[dim_x]].from[dim_x] = p->pos[dim_x];
+			heap_decrease_key_no_replace(&h, path[p->pos[dim_y] - 1][p->pos[dim_x]    ].hn);
+		}
+		if ((path[p->pos[dim_y]    ][p->pos[dim_x] - 1].hn) &&
+				(path[p->pos[dim_y]    ][p->pos[dim_x] - 1].cost >
+				 p->cost + hardnesspair(p->pos))) {
+			path[p->pos[dim_y]    ][p->pos[dim_x] - 1].cost =
+				p->cost + hardnesspair(p->pos);
+			path[p->pos[dim_y]    ][p->pos[dim_x] - 1].from[dim_y] = p->pos[dim_y];
+			path[p->pos[dim_y]    ][p->pos[dim_x] - 1].from[dim_x] = p->pos[dim_x];
+			heap_decrease_key_no_replace(&h, path[p->pos[dim_y]    ][p->pos[dim_x] - 1].hn);
+		}
+		if ((path[p->pos[dim_y]    ][p->pos[dim_x] + 1].hn) &&
+				(path[p->pos[dim_y]    ][p->pos[dim_x] + 1].cost >
+				 p->cost + hardnesspair(p->pos))) {
+			path[p->pos[dim_y]    ][p->pos[dim_x] + 1].cost =
+				p->cost + hardnesspair(p->pos);
+			path[p->pos[dim_y]    ][p->pos[dim_x] + 1].from[dim_y] = p->pos[dim_y];
+			path[p->pos[dim_y]    ][p->pos[dim_x] + 1].from[dim_x] = p->pos[dim_x];
+			heap_decrease_key_no_replace(&h, path[p->pos[dim_y]    ][p->pos[dim_x] + 1].hn);
+		}
+		if ((path[p->pos[dim_y] + 1][p->pos[dim_x]    ].hn) &&
+				(path[p->pos[dim_y] + 1][p->pos[dim_x]    ].cost >
+				 p->cost + hardnesspair(p->pos))) {
+			path[p->pos[dim_y] + 1][p->pos[dim_x]    ].cost =
+				p->cost + hardnesspair(p->pos);
+			path[p->pos[dim_y] + 1][p->pos[dim_x]    ].from[dim_y] = p->pos[dim_y];
+			path[p->pos[dim_y] + 1][p->pos[dim_x]    ].from[dim_x] = p->pos[dim_x];
+			heap_decrease_key_no_replace(&h, path[p->pos[dim_y] + 1][p->pos[dim_x]    ].hn);
 		}
 	}
 }
 
-// check if two rooms intersect
-#define INTERSECTS(a, aWidth, b, bWidth)              \
-	((a <= b && b <= a + aWidth) ||                   \
-	(a <= b + bWidth && b + bWidth <= a + aWidth) ||  \
-	(b <= a && a <= b + bWidth) ||                    \
-	(b <= a + aWidth && a + aWidth <= b + bWidth))
+/* This is a cut-and-paste of the above.  The code is modified to  *
+ * calculate paths based on inverse hardnesses so that we get a    *
+ * high probability of creating at least one cycle in the dungeon. */
+static void dijkstra_corridor_inv(dungeon_t *d, pair_t from, pair_t to)
+{
+	static corridor_path_t path[DUNGEON_Y][DUNGEON_X], *p;
+	static uint32_t initialized = 0;
+	heap_t h;
+	uint32_t x, y;
 
-// check if it intersects with other rooms or walls
-bool is_valid_room(room_t newRoom) {
-	bool isOk = true;
+	if (!initialized) {
+		for (y = 0; y < DUNGEON_Y; y++) {
+			for (x = 0; x < DUNGEON_X; x++) {
+				path[y][x].pos[dim_y] = y;
+				path[y][x].pos[dim_x] = x;
+			}
+		}
+		initialized = 1;
+	}
 
-	// check other rooms
-	vector_for(room_t, room, &room_vector) {
-		if(INTERSECTS(room->x, room->width, newRoom.x, newRoom.width) &&
-			INTERSECTS(room->y, room->height, newRoom.y, newRoom.height)) {
-				isOk = false;
+	for (y = 0; y < DUNGEON_Y; y++) {
+		for (x = 0; x < DUNGEON_X; x++) {
+			path[y][x].cost = INT_MAX;
+		}
+	}
+
+	path[from[dim_y]][from[dim_x]].cost = 0;
+
+	heap_init(&h, corridor_path_cmp, NULL);
+
+	for (y = 0; y < DUNGEON_Y; y++) {
+		for (x = 0; x < DUNGEON_X; x++) {
+			if (mapxy(x, y) != ter_wall_immutable) {
+				path[y][x].hn = heap_insert(&h, &path[y][x]);
+			} else {
+				path[y][x].hn = NULL;
+			}
+		}
+	}
+
+	while ((p = heap_remove_min(&h))) {
+		p->hn = NULL;
+
+		if ((p->pos[dim_y] == to[dim_y]) && p->pos[dim_x] == to[dim_x]) {
+			for (x = to[dim_x], y = to[dim_y];
+					 (x != from[dim_x]) || (y != from[dim_y]);
+					 p = &path[y][x], x = p->from[dim_x], y = p->from[dim_y]) {
+				if (mapxy(x, y) != ter_floor_room) {
+					mapxy(x, y) = ter_floor_hall;
+					hardnessxy(x, y) = 0;
+				}
+			}
+			heap_delete(&h);
+			return;
+		}
+
+#define hardnesspair_inv(p) (is_open_space(d, p[dim_y], p[dim_x]) ? 127 :     \
+    (adjacent_to_room(d, p[dim_y], p[dim_x]) ? 191 : \
+    (255 - hardnesspair(p))))
+
+		if ((path[p->pos[dim_y] - 1][p->pos[dim_x]    ].hn) &&
+				(path[p->pos[dim_y] - 1][p->pos[dim_x]    ].cost >
+				 p->cost + hardnesspair_inv(p->pos))) {
+			path[p->pos[dim_y] - 1][p->pos[dim_x]    ].cost =
+				p->cost + hardnesspair_inv(p->pos);
+			path[p->pos[dim_y] - 1][p->pos[dim_x]    ].from[dim_y] = p->pos[dim_y];
+			path[p->pos[dim_y] - 1][p->pos[dim_x]    ].from[dim_x] = p->pos[dim_x];
+			heap_decrease_key_no_replace(&h, path[p->pos[dim_y] - 1][p->pos[dim_x]    ].hn);
+		}
+		if ((path[p->pos[dim_y]    ][p->pos[dim_x] - 1].hn) &&
+				(path[p->pos[dim_y]    ][p->pos[dim_x] - 1].cost >
+				 p->cost + hardnesspair_inv(p->pos))) {
+			path[p->pos[dim_y]    ][p->pos[dim_x] - 1].cost =
+				p->cost + hardnesspair_inv(p->pos);
+			path[p->pos[dim_y]    ][p->pos[dim_x] - 1].from[dim_y] = p->pos[dim_y];
+			path[p->pos[dim_y]    ][p->pos[dim_x] - 1].from[dim_x] = p->pos[dim_x];
+			heap_decrease_key_no_replace(&h, path[p->pos[dim_y]    ][p->pos[dim_x] - 1].hn);
+		}
+		if ((path[p->pos[dim_y]    ][p->pos[dim_x] + 1].hn) &&
+				(path[p->pos[dim_y]    ][p->pos[dim_x] + 1].cost >
+				 p->cost + hardnesspair_inv(p->pos))) {
+			path[p->pos[dim_y]    ][p->pos[dim_x] + 1].cost =
+				p->cost + hardnesspair_inv(p->pos);
+			path[p->pos[dim_y]    ][p->pos[dim_x] + 1].from[dim_y] = p->pos[dim_y];
+			path[p->pos[dim_y]    ][p->pos[dim_x] + 1].from[dim_x] = p->pos[dim_x];
+			heap_decrease_key_no_replace(&h, path[p->pos[dim_y]    ][p->pos[dim_x] + 1].hn);
+		}
+		if ((path[p->pos[dim_y] + 1][p->pos[dim_x]    ].hn) &&
+				(path[p->pos[dim_y] + 1][p->pos[dim_x]    ].cost >
+				 p->cost + hardnesspair_inv(p->pos))) {
+			path[p->pos[dim_y] + 1][p->pos[dim_x]    ].cost =
+				p->cost + hardnesspair_inv(p->pos);
+			path[p->pos[dim_y] + 1][p->pos[dim_x]    ].from[dim_y] = p->pos[dim_y];
+			path[p->pos[dim_y] + 1][p->pos[dim_x]    ].from[dim_x] = p->pos[dim_x];
+			heap_decrease_key_no_replace(&h, path[p->pos[dim_y] + 1][p->pos[dim_x]    ].hn);
+		}
+	}
+}
+
+/* Chooses a random point inside each room and connects them with a *
+ * corridor.  Random internal points prevent corridors from exiting *
+ * rooms in predictable locations.                                  */
+static int connect_two_rooms(dungeon_t *d, room_t *r1, room_t *r2)
+{
+	pair_t e1, e2;
+
+	e1[dim_y] = rand_range(r1->position[dim_y], r1->position[dim_y] + r1->size[dim_y] - 1);
+	e1[dim_x] = rand_range(r1->position[dim_x], r1->position[dim_x] + r1->size[dim_x] - 1);
+	e2[dim_y] = rand_range(r2->position[dim_y], r2->position[dim_y] + r2->size[dim_y] - 1);
+	e2[dim_x] = rand_range(r2->position[dim_x], r2->position[dim_x] + r2->size[dim_x] - 1);
+
+	/*  return connect_two_points_recursive(d, e1, e2);*/
+	dijkstra_corridor(d, e1, e2);
+
+	return 0;
+}
+
+static int create_cycle(dungeon_t *d)
+{
+	/* Find the (approximately) farthest two rooms, then connect *
+	 * them by the shortest path using inverted hardnesses.      */
+
+	int32_t max, tmp, i, j, p, q;
+	pair_t e1, e2;
+
+	for (i = max = 0; i < d->rooms.length - 1; i++) {
+		for (j = i + 1; j < d->rooms.length; j++) {
+			tmp = (((vector_get(&d->rooms, room_t, i).position[dim_x] - vector_get(&d->rooms, room_t, j).position[dim_x])  *
+                (vector_get(&d->rooms, room_t, i).position[dim_x] - vector_get(&d->rooms, room_t, j).position[dim_x])) +
+                ((vector_get(&d->rooms, room_t, i).position[dim_y] - vector_get(&d->rooms, room_t, j).position[dim_y])  *
+                (vector_get(&d->rooms, room_t, i).position[dim_y] - vector_get(&d->rooms, room_t, j).position[dim_y])));
+			if (tmp > max) {
+				max = tmp;
+				p = i;
+				q = j;
+			}
+		}
+	}
+
+	/* Can't simply call connect_two_rooms() because it doesn't *
+	 * use inverse hardnesses, so duplicate it here.            */
+	e1[dim_y] = rand_range(vector_get(&d->rooms, room_t, p).position[dim_y],
+                (vector_get(&d->rooms, room_t, p).position[dim_y] + vector_get(&d->rooms, room_t, p).size[dim_y] - 1));
+	e1[dim_x] = rand_range(vector_get(&d->rooms, room_t, p).position[dim_x],
+                (vector_get(&d->rooms, room_t, p).position[dim_x] + vector_get(&d->rooms, room_t, p).size[dim_x] - 1));
+	e2[dim_y] = rand_range(vector_get(&d->rooms, room_t, q).position[dim_y],
+                (vector_get(&d->rooms, room_t, q).position[dim_y] + vector_get(&d->rooms, room_t, q).size[dim_y] - 1));
+	e2[dim_x] = rand_range(vector_get(&d->rooms, room_t, q).position[dim_x],
+                (vector_get(&d->rooms, room_t, q).position[dim_x] + vector_get(&d->rooms, room_t, q).size[dim_x] - 1));
+
+	dijkstra_corridor_inv(d, e1, e2);
+
+	return 0;
+}
+
+static int connect_rooms(dungeon_t *d)
+{
+	uint32_t i;
+
+	for (i = 1; i < d->rooms.length; i++) {
+		connect_two_rooms(d, vector_get_ptr(&d->rooms, room_t, i) - 1, vector_get_ptr(&d->rooms, room_t, i));
+	}
+
+	create_cycle(d);
+
+	return 0;
+}
+
+int gaussian[5][5] = {
+	{  1,  4,  7,  4,  1 },
+	{  4, 16, 26, 16,  4 },
+	{  7, 26, 41, 26,  7 },
+	{  4, 16, 26, 16,  4 },
+	{  1,  4,  7,  4,  1 }
+};
+
+typedef struct queue_node {
+	int x, y;
+	struct queue_node *next;
+} queue_node_t;
+
+static int smooth_hardness(dungeon_t *d)
+{
+	int32_t i, x, y;
+	int32_t s, t, p, q;
+	queue_node_t *head, *tail, *tmp;
+    #ifdef VERBOSE_DEBUG
+	FILE *out;
+    #endif
+	uint8_t hardness[DUNGEON_Y][DUNGEON_X];
+
+	memset(&hardness, 0, sizeof (hardness));
+
+	/* Seed with some values */
+	for (i = 1; i < 255; i += 20) {
+		do {
+			x = rand() % DUNGEON_X;
+			y = rand() % DUNGEON_Y;
+		} while (hardness[y][x]);
+		hardness[y][x] = i;
+		if (i == 1) {
+			head = tail = malloc(sizeof (*tail));
+		} else {
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+		}
+		tail->next = NULL;
+		tail->x = x;
+		tail->y = y;
+	}
+
+    #ifdef VERBOSE_DEBUG
+	out = fopen("seeded.pgm", "w");
+	fprintf(out, "P5\n%u %u\n255\n", DUNGEON_X, DUNGEON_Y);
+	fwrite(&hardness, sizeof (hardness), 1, out);
+	fclose(out);
+    #endif
+
+	/* Diffuse the vaules to fill the space */
+	while (head) {
+		x = head->x;
+		y = head->y;
+		i = hardness[y][x];
+
+		if (x - 1 >= 0 && y - 1 >= 0 && !hardness[y - 1][x - 1]) {
+			hardness[y - 1][x - 1] = i;
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+			tail->next = NULL;
+			tail->x = x - 1;
+			tail->y = y - 1;
+		}
+		if (x - 1 >= 0 && !hardness[y][x - 1]) {
+			hardness[y][x - 1] = i;
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+			tail->next = NULL;
+			tail->x = x - 1;
+			tail->y = y;
+		}
+		if (x - 1 >= 0 && y + 1 < DUNGEON_Y && !hardness[y + 1][x - 1]) {
+			hardness[y + 1][x - 1] = i;
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+			tail->next = NULL;
+			tail->x = x - 1;
+			tail->y = y + 1;
+		}
+		if (y - 1 >= 0 && !hardness[y - 1][x]) {
+			hardness[y - 1][x] = i;
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+			tail->next = NULL;
+			tail->x = x;
+			tail->y = y - 1;
+		}
+		if (y + 1 < DUNGEON_Y && !hardness[y + 1][x]) {
+			hardness[y + 1][x] = i;
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+			tail->next = NULL;
+			tail->x = x;
+			tail->y = y + 1;
+		}
+		if (x + 1 < DUNGEON_X && y - 1 >= 0 && !hardness[y - 1][x + 1]) {
+			hardness[y - 1][x + 1] = i;
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+			tail->next = NULL;
+			tail->x = x + 1;
+			tail->y = y - 1;
+		}
+		if (x + 1 < DUNGEON_X && !hardness[y][x + 1]) {
+			hardness[y][x + 1] = i;
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+			tail->next = NULL;
+			tail->x = x + 1;
+			tail->y = y;
+		}
+		if (x + 1 < DUNGEON_X && y + 1 < DUNGEON_Y && !hardness[y + 1][x + 1]) {
+			hardness[y + 1][x + 1] = i;
+			tail->next = malloc(sizeof (*tail));
+			tail = tail->next;
+			tail->next = NULL;
+			tail->x = x + 1;
+			tail->y = y + 1;
+		}
+
+		tmp = head;
+		head = head->next;
+		free(tmp);
+	}
+
+	/* And smooth it a bit with a gaussian convolution */
+	for (y = 0; y < DUNGEON_Y; y++) {
+		for (x = 0; x < DUNGEON_X; x++) {
+			for (s = t = p = 0; p < 5; p++) {
+				for (q = 0; q < 5; q++) {
+					if (y + (p - 2) >= 0 && y + (p - 2) < DUNGEON_Y &&
+						  x + (q - 2) >= 0 && x + (q - 2) < DUNGEON_X) {
+						s += gaussian[p][q];
+						t += hardness[y + (p - 2)][x + (q - 2)] * gaussian[p][q];
+					}
+				}
+			}
+			d->hardness[y][x] = t / s;
+		}
+	}
+	/* Let's do it again, until it's smooth like Kenny G. */
+	for (y = 0; y < DUNGEON_Y; y++) {
+		for (x = 0; x < DUNGEON_X; x++) {
+			for (s = t = p = 0; p < 5; p++) {
+				for (q = 0; q < 5; q++) {
+					if (y + (p - 2) >= 0 && y + (p - 2) < DUNGEON_Y &&
+						  x + (q - 2) >= 0 && x + (q - 2) < DUNGEON_X) {
+						s += gaussian[p][q];
+						t += hardness[y + (p - 2)][x + (q - 2)] * gaussian[p][q];
+					}
+				}
+			}
+			d->hardness[y][x] = t / s;
+		}
+	}
+
+
+    #ifdef VERBOSE_DEBUG
+	out = fopen("diffused.pgm", "w");
+	fprintf(out, "P5\n%u %u\n255\n", DUNGEON_X, DUNGEON_Y);
+	fwrite(&hardness, sizeof (hardness), 1, out);
+	fclose(out);
+
+	out = fopen("smoothed.pgm", "w");
+	fprintf(out, "P5\n%u %u\n255\n", DUNGEON_X, DUNGEON_Y);
+	fwrite(&d->hardness, sizeof (d->hardness), 1, out);
+	fclose(out);
+    #endif
+
+	return 0;
+}
+
+static int empty_dungeon(dungeon_t *d)
+{
+	uint8_t x, y;
+
+	smooth_hardness(d);
+	for (y = 0; y < DUNGEON_Y; y++) {
+		for (x = 0; x < DUNGEON_X; x++) {
+			mapxy(x, y) = ter_wall;
+			if (y == 0 || y == DUNGEON_Y - 1 ||
+					x == 0 || x == DUNGEON_X - 1) {
+				mapxy(x, y) = ter_wall_immutable;
+				hardnessxy(x, y) = 255;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int place_rooms(dungeon_t *d)
+{
+	pair_t p;
+	uint32_t i;
+	int success;
+	room_t *r;
+
+	for (success = 0; !success; ) {
+		success = 1;
+		for (i = 0; success && i < d->rooms.length; i++) {
+			r = vector_get_ptr(&d->rooms, room_t, i);
+			r->position[dim_x] = 1 + rand() % (DUNGEON_X - 2 - r->size[dim_x]);
+			r->position[dim_y] = 1 + rand() % (DUNGEON_Y - 2 - r->size[dim_y]);
+			for (p[dim_y] = r->position[dim_y] - 1;
+					 success && p[dim_y] < r->position[dim_y] + r->size[dim_y] + 1;
+					 p[dim_y]++) {
+				for (p[dim_x] = r->position[dim_x] - 1;
+						 success && p[dim_x] < r->position[dim_x] + r->size[dim_x] + 1;
+						 p[dim_x]++) {
+					if (mappair(p) >= ter_floor) {
+						success = 0;
+						empty_dungeon(d);
+					} else if ((p[dim_y] != r->position[dim_y] - 1)              &&
+                            (p[dim_y] != r->position[dim_y] + r->size[dim_y]) &&
+                            (p[dim_x] != r->position[dim_x] - 1)              &&
+                            (p[dim_x] != r->position[dim_x] + r->size[dim_x])) {
+						mappair(p) = ter_floor_room;
+						hardnesspair(p) = 0;
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int make_rooms(dungeon_t *d)
+{
+	uint32_t i;
+
+	for (i = MIN_ROOMS; i < MAX_ROOMS && rand_under(6, 8); i++);
+
+	vector_init(&d->rooms, sizeof(vector_t), i);
+	d->rooms.length = i;
+
+	for (i = 0; i < d->rooms.length; i++) {
+		vector_get(&d->rooms, room_t, i).size[dim_x] = ROOM_MIN_X;
+		vector_get(&d->rooms, room_t, i).size[dim_y] = ROOM_MIN_Y;
+		while (rand_under(3, 4) && vector_get(&d->rooms, room_t, i).size[dim_x] < ROOM_MAX_X) {
+			vector_get(&d->rooms, room_t, i).size[dim_x]++;
+		}
+		while (rand_under(3, 4) && vector_get(&d->rooms, room_t, i).size[dim_y] < ROOM_MAX_Y) {
+			vector_get(&d->rooms, room_t, i).size[dim_y]++;
+		}
+	}
+
+	return 0;
+}
+
+int gen_dungeon(dungeon_t *d)
+{
+	empty_dungeon(d);
+
+	do {
+		make_rooms(d);
+	} while (place_rooms(d));
+	connect_rooms(d);
+
+	return 0;
+}
+
+void render_dungeon(dungeon_t *d)
+{
+	pair_t p;
+
+	for (p[dim_y] = 0; p[dim_y] < DUNGEON_Y; p[dim_y]++) {
+		for (p[dim_x] = 0; p[dim_x] < DUNGEON_X; p[dim_x]++) {
+			switch (mappair(p)) {
+			case ter_wall:
+			case ter_wall_immutable:
+				putchar(' ');
 				break;
-		}
-	}
-
-	return isOk &&
-		// check walls
-		!OUT_OF_BOUNDS(newRoom.x - 1, newRoom.y - 1) &&
-		!OUT_OF_BOUNDS(newRoom.x + newRoom.width + 1, newRoom.y + newRoom.height + 1);
-}
-
-int __total_room_area = 0;
-
-// create a new room
-bool create_room(int fails) {
-	// too many failed attempts
-	if(fails > MAX_FAILED_PLACEMENTS ||
-		__total_room_area > (DUNGEON_WIDTH * DUNGEON_HEIGHT) * PERCENT_OF_DUNGON_ROOMS) return false;
-
-	room_t newRoom;
-
-	// initialize the new room
-	newRoom.x = rand() % DUNGEON_WIDTH;
-	newRoom.y = rand() % DUNGEON_HEIGHT;
-	newRoom.height = rand() % (MAX_ROOM_SIZE - MIN_ROOM_SIZE + 1) + MIN_ROOM_SIZE;
-	newRoom.width = rand() % (MAX_ROOM_SIZE - MIN_ROOM_SIZE + 1) + MIN_ROOM_SIZE;
-
-	// check if it is in bounds
-	if(is_valid_room(newRoom)) {
-		// add the room to the harness matrix
-		for(int m = newRoom.y; m < newRoom.y + newRoom.height; ++m) {
-			for(int n = newRoom.x; n < newRoom.x + newRoom.width; ++n) {
-				hardness_matrix[m][n] = ROOM;
+			case ter_floor:
+			case ter_floor_room:
+				putchar('.');
+				break;
+			case ter_floor_hall:
+				putchar('#');
+				break;
+			case ter_debug:
+				putchar('*');
+				fprintf(stderr, "Debug character at %d, %d\n", p[dim_y], p[dim_x]);
+				break;
 			}
 		}
-
-		// add this to the list of rooms
-		vector_add(&room_vector, &newRoom);
-
-		// track the area of the dungeon that is taken up by the rooms
-		__total_room_area += newRoom.width * newRoom.height;
-
-		return true;
-	}
-	// try again
-	else {
-		return create_room(fails + 1);
+		putchar('\n');
 	}
 }
 
-// check if we are in the ending room
-#define IS_END(m, n) \
-	((roomB.x <= m && m <= roomB.x + roomB.width) && \
-	 (roomB.y <= n && n <= roomB.y + roomB.height))
-
-// check if we can move forward one space
-#define CAN_MOVE_FORWARD(x, y) \
-	(!OUT_OF_BOUNDS(x + x_move * x_direction, y + !x_move * y_direction) && \
-	!OUT_OF_BOUNDS(x + x_move * x_direction * 2, y + !x_move * y_direction * 2) && \
-	(\
-		(hardness_matrix[y + !x_move * y_direction][x + x_move * x_direction] || \
-			IS_END(x + x_move * x_direction, y + !x_move * y_direction)) && \
-		 (hardness_matrix[y + !x_move * y_direction * 2][x + x_move * x_direction * 2] || \
-			 IS_END(x + x_move * x_direction * 2, y + !x_move * y_direction * 2)) \
-	 ))
-
-// create a hall way between two rooms
-void connect_rooms(room_t roomA, room_t roomB) {
-	// get the direction we want to go in
-	int x_direction = roomB.x - roomA.x;
-	int y_direction = roomB.y - roomA.y;
-
-	// choose a starting point
-	int x = roomA.x,
-		y = roomA.y;
-
-	bool movedX = true;
-	bool movedY = true;
-
-	// move to the part of this room that is closest to the other room
-	if(x_direction >= roomA.width) {
-		x += roomA.width;
-	}
-	else if(x_direction > 0) {
-		x += x_direction;
-		x_direction = 0;
-	}
-	else {
-		movedX = false;
-	}
-
-	if(y_direction >= roomA.height) {
-		y += roomA.height;
-	}
-	else if(y_direction > 0) {
-		y += y_direction;
-		y_direction = 0;
-	}
-	else {
-		movedY = false;
-	}
-
-	// convert the directions to +-1
-	if(x_direction != 0) x_direction /= abs(x_direction);
-	if(y_direction != 0) y_direction /= abs(y_direction);
-
-	// move out of the room
-	if(!movedX && !movedY) x += x_direction;
-
-	bool x_move = true;
-
-	// draw the line
-	while(!IS_END(x, y)) {
-		// place part of the path
-		hardness_matrix[y][x] = CORRIDOR;
-
-		// try moving up and down and take the fastest
-		if(!CAN_MOVE_FORWARD(x, y)) {
-			int up = x_move ? y : x;
-			int down = x_move ? y : x;
-
-			// go up
-			while(!CAN_MOVE_FORWARD((x_move ? x : up), (x_move ? up : y)) &&
-				up < (x_move ? DUNGEON_HEIGHT : DUNGEON_WIDTH))
-					++up;
-
-			// go down
-			while(!CAN_MOVE_FORWARD((x_move ? x : down), (x_move ? down : y)) &&
-				down >= 0)
-				--down;
-
-			// choose the shotest path
-			bool goUp = up - (x_move ? x : y) > (x_move ? x : y) - down;
-
-			// draw the path
-			while((x_move ? y : x) != (goUp ? up : down)) {
-				*(x_move ? &y : &x) += goUp ? 1 : -1;
-				hardness_matrix[y][x] = CORRIDOR;
-			}
-		}
-
-		// move to the next spot in the path
-		*(x_move ? &x : &y) += x_move ? x_direction : y_direction;
-
-		// change directions
-		if(roomB.x <= x && x <= roomB.x + roomB.width) {
-			x_move = false;
-			y_direction = roomB.y == y ? 0 : (roomB.y - y) / abs(roomB.y - y);
-		}
-
-		if(roomB.y <= y && y <= roomB.y + roomB.height) {
-			x_move = true;
-			x_direction = roomB.x == x ? 0 : (roomB.x - x) / abs(roomB.x - x);
-		}
-	}
-
-	// draw the final hash if we don't have one yet
-	if(hardness_matrix[y][x]) {
-		hardness_matrix[y][x] = CORRIDOR;
-	}
+void delete_dungeon(dungeon_t *d)
+{
+	vector_destroy(&d->rooms);
 }
 
-#undef OUT_OF_BOUNDS
-#undef INTERSECTS
-#undef CAN_MOVE_FORWARD
-#undef IS_END
+void init_dungeon(dungeon_t *d)
+{
+	UNUSED(in_room);
+	empty_dungeon(d);
+}

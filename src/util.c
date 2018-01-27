@@ -3,9 +3,9 @@
 #include <string.h>
 
 // initialize a vector
-void vector_init(vector_t *vector, size_t size) {
+void vector_init(vector_t *vector, size_t size, int allocLength) {
 	vector->length = 0;
-	vector->allocLength = 5;
+	vector->allocLength = allocLength;
 	vector->elementSize = size;
 	vector->begin = malloc(vector->allocLength * size);
 }

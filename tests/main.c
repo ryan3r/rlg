@@ -8,7 +8,6 @@ uint32_t __tests_disabled = 0;
 bool verbose_mode = false;
 
 // test headers
-void dungeon_test();
 
 int main(int argc, char **argv) {
 	// check for the verbose flag
@@ -17,7 +16,6 @@ int main(int argc, char **argv) {
 	}
 
 	// run tests
-	dungeon_test();
 
 	// if we reached here all tests passed
 	printf("%d passed, %d failed, %d disabled\n", __tests_passed, __tests_failed, __tests_disabled);
