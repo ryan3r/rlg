@@ -3,7 +3,7 @@
 GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb
 
 # objects for the program
-SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o
+SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/arguments.o
 # objects for the tests
 TEST_OBJECTS = build/dungeon_test.o
 

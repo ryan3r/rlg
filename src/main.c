@@ -4,35 +4,44 @@
 #include <sys/time.h>
 #include <dungeon.h>
 #include <string.h>
+#include <arguments.h>
 
 // TODO: Check memory leaks
 
 int main(int argc, char *argv[])
 {
-	dungeon_t d;
-	struct timeval tv;
-	uint32_t seed;
-
-	if (argc == 2) {
-		seed = atoi(argv[1]);
-	} else {
-		gettimeofday(&tv, NULL);
-		seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
-	}
-
-	printf("Using seed: %u\n", seed);
-	srand(seed);
-
+	// set the cwd and create the data dir
 	if(init_game_dir()) return 1;
 
+	// parse the command line arguments
+	arguments_t arguments;
+	parse_args(&arguments, argc, argv);
+
+	// setup the dungeon
+	dungeon_t d;
 	init_dungeon(&d);
 
-	if(load_dungeon(&d, "foo")) return 25;
+	// try to load a dungeon file
+	if(arguments.load_file != NULL) {
+		if(load_dungeon(&d, arguments.load_file)) return 1;
+	}
+	// generate a new dungeon
+	else {
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
 
-	// gen_dungeon(&d);
+		srand((tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff);
+
+		gen_dungeon(&d);
+	}
+
+	// display the dungeon
 	render_dungeon(&d);
 
-	save_dungeon(&d, "foo");
+	// try to save the dungeon
+	if(arguments.save_file != NULL) {
+		if(save_dungeon(&d, arguments.save_file)) return 1;
+	}
 
 	delete_dungeon(&d);
 
