@@ -33,6 +33,16 @@ build/%.o: src/%.c
 	@echo Building $@
 	@gcc -c $< -o $@ $(GCC_FLAGS) -MMD -MF build/$*.d
 
+# run memory tests
+mem: build/dungeon
+	valgrind --tool=memcheck --leak-check=yes build/dungeon
+
+mem-load: build/dungeon
+	valgrind --tool=memcheck --leak-check=yes build/dungeon --load
+
+mem-save: build/dungeon
+	valgrind --tool=memcheck --leak-check=yes build/dungeon --save
+
 # clean up build artifacts
 clean:
 	@echo Removing all build files

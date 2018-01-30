@@ -6,8 +6,6 @@
 #include <string.h>
 #include <arguments.h>
 
-// TODO: Check memory leaks
-
 int main(int argc, char *argv[])
 {
 	// set the cwd and create the data dir

@@ -776,6 +776,8 @@ int load_dungeon(dungeon_t *dungeon, char *file_name) {
 	// initialize the terrain
 	init_terrain_map(dungeon);
 
+	free(rooms);
+
 	// close the file
 	fclose(file);
 
