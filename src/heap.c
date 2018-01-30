@@ -1,4 +1,4 @@
-// Coppied from Dr. Sheaffer's solution
+// Coppied from Jeremy's solution
 #include <heap.h>
 #include <macros.h>
 

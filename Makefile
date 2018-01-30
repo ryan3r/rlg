@@ -1,4 +1,4 @@
-# Based on Dr. Sheaffer's solution
+# Based on Jeremy's solution
 
 GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb
 

@@ -1,7 +1,7 @@
 #ifndef DUNGEON_H
 #define DUNGEON_H
 
-// Copied from Dr. Sheaffer's solution (rlg327)
+// Copied from Jeremy's solution (rlg327)
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>

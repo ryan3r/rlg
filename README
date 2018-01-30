@@ -1,17 +1,22 @@
 # Description
 
-A dungeon generator rooms are represented by "."s and corridors are represented
-by "#"s.
+Load and save functionality.  An extension to the dungeon generator to support
+the binary dungeon format.
 
 # Usage
 
 ```
-build/dungeon [seed]
+build/dungeon [--load=[FILE]] [--save=[FILE]]
 ```
 
-The first argument is the seed to use for generation.  If no seed is given it
-will default to a random seed.
+The load flag can be given to load an existing dungeon.  The save flag can be
+given to save the dungeon that is displayed.  If the load flag is not given a
+random dungeon will be generated. The program looks for files in the ~/.rlg327
+folder if one does not exist it will be created.  If you want to load a file
+outside the .rlg327 directory give it an absolute path.
 
-# Tests
+# New and noteworthy
 
-There are tests for the room placing code which can be run with `make test`.
+ * There is a basic vector implementation in src/vector.c and include/vector.h
+ * The load and save functions have been added at the end of src/dungeon.c
+ * I modified Jeremy's dungeon_t to use a vector_t for the rooms

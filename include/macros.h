@@ -1,3 +1,4 @@
+// Copied from Jeremy's solution 
 #ifndef MACROS_H
 # define MACROS_H
 

@@ -1,4 +1,4 @@
-// Copied from Dr. Sheaffer's solution
+// Copied from Jeremy's solution
 
 #ifndef HEAP_H
 # define HEAP_H
