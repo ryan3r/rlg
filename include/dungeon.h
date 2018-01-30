@@ -14,7 +14,7 @@
 /* Very slow seed: 686846853 */
 
 #include <heap.h>
-#include <util.h>
+#include <vector.h>
 
 /* Returns true if random float in [0,1] is less than *
  * numerator/denominator.  Uses only integer math.    */
@@ -86,5 +86,14 @@ int gen_dungeon(dungeon_t *d);
 void render_dungeon(dungeon_t *d);
 void delete_dungeon(dungeon_t *d);
 void init_dungeon(dungeon_t *d);
+
+// create the .rlg327 directory and switch the working directory to it
+int init_game_dir();
+
+// write the dungeon to a save file
+int save_dungeon(dungeon_t*, char*);
+
+// load the dungeon from a save file
+int load_dungeon(dungeon_t*, char*);
 
 #endif

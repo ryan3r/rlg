@@ -6,12 +6,14 @@
 #include <endian.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include <limits.h>
 
 /* Very slow seed: 686846853 */
 
+#include <macros.h>
 #include <heap.h>
-#include <util.h>
+#include <vector.h>
 #include <dungeon.h>
 
 static uint32_t in_room(dungeon_t *d, int16_t y, int16_t x)
@@ -608,4 +610,174 @@ void init_dungeon(dungeon_t *d)
 {
 	UNUSED(in_room);
 	empty_dungeon(d);
+}
+
+// the name of the game dir
+char rlg_dir_name[] = ".rlg327";
+
+// create the .rlg327 directory and switch the working directory to it
+int init_game_dir() {
+	int status = 0;
+
+	// find the home directory
+	char *home_dir = getenv("HOME");
+
+	// find absolute path to our save directory
+	size_t length = strlen(home_dir) + sizeof(rlg_dir_name) + 2;
+	char *path = malloc(length);
+	snprintf(path, length, "%s/%s", home_dir, rlg_dir_name);
+
+	// make the directory if it doesn't exist
+	if(access(path, F_OK) == -1) {
+		status = mkdir(path, 0777);
+	}
+
+	// move to the save directory
+	if(!status) {
+		status = chdir(path);
+	}
+
+	// print any error messages
+	if(status) {
+		perror("Failed to initialize save directory");
+	}
+
+	free(path);
+
+	return status;
+}
+
+// initialize the terrain map of a newly loaded dungeon
+static void init_terrain_map(dungeon_t* dungeon) {
+	FOR(y, DUNGEON_Y)
+		FOR(x, DUNGEON_X) {
+			// room or corridor, assume corridor for now
+			if(!dungeon->hardness[y][x]) {
+				dungeon->map[y][x] = ter_floor_hall;
+			}
+			else {
+				dungeon->map[y][x] = dungeon->hardness[y][x] == 255 ?
+					ter_wall_immutable : ter_wall;
+			}
+		}
+
+	// place the rooms in the map
+	vector_for(room_t, room, &dungeon->rooms) {
+		for(uint32_t y = room->position[dim_y],
+				end = room->position[dim_y] + room->size[dim_y]; y < end; ++y) {
+			for(uint32_t x = room->position[dim_x],
+					end_x = room->position[dim_x] + room->size[dim_x]; x < end_x; ++x) {
+				dungeon->map[y][x] = ter_floor_room;
+			}
+		}
+	}
+}
+
+char rlg_file_marker[] = "RLG327-S2018";
+
+// write the dungeon to a save file
+int save_dungeon(dungeon_t *dungeon, char *file_name) {
+	FILE *file = fopen(file_name, "wb");
+
+	if(file == NULL) return -1;
+
+	// prepare the header
+	uint8_t header[20];
+
+	memcpy(header, rlg_file_marker, sizeof(rlg_file_marker) - 1);
+
+	uint32_t version = htobe32(0);
+	memcpy(header + 12, &version, sizeof(version));
+
+	// calculate the file size
+	uint32_t file_size = htobe32(1699 + dungeon->rooms.length * 4);
+
+	*((uint32_t*) (header + 16)) = file_size;
+
+	// write the header
+	fwrite(header, sizeof(header), 1, file);
+
+	// write the hardness map to the file
+	fwrite(dungeon->hardness, sizeof(dungeon->hardness), 1, file);
+
+    // convert the rooms to a serializable format
+	size_t rooms_size = dungeon->rooms.length * 4 * sizeof(uint8_t);
+	uint8_t *rooms = malloc(rooms_size);
+	uint32_t index = 0;
+
+	vector_for(room_t, room, &dungeon->rooms) {
+		rooms[index++] = room->position[dim_y];
+		rooms[index++] = room->position[dim_x];
+		rooms[index++] = room->size[dim_y];
+		rooms[index++] = room->size[dim_x];
+	}
+
+	// write the rooms to the file
+	fwrite(rooms, rooms_size, 1, file);
+
+	free(rooms);
+
+	fclose(file);
+
+	return 0;
+}
+
+// load the dungeon from a save file
+int load_dungeon(dungeon_t *dungeon, char *file_name) {
+	FILE *file = fopen(file_name, "rb");
+
+	if(file == NULL) return -1;
+
+	// verify the header
+	uint8_t header[20];
+
+	fread(&header, sizeof(header), 1, file);
+
+	// verify the marker
+	if(memcmp(header, rlg_file_marker, sizeof(rlg_file_marker) - 1)) {
+		fprintf(stderr, "Invalid file marker\n");
+		return -1;
+	}
+
+	uint32_t version;
+
+	memcpy(&version, header + 12, sizeof(version));
+	version = be32toh(version);
+
+	// verify the version
+	if(version > 0) {
+		fprintf(stderr, "Version %d is not supported\n", version);
+		return -1;
+	}
+
+	// load the hardness map from the file
+	fread(dungeon->hardness, sizeof(dungeon->hardness), 1, file);
+
+	// load the rooms
+	uint32_t file_size = be32toh(*((uint32_t*) (header + 16)));
+
+	uint32_t rooms_size = file_size - 1699;
+	vector_init(&dungeon->rooms, sizeof(room_t), rooms_size / 4);
+	dungeon->rooms.length = rooms_size / 4;
+
+	// deserialize the rooms
+	uint8_t *rooms = malloc(rooms_size * sizeof(uint8_t));
+	uint32_t index = 0;
+
+	fread(rooms, rooms_size * sizeof(uint8_t), 1, file);
+
+	vector_for(room_t, room, &dungeon->rooms) {
+		room->position[dim_y] = rooms[index++];
+		room->position[dim_x] = rooms[index++];
+		room->size[dim_y] = rooms[index++];
+		room->size[dim_x] = rooms[index++];
+	}
+
+	// initialize the terrain
+	init_terrain_map(dungeon);
+
+	// close the file
+	fclose(file);
+
+	return 0;
 }

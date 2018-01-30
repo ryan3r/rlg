@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <util.h>
+#include <vector.h>
 #include <string.h>
 
 // initialize a vector
@@ -32,9 +32,4 @@ void vector_remove_last(vector_t *vector) {
 // release the memory for a vector
 void vector_destroy(vector_t *vector) {
 	free(vector->begin);
-}
-
-// get the end pointer for the vector
-void* vector_end(vector_t *vector) {
-	return vector->begin + (vector->length * vector->elementSize);
 }

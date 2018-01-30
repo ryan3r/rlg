@@ -182,4 +182,9 @@ extern "C" {
 
 # endif /* NIAGARA */
 
+
+// the typical for each loop
+#define FOR(var, end) \
+	for(unsigned int var = 0; var < end; ++var)
+
 #endif

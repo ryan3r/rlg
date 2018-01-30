@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
-#include <endian.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <limits.h>
 #include <sys/time.h>
 #include <dungeon.h>
+#include <string.h>
+
+// TODO: Check memory leaks
 
 int main(int argc, char *argv[])
 {
@@ -25,9 +23,17 @@ int main(int argc, char *argv[])
 	printf("Using seed: %u\n", seed);
 	srand(seed);
 
+	if(init_game_dir()) return 1;
+
 	init_dungeon(&d);
-	gen_dungeon(&d);
+
+	if(load_dungeon(&d, "foo")) return 25;
+
+	// gen_dungeon(&d);
 	render_dungeon(&d);
+
+	save_dungeon(&d, "foo");
+
 	delete_dungeon(&d);
 
 	return 0;

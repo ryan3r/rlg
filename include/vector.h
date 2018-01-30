@@ -2,12 +2,9 @@
 #define UTIL_HEADER_DEFINED
 
 #include <stdlib.h>
+#include <macros.h>
 
 #define VECTOR_DEFAULT_LENGTH 5
-
-// the typical for each loop
-#define FOR(var, end) \
-	for(unsigned int var = 0; var < end; ++var)
 
 // a basic vector
 typedef struct {
@@ -37,10 +34,7 @@ void vector_remove_last(vector_t *vector);
 // release the memory for a vector
 void vector_destroy(vector_t *vector);
 
-// get the end pointer for the vector
-void* vector_end(vector_t *vector);
-
 #define vector_for(type, var, vector) \
-	for(type *var = (vector)->begin, *__end_ ## var = vector_end(vector); var < __end_ ## var; ++var)
+	for(type *var = (vector)->begin, *__end_ ## var = var + (vector)->length; var != __end_ ## var; ++var)
 
 #endif
