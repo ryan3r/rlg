@@ -1,4 +1,4 @@
-// Copied from Jeremy's solution 
+// Copied from Jeremy's solution
 #ifndef MACROS_H
 # define MACROS_H
 
@@ -187,5 +187,27 @@ extern "C" {
 // the typical for each loop
 #define FOR(var, end) \
 	for(unsigned int var = 0; var < end; ++var)
+
+// print errors in fread
+#define fread(ptr, size, num, file) ({                                         \
+		size_t read = fread(ptr, size, num, file);                             \
+		if(read < num) {                                                       \
+			if(feof(file))                                                     \
+				fprintf(stderr, "Unexpected EOF\n");                           \
+			else                                                               \
+				perror("An error occured while loading");                      \
+		}                                                                      \
+		read;                                                                  \
+	})
+
+// print errors in fwrite
+#define fwrite(ptr, size, num, file) ({                                        \
+		size_t written = fwrite(ptr, size, num, file);                         \
+		if(written < num)                                                      \
+			perror("An error occured while saving");                           \
+		written;                                                               \
+	})
+
+
 
 #endif

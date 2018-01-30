@@ -695,10 +695,10 @@ int save_dungeon(dungeon_t *dungeon, char *file_name) {
 	*((uint32_t*) (header + 16)) = file_size;
 
 	// write the header
-	fwrite(header, sizeof(header), 1, file);
+	if(fwrite(header, sizeof(header), 1, file) < 1) return -1;
 
 	// write the hardness map to the file
-	fwrite(dungeon->hardness, sizeof(dungeon->hardness), 1, file);
+	if(fwrite(dungeon->hardness, sizeof(dungeon->hardness), 1, file) < 1) return -1;
 
     // convert the rooms to a serializable format
 	size_t rooms_size = dungeon->rooms.length * 4 * sizeof(uint8_t);
@@ -713,7 +713,7 @@ int save_dungeon(dungeon_t *dungeon, char *file_name) {
 	}
 
 	// write the rooms to the file
-	fwrite(rooms, rooms_size, 1, file);
+	if(fwrite(rooms, rooms_size, 1, file) < 1) return -1;
 
 	free(rooms);
 
@@ -731,7 +731,7 @@ int load_dungeon(dungeon_t *dungeon, char *file_name) {
 	// verify the header
 	uint8_t header[20];
 
-	fread(&header, sizeof(header), 1, file);
+	if(fread(&header, sizeof(header), 1, file) < 1) return -1;
 
 	// verify the marker
 	if(memcmp(header, rlg_file_marker, sizeof(rlg_file_marker) - 1)) {
@@ -751,7 +751,7 @@ int load_dungeon(dungeon_t *dungeon, char *file_name) {
 	}
 
 	// load the hardness map from the file
-	fread(dungeon->hardness, sizeof(dungeon->hardness), 1, file);
+	if(fread(dungeon->hardness, sizeof(dungeon->hardness), 1, file) < 1) return -1;
 
 	// load the rooms
 	uint32_t file_size = be32toh(*((uint32_t*) (header + 16)));
@@ -764,7 +764,7 @@ int load_dungeon(dungeon_t *dungeon, char *file_name) {
 	uint8_t *rooms = malloc(rooms_size * sizeof(uint8_t));
 	uint32_t index = 0;
 
-	fread(rooms, rooms_size * sizeof(uint8_t), 1, file);
+	if(fread(rooms, rooms_size * sizeof(uint8_t), 1, file) < 1) return -1;
 
 	vector_for(room_t, room, &dungeon->rooms) {
 		room->position[dim_y] = rooms[index++];
