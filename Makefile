@@ -4,8 +4,6 @@ GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb
 
 # objects for the program
 SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/arguments.o
-# objects for the tests
-TEST_OBJECTS = build/dungeon_test.o
 
 # build the program
 build/dungeon: src/main.c $(SRC_OBJECTS)
@@ -13,7 +11,7 @@ build/dungeon: src/main.c $(SRC_OBJECTS)
 	@gcc $^ -o $@ $(GCC_FLAGS)
 
 # include dependency files
--include $(SRC_OBJECTS:.o=.d) $(TEST_OBJECTS:.o=.d)
+-include $(SRC_OBJECTS:.o=.d)
 
 # build individual files
 build/%.o: src/%.c
@@ -35,8 +33,5 @@ clean:
 	@echo Removing all build files
 	@rm -rf build/*
 
-# build everything
-all: build/tests build/dungeon
-
 # build everything from scratch
-rebuild: clean all
+rebuild: clean build/dungeon
