@@ -12,23 +12,10 @@ build/dungeon: src/main.c $(SRC_OBJECTS)
 	@echo Building $@
 	@gcc $^ -o $@ $(GCC_FLAGS)
 
-# run the tests
-test: build/tests
-	@build/tests
-
-# build the tests
-build/tests: $(TEST_OBJECTS) $(SRC_OBJECTS) tests/main.c
-	@echo Building $@
-	@gcc $^ -o build/tests $(GCC_FLAGS)
-
 # include dependency files
 -include $(SRC_OBJECTS:.o=.d) $(TEST_OBJECTS:.o=.d)
 
 # build individual files
-build/%.o: tests/%.c
-	@echo Building $@
-	@gcc -c $< -o $@ $(GCC_FLAGS) -MMD -MF build/$*.d
-
 build/%.o: src/%.c
 	@echo Building $@
 	@gcc -c $< -o $@ $(GCC_FLAGS) -MMD -MF build/$*.d
