@@ -704,7 +704,7 @@ int save_dungeon(dungeon_t *dungeon, char *file_name) {
     memcpy(header + 12, &version, sizeof(version));
 
     // calculate the file size
-    uint32_t file_size = htobe32(1699 + dungeon->rooms.length * 4);
+    uint32_t file_size = htobe32(1700 + dungeon->rooms.length * 4);
 
     *((uint32_t *)(header + 16)) = file_size;
 
@@ -772,7 +772,7 @@ int load_dungeon(dungeon_t *dungeon, char *file_name) {
     // load the rooms
     uint32_t file_size = be32toh(*((uint32_t *)(header + 16)));
 
-    uint32_t rooms_size = file_size - 1699;
+    uint32_t rooms_size = file_size - 1700;
     vector_init(&dungeon->rooms, sizeof(room_t), rooms_size / 4);
     dungeon->rooms.length = rooms_size / 4;
 
