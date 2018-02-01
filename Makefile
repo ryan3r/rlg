@@ -6,7 +6,7 @@ GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb
 SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/arguments.o
 
 # build the program
-build/dungeon: src/main.c $(SRC_OBJECTS)
+build/dungeon: src/main.c $(SRC_OBJECTS) build/foo.o
 	@echo Building $@
 	@gcc $^ -o $@ $(GCC_FLAGS)
 

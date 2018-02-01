@@ -1,14 +1,19 @@
 #!/bin/bash
 
+# Clean the terminal before outputing
+if [ "$1" = "-c" ]; then
+	clear
+fi
+
 # Get the assignment number
-if [ -z "$1" ]; then
+if [ -z "$1" ] || [ "$1" = "-c" ]; then
 	read -p "Assignment number: " assignment
 else
 	assignment=$1
 fi
 
 package_name="Ray_Ryan.assignment-$assignment"
-workspace="/media/sf_cs327"
+workspace="/media/sf_projects/cs327"
 
 cd $workspace
 
@@ -17,6 +22,7 @@ make clean -s
 
 # Make the change log
 if [ -d ".git" ]; then
+	echo "Writing CHANGELOG"
 	git log > CHANGELOG
 fi
 
@@ -32,16 +38,22 @@ cd /tmp/$package_name
 find . -type d -empty -delete
 cd ..
 
+echo "Compressing files"
 # Make the tar ball
 tar cfz $package_name.tar.gz $package_name \
-	--exclude=".*" --exclude="submissions" --exclude="deploy"
+	--exclude=".*" --exclude="submissions" --exclude="deploy" --exclude="rlg327-s2018*"
 
 # Move the tar ball to the workspace
 cp /tmp/$package_name.tar.gz  $workspace/submissions/$package_name.tar.gz
 
+echo "Cleaning up"
 # Clean up
 rm -rf $package_name
 rm -f $package_name.tar.gz
+
+# Put the build directory back
+cd $workspace
+mkdir -p build
 
 # Tell the user that we are done
 echo "Build complete"

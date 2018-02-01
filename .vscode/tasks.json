@@ -18,7 +18,7 @@
                 "echo": false,
                 "reveal": "silent",
                 "focus": false,
-                "panel": "new"
+                "panel": "shared"
             }
         },
         {
@@ -38,6 +38,22 @@
                 "focus": true,
                 "panel": "shared"
             }
+        },
+        {
+            "label": "Build tar ball",
+            "type": "shell",
+            "command": "./deploy",
+            "args": [
+                "-c"
+            ],
+            "group": "none",
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
         }
     ]
 }
