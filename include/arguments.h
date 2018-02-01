@@ -2,8 +2,8 @@
 #define ARGUMENTS_H
 
 typedef struct {
-	char *load_file;
-	char *save_file;
+    char *load_file;
+    char *save_file;
 } arguments_t;
 
 // parse the command line arguments/open files for loading/saving
