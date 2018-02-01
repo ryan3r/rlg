@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/dungeon",
             "args": [],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": true,

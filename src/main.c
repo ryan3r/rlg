@@ -42,5 +42,10 @@ int main(int argc, char *argv[]) {
 
     delete_dungeon(&d);
 
+    #ifdef DEBUGGING
+    printf("Execution finished.\nPress enter to close...");
+    getchar();
+    #endif
+
     return 0;
 }

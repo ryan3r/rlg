@@ -7,6 +7,9 @@
             "label": "make",
             "type": "shell",
             "command": "make",
+            "args": [
+                "EXTRA_FLAGS=-DDEBUGGING"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true

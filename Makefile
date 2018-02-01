@@ -1,12 +1,12 @@
 # Based on Jeremy's solution
 
-GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb
+GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb $(EXTRA_FLAGS)
 
 # objects for the program
 SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/arguments.o
 
 # build the program
-build/dungeon: src/main.c $(SRC_OBJECTS) build/foo.o
+build/dungeon: src/main.c $(SRC_OBJECTS)
 	@echo Building $@
 	@gcc $^ -o $@ $(GCC_FLAGS)
 
