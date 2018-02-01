@@ -5,7 +5,7 @@
 #include <string.h>
 
 // program information
-const char *program_name = "dungeon 1.02";
+const char *program_name = "dungeon";
 const char *bug_email = "<bugs@404.com>";
 
 static char doc[] = "dungeon 1.02 -- A basic dungeon generator";
