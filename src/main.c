@@ -42,10 +42,10 @@ int main(int argc, char *argv[]) {
 
     delete_dungeon(&d);
 
-    #ifdef DEBUGGING
+    if (getenv("PAUSE_ON_EXIT")) {
     printf("Execution finished.\nPress enter to close...");
     getchar();
-    #endif
+    }
 
     return 0;
 }

@@ -1,6 +1,6 @@
 # Based on Jeremy's solution
 
-GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb $(EXTRA_FLAGS)
+GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb
 
 # objects for the program
 SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/arguments.o

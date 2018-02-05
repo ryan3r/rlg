@@ -9,11 +9,15 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/dungeon",
-            "args": [],
+            "args": [
+                "-l"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": true,
+            "environment": [
+                { "name": "PAUSE_ON_EXIT", "value": "1" }
+            ],
+            "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
                 {
