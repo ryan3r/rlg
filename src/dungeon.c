@@ -618,10 +618,16 @@ void render_dungeon(dungeon_t *d) {
     }
 }
 
-void delete_dungeon(dungeon_t *d) { vector_destroy(&d->rooms); }
+void delete_dungeon(dungeon_t *d) {
+    vector_destroy(&d->rooms);
+    d2_free(d->paths, DUNGEON_Y);
+    d2_free(d->paths_tunneling, DUNGEON_Y);
+}
 
 void init_dungeon(dungeon_t *d) {
     UNUSED(in_room);
+    d->paths_tunneling = NULL;
+    d->paths = NULL;
     empty_dungeon(d);
 }
 
@@ -798,4 +804,74 @@ int load_dungeon(dungeon_t *dungeon, char *file_name) {
     fclose(file);
 
     return 0;
+}
+
+#define FIND_COST_IF(x, y)                                        \
+    if ((path[y][x].hn) &&                                        \
+        (path[y][x].cost > p->cost + hardnesspair(p->pos) + 1)) { \
+        path[y][x].cost = p->cost + hardnesspair(p->pos) + 1;     \
+        path[y][x].from[dim_y] = p->pos[dim_y];                   \
+        path[y][x].from[dim_x] = p->pos[dim_x];                   \
+        heap_decrease_key_no_replace(&h, path[y][x].hn);          \
+    }
+
+static void _calc_travel_costs(dungeon_t *d, corridor_path_t ***path,
+                               bool can_tunnel) {
+    corridor_path_t *p;
+    heap_t h;
+    uint32_t x, y;
+
+    if (*path == NULL) {
+        *path = d2_malloc(DUNGEON_Y, DUNGEON_X, corridor_path_t);
+
+        for (y = 0; y < DUNGEON_Y; y++) {
+            for (x = 0; x < DUNGEON_X; x++) {
+                path[y][x].pos[dim_y] = y;
+                path[y][x].pos[dim_x] = x;
+            }
+        }
+    }
+
+    for (y = 0; y < DUNGEON_Y; y++) {
+        for (x = 0; x < DUNGEON_X; x++) {
+            path[y][x].cost = INT_MAX;
+        }
+    }
+
+    path[d->player[dim_y]][d->player[dim_x]].cost = 0;
+
+    heap_init(&h, corridor_path_cmp, NULL);
+
+    for (y = 0; y < DUNGEON_Y; y++) {
+        for (x = 0; x < DUNGEON_X; x++) {
+            if (can_tunnel ? mapxy(x, y) != ter_wall_immutable
+                           : mapxy(x, y) == ter_floor_hall ||
+                                 mapxy(x, y) == ter_floor_room) {
+                path[y][x].hn = heap_insert(&h, &path[y][x]);
+            } else {
+                path[y][x].hn = NULL;
+            }
+        }
+    }
+
+    while ((p = heap_remove_min(&h))) {
+        p->hn = NULL;
+
+        FIND_COST_IF(p->pos[dim_x], p->pos[dim_y] - 1)
+        FIND_COST_IF(p->pos[dim_x] - 1, p->pos[dim_y])
+        FIND_COST_IF(p->pos[dim_x] + 1, p->pos[dim_y])
+        FIND_COST_IF(p->pos[dim_x], p->pos[dim_y] + 1)
+
+        FIND_COST_IF(p->pos[dim_x] - 1, p->pos[dim_y] - 1)
+        FIND_COST_IF(p->pos[dim_x] - 1, p->pos[dim_y] + 1)
+        FIND_COST_IF(p->pos[dim_x] + 1, p->pos[dim_y] - 1)
+        FIND_COST_IF(p->pos[dim_x] + 1, p->pos[dim_y] + 1)
+    }
+}
+
+#undef FIND_COST_IF
+
+void calc_travel_costs(dungeon_t *d) {
+    _calc_travel_costs(d, &d->paths_tunneling, true);
+    _calc_travel_costs(d, &d->paths, false);
 }

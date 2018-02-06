@@ -1,0 +1,6 @@
+{
+    "C_Cpp.clang_format_style": "{\"BasedOnStyle\":\"google\",\"IndentWidth\":4}",
+    "files.associations": {
+        "time.h": "c"
+    }
+}

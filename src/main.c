@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[]) {
     // set the cwd and create the data dir
@@ -32,8 +33,27 @@ int main(int argc, char *argv[]) {
         gen_dungeon(&d);
     }
 
+    d.player[dim_x] = 15;
+    d.player[dim_y] = 10;
+    calc_travel_costs(&d);
+
     // display the dungeon
-    render_dungeon(&d);
+    // render_dungeon(&d);
+
+    for (uint32_t y = 0; y < DUNGEON_Y; y++) {
+        for (uint32_t x = 0; x < DUNGEON_X; x++) {
+            uint32_t cost = d.paths[y][x].cost;
+
+            if (x == 15 && y == 10) {
+                printf("@");
+            } else if (cost == INT_MAX) {
+                printf(" ");
+            } else {
+                printf("%u", cost % 10);
+            }
+        }
+        printf("\n");
+    }
 
     // try to save the dungeon
     if (arguments.save_file != NULL) {
@@ -43,8 +63,8 @@ int main(int argc, char *argv[]) {
     delete_dungeon(&d);
 
     if (getenv("PAUSE_ON_EXIT")) {
-    printf("Execution finished.\nPress enter to close...");
-    getchar();
+        printf("Execution finished.\nPress enter to close...");
+        getchar();
     }
 
     return 0;

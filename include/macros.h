@@ -221,4 +221,20 @@ extern "C" {
         written;                                                    \
     })
 
+// allocate a 2d array
+#define d2_malloc(num_rows, num_cols, type)            \
+    ({                                                 \
+        type **d2 = malloc(num_rows * sizeof(type *)); \
+        for (int i = 0; i < num_rows; ++i)             \
+            d2[i] = calloc(num_cols, sizeof(type));    \
+        d2;                                            \
+    })
+
+// free a 2d array
+#define d2_free(d2, num_rows)                           \
+    ({                                                  \
+        for (int i = 0; i < num_rows; ++i) free(d2[i]); \
+        free(d2);                                       \
+    })
+
 #endif

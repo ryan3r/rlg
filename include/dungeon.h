@@ -10,6 +10,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
 /* Very slow seed: 686846853 */
 
@@ -76,6 +77,9 @@ typedef struct dungeon {
      * and pulling in unnecessary data with each map cell would add a lot   *
      * of overhead to the memory system.                                    */
     uint8_t hardness[DUNGEON_Y][DUNGEON_X];
+    corridor_path_t **paths_tunneling;
+    corridor_path_t **paths;
+    pair_t player;
 } dungeon_t;
 
 int gen_dungeon(dungeon_t *d);
@@ -91,5 +95,7 @@ int save_dungeon(dungeon_t *, char *);
 
 // load the dungeon from a save file
 int load_dungeon(dungeon_t *, char *);
+
+void calc_travel_costs(dungeon_t *d);
 
 #endif
