@@ -877,3 +877,11 @@ void calc_travel_costs(dungeon_t *d) {
     _calc_travel_costs(d, true);
     _calc_travel_costs(d, false);
 }
+
+// place a player in a random room
+void place_player(dungeon_t *d) {
+    room_t room = vector_get(&d->rooms, room_t, rand_range(0, d->rooms.length - 1));
+
+    d->player[dim_x] = rand_range(room.position[dim_x], room.position[dim_x] + room.size[dim_x] - 1);
+    d->player[dim_y] = rand_range(room.position[dim_y], room.position[dim_y] + room.size[dim_y] - 1);
+}

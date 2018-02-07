@@ -15,6 +15,7 @@ static char args_doc[] = "";
 static struct argp_option options[] = {
     {"load", 'l', "FILE", OPTION_ARG_OPTIONAL, "Load a dungeon file"},
     {"save", 's', "FILE", OPTION_ARG_OPTIONAL, "Save a dungeon file"},
+    {"player", 'p', "(y,x)", 0, "The player position"},
     {0}};
 
 // the default dungeon file
@@ -33,6 +34,12 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
         // save a file
         case 's':
             arguments->save_file = arg ? arg : dungeon_file_name;
+            break;
+        
+        // place that player
+        case 'p':
+            arguments->chosen_position = true;
+            sscanf(arg, "(%hhu,%hhu)", &arguments->player_y, &arguments->player_x);
             break;
 
         // use defaults

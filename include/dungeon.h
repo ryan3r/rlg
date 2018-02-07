@@ -98,4 +98,6 @@ int load_dungeon(dungeon_t *, char *);
 
 void calc_travel_costs(dungeon_t *d);
 
+void place_player(dungeon_t *d) ;
+
 #endif

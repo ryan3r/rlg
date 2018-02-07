@@ -1,6 +1,6 @@
 # Based on Jeremy's solution
 
-GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb
+GCC_FLAGS = -std=gnu11 -I include -Wall -ggdb
 
 # objects for the program
 SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/arguments.o
@@ -42,11 +42,11 @@ build:
 
 # run tests
 test: build/dungeon
-	@build/dungeon --save > expected_outputs/expected
-	@build/dungeon --load > expected_outputs/out
+	@build/dungeon --save --player="(1,1)" > expected_outputs/expected
+	@build/dungeon --load --player="(1,1)" > expected_outputs/out
 	@diff expected_outputs/out expected_outputs/expected
 
-	@build/dungeon --load="$(shell pwd)/test_dungeon_files/1521618087.rlg327" > expected_outputs/out
+	@build/dungeon --player="(10,15)" --load="$(shell pwd)/test_dungeon_files/1521618087.rlg327" > expected_outputs/out
 	@diff expected_outputs/out expected_outputs/1521618087.rlg327
 
 	@echo "All tests passed"

@@ -2,3 +2,5 @@
 *.tar.gz
 CHANGELOG
 build/*
+expected_outputs/expected
+expected_outputs/out

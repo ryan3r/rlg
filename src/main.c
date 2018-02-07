@@ -8,6 +8,12 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
+    // seed the random number generator
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    srand((tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff);
+
     // set the cwd and create the data dir
     if (init_game_dir()) return 1;
 
@@ -25,16 +31,19 @@ int main(int argc, char *argv[]) {
     }
     // generate a new dungeon
     else {
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-
-        srand((tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff);
-
         gen_dungeon(&d);
     }
 
-    d.player[dim_x] = 15;
-    d.player[dim_y] = 10;
+    // use a specific location
+    if(arguments.chosen_position) {
+        d.player[dim_x] = arguments.player_x;
+        d.player[dim_y] = arguments.player_y;
+    }
+    // randomly place a player
+    else {
+        place_player(&d);
+    }
+
     calc_travel_costs(&d);
 
     // display the dungeon
@@ -44,7 +53,7 @@ int main(int argc, char *argv[]) {
         for (uint32_t x = 0; x < DUNGEON_X; x++) {
             uint32_t cost = d.paths[y][x].cost;
 
-            if (x == 15 && y == 10) {
+            if (d.player[dim_x] == x && d.player[dim_y] == y) {
                 printf("@");
             } else if (cost == INT_MAX) {
                 printf(" ");
