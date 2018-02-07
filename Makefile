@@ -6,9 +6,9 @@ GCC_FLAGS = -std=gnu11 -I include -Wall -Werror -ggdb
 SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/arguments.o
 
 # build the program
-build/dungeon: src/main.c $(SRC_OBJECTS)
+build/dungeon: build src/main.c $(SRC_OBJECTS)
 	@echo Building $@
-	@gcc $^ -o $@ $(GCC_FLAGS)
+	@gcc src/main.c $(SRC_OBJECTS) -o $@ $(GCC_FLAGS)
 
 # include dependency files
 -include $(SRC_OBJECTS:.o=.d)
@@ -31,7 +31,22 @@ mem-save: build/dungeon
 # clean up build artifacts
 clean:
 	@echo Removing all build files
-	@rm -rf build/*
+	@rm -rf build
 
 # build everything from scratch
 rebuild: clean build/dungeon
+
+# create the build directory
+build:
+	@mkdir -p build
+
+# run tests
+test: build/dungeon
+	@build/dungeon --save > expected_outputs/expected
+	@build/dungeon --load > expected_outputs/out
+	@diff expected_outputs/out expected_outputs/expected
+
+	@build/dungeon --load="$(shell pwd)/test_dungeon_files/1521618087.rlg327" > expected_outputs/out
+	@diff expected_outputs/out expected_outputs/1521618087.rlg327
+
+	@echo "All tests passed"

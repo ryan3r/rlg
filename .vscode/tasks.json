@@ -54,6 +54,32 @@
                 "panel": "shared"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Ci tests",
+            "type": "shell",
+            "command": "./ci-test",
+            "group": "test",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Tests",
+            "type": "shell",
+            "command": "make test",
+            "group": "test",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
         }
     ]
 }

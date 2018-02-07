@@ -38,9 +38,9 @@ int main(int argc, char *argv[]) {
     calc_travel_costs(&d);
 
     // display the dungeon
-    render_dungeon(&d);
+    // render_dungeon(&d);
 
-    /*for (uint32_t y = 0; y < DUNGEON_Y; y++) {
+    for (uint32_t y = 0; y < DUNGEON_Y; y++) {
         for (uint32_t x = 0; x < DUNGEON_X; x++) {
             uint32_t cost = d.paths[y][x].cost;
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
             }
         }
         printf("\n");
-    }*/
+    }
 
     // try to save the dungeon
     if (arguments.save_file != NULL) {

@@ -13,7 +13,7 @@ else
 fi
 
 package_name="Ray_Ryan.assignment-$assignment"
-workspace="/media/sf_projects/cs327"
+workspace="/mnt/904A4A084A49EB92/Users/ryan3/Documents/projects/cs327"
 
 cd $workspace
 
@@ -36,12 +36,12 @@ cp -r  $workspace /tmp/$package_name
 # Remove any empty folders
 cd /tmp/$package_name
 find . -type d -empty -delete
+rm -rf .vscode .gitignore submissions rlg327-s2018* ci-test deploy .git
 cd ..
 
 echo "Compressing files"
 # Make the tar ball
-tar cfz $package_name.tar.gz $package_name \
-	--exclude=".*" --exclude="submissions" --exclude="deploy" --exclude="rlg327-s2018*"
+tar cfz $package_name.tar.gz $package_name
 
 # Move the tar ball to the workspace
 cp /tmp/$package_name.tar.gz  $workspace/submissions/$package_name.tar.gz
