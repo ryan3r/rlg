@@ -56,7 +56,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Ci tests",
+            "label": "CI tests",
             "type": "shell",
             "command": "./ci-test",
             "group": "test",
