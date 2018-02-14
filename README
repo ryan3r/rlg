@@ -1,13 +1,16 @@
 # Description
 
-Load and save functionality.  An extension to the dungeon generator to support
-the binary dungeon format.
+Distance maps for mosters.  Generates a map of the dungeon and maps showing 
+the distance to any point in the dungeon from the player.  
 
 # Usage
 
 ```
-build/dungeon [--load=[FILE]] [--save=[FILE]]
+build/dungeon [--load=[FILE]] [--save=[FILE]] [--player="(y,x)"]
 ```
+
+The optional player flag can be added to set the position of the player.  If 
+the player flag is not specified the player will be randomly placed in a room.
 
 The load flag can be given to load an existing dungeon.  The save flag can be
 given to save the dungeon that is displayed.  If the load flag is not given a
@@ -15,8 +18,7 @@ random dungeon will be generated. The program looks for files in the ~/.rlg327
 folder if one does not exist it will be created.  If you want to load a file
 outside the .rlg327 directory give it an absolute path.
 
-# New and noteworthy
+# Tests
 
- * There is a basic vector implementation in src/vector.c and include/vector.h
- * The load and save functions have been added at the end of src/dungeon.c
- * I modified Jeremy's dungeon_t to use a vector_t for the rooms
+There are tests that compare the output of build/dungeon to the outputs generated
+by Jeremy.
