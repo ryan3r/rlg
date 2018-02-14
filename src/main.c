@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     }
 
     // use a specific location
-    if(arguments.chosen_position) {
+    if (arguments.chosen_position) {
         d.player[dim_x] = arguments.player_x;
         d.player[dim_y] = arguments.player_y;
     }
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     calc_travel_costs(&d);
 
     // display the dungeon
-    // render_dungeon(&d);
+    render_dungeon(&d);
 
     for (uint32_t y = 0; y < DUNGEON_Y; y++) {
         for (uint32_t x = 0; x < DUNGEON_X; x++) {
@@ -55,7 +55,22 @@ int main(int argc, char *argv[]) {
 
             if (d.player[dim_x] == x && d.player[dim_y] == y) {
                 printf("@");
-            } else if (cost == INT_MAX) {
+            } else if (d.hardness[y][x] != 0) {
+                printf(" ");
+            } else {
+                printf("%u", cost % 10);
+            }
+        }
+        printf("\n");
+    }
+
+    for (uint32_t y = 0; y < DUNGEON_Y; y++) {
+        for (uint32_t x = 0; x < DUNGEON_X; x++) {
+            uint32_t cost = d.paths_tunneling[y][x].cost;
+
+            if (d.player[dim_x] == x && d.player[dim_y] == y) {
+                printf("@");
+            } else if (d.hardness[y][x] == 255) {
                 printf(" ");
             } else {
                 printf("%u", cost % 10);

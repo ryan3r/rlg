@@ -595,6 +595,11 @@ void render_dungeon(dungeon_t *d) {
 
     for (p[dim_y] = 0; p[dim_y] < DUNGEON_Y; p[dim_y]++) {
         for (p[dim_x] = 0; p[dim_x] < DUNGEON_X; p[dim_x]++) {
+            if(d->player[dim_x] == p[dim_x] && d->player[dim_y] == p[dim_y]) {
+                putchar('@');
+                continue;
+            }
+
             switch (mappair(p)) {
                 case ter_wall:
                 case ter_wall_immutable:
@@ -668,14 +673,16 @@ int init_game_dir() {
 
 // initialize the terrain map of a newly loaded dungeon
 static void init_terrain_map(dungeon_t *dungeon) {
-    FOR(y, DUNGEON_Y)
-    FOR(x, DUNGEON_X) {
-        // room or corridor, assume corridor for now
-        if (!dungeon->hardness[y][x]) {
-            dungeon->map[y][x] = ter_floor_hall;
-        } else {
-            dungeon->map[y][x] =
-                dungeon->hardness[y][x] == 255 ? ter_wall_immutable : ter_wall;
+    FOR(y, DUNGEON_Y) {
+        FOR(x, DUNGEON_X) {
+            // room or corridor, assume corridor for now
+            if (!dungeon->hardness[y][x]) {
+                dungeon->map[y][x] = ter_floor_hall;
+            } else {
+                dungeon->map[y][x] = dungeon->hardness[y][x] == 255
+                                         ? ter_wall_immutable
+                                         : ter_wall;
+            }
         }
     }
 
@@ -808,13 +815,16 @@ int load_dungeon(dungeon_t *dungeon, char *file_name) {
 
 #define GET_PATH (can_tunnel ? d->paths_tunneling : d->paths)
 
-#define FIND_COST_IF(x, y)                                        \
-    if ((GET_PATH[y][x].hn) &&                                        \
-        (GET_PATH[y][x].cost > p->cost + hardnesspair(p->pos) + 1)) { \
-        GET_PATH[y][x].cost = p->cost + hardnesspair(p->pos) + 1;     \
-        GET_PATH[y][x].from[dim_y] = p->pos[dim_y];                   \
-        GET_PATH[y][x].from[dim_x] = p->pos[dim_x];                   \
-        heap_decrease_key_no_replace(&h, GET_PATH[y][x].hn);          \
+#define IS_FLOOR(ter) \
+    ((ter) == ter_floor || (ter) == ter_floor_hall || (ter) == ter_floor_room)
+
+#define FIND_COST_IF(x, y)                                                   \
+    if ((GET_PATH[y][x].hn) &&                                               \
+        (GET_PATH[y][x].cost > p->cost + (hardnesspair(p->pos) / 85 + 1))) { \
+        GET_PATH[y][x].cost = p->cost + (hardnesspair(p->pos) / 85 + 1);     \
+        GET_PATH[y][x].from[dim_y] = p->pos[dim_y];                          \
+        GET_PATH[y][x].from[dim_x] = p->pos[dim_x];                          \
+        heap_decrease_key_no_replace(&h, GET_PATH[y][x].hn);                 \
     }
 
 static void _calc_travel_costs(dungeon_t *d, bool can_tunnel) {
@@ -823,7 +833,8 @@ static void _calc_travel_costs(dungeon_t *d, bool can_tunnel) {
     uint32_t x, y;
 
     if (GET_PATH == NULL) {
-        *(can_tunnel ? &d->paths_tunneling : &d->paths) = d2_malloc(DUNGEON_Y, DUNGEON_X, corridor_path_t);
+        *(can_tunnel ? &d->paths_tunneling : &d->paths) =
+            d2_malloc(DUNGEON_Y, DUNGEON_X, corridor_path_t);
 
         for (y = 0; y < DUNGEON_Y; y++) {
             for (x = 0; x < DUNGEON_X; x++) {
@@ -835,7 +846,9 @@ static void _calc_travel_costs(dungeon_t *d, bool can_tunnel) {
 
     for (y = 0; y < DUNGEON_Y; y++) {
         for (x = 0; x < DUNGEON_X; x++) {
-            GET_PATH[y][x].cost = INT_MAX;
+            // I use INT16_MAX because INT32_MAX causes overflows. I subtract two because
+            // it has to end with a 5.  
+            GET_PATH[y][x].cost = INT16_MAX - 2;
         }
     }
 
@@ -845,9 +858,7 @@ static void _calc_travel_costs(dungeon_t *d, bool can_tunnel) {
 
     for (y = 0; y < DUNGEON_Y; y++) {
         for (x = 0; x < DUNGEON_X; x++) {
-            if (can_tunnel ? mapxy(x, y) != ter_wall_immutable
-                           : mapxy(x, y) == ter_floor_hall ||
-                                 mapxy(x, y) == ter_floor_room) {
+            if (can_tunnel ? hardnessxy(x, y) != 255 : !hardnessxy(x, y)) {
                 GET_PATH[y][x].hn = heap_insert(&h, &GET_PATH[y][x]);
             } else {
                 GET_PATH[y][x].hn = NULL;
@@ -880,8 +891,11 @@ void calc_travel_costs(dungeon_t *d) {
 
 // place a player in a random room
 void place_player(dungeon_t *d) {
-    room_t room = vector_get(&d->rooms, room_t, rand_range(0, d->rooms.length - 1));
+    room_t room =
+        vector_get(&d->rooms, room_t, rand_range(0, d->rooms.length - 1));
 
-    d->player[dim_x] = rand_range(room.position[dim_x], room.position[dim_x] + room.size[dim_x] - 1);
-    d->player[dim_y] = rand_range(room.position[dim_y], room.position[dim_y] + room.size[dim_y] - 1);
+    d->player[dim_x] = rand_range(room.position[dim_x],
+                                  room.position[dim_x] + room.size[dim_x] - 1);
+    d->player[dim_y] = rand_range(room.position[dim_y],
+                                  room.position[dim_y] + room.size[dim_y] - 1);
 }
