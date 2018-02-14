@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/dungeon",
+            "program": "${workspaceFolder}/build/rlg",
             "args": [
                 "--player=\"(6,55)\"",
                 "--load=/mnt/904A4A084A49EB92/Users/ryan3/Documents/projects/cs327/test_dungeon_files/adventure.rlg327"

@@ -6,7 +6,7 @@ the distance to any point in the dungeon from the player.
 # Usage
 
 ```
-build/dungeon [--load=[FILE]] [--save=[FILE]] [--player="(y,x)"]
+build/rlg [--load=[FILE]] [--save=[FILE]] [--player="(y,x)"]
 ```
 
 The optional player flag can be added to set the position of the player.  If 
@@ -20,5 +20,5 @@ outside the .rlg327 directory give it an absolute path.
 
 # Tests
 
-There are tests that compare the output of build/dungeon to the outputs generated
+There are tests that compare the output of build/rlg to the outputs generated
 by Jeremy.
