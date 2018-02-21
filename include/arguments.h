@@ -10,6 +10,7 @@ typedef struct {
     bool chosen_position;
     uint8_t player_x;
     uint8_t player_y;
+    uint32_t num_monsters;
 } arguments_t;
 
 // parse the command line arguments/open files for loading/saving

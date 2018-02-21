@@ -48,6 +48,10 @@ static int32_t corridor_path_cmp(const void *key, const void *with) {
     return ((corridor_path_t *)key)->cost - ((corridor_path_t *)with)->cost;
 }
 
+int32_t turn_comparator(const void *key, const void *with) {
+    return ((entity_t*) key)->turn - ((entity_t*) with)->turn;
+}
+
 static void dijkstra_corridor(dungeon_t *d, pair_t from, pair_t to) {
     static corridor_path_t path[DUNGEON_Y][DUNGEON_X], *p;
     static uint32_t initialized = 0;
@@ -595,8 +599,16 @@ void render_dungeon(dungeon_t *d) {
 
     for (p[dim_y] = 0; p[dim_y] < DUNGEON_Y; p[dim_y]++) {
         for (p[dim_x] = 0; p[dim_x] < DUNGEON_X; p[dim_x]++) {
-            if(d->player[dim_x] == p[dim_x] && d->player[dim_y] == p[dim_y]) {
-                putchar('@');
+            if(d->entity_map[p[dim_y]][p[dim_x]]) {
+                entity_t *entity = d->entity_map[p[dim_y]][p[dim_x]];
+
+                if(entity_get_attr(entity, attr_pc))
+                    putchar('@');
+                else if(entity->attrs % 16 < 10)
+                    putchar('0' + (entity->attrs % 16));
+                else
+                    putchar('a' + (entity->attrs % 16) - 10);
+
                 continue;
             }
 
@@ -633,6 +645,17 @@ void init_dungeon(dungeon_t *d) {
     UNUSED(in_room);
     d->paths_tunneling = NULL;
     d->paths = NULL;
+
+    heap_init(&d->turn_queue, turn_comparator, NULL);
+
+    entity_init(&d->player, 1);
+
+    FOR(y, DUNGEON_Y) {
+        FOR(x, DUNGEON_X) {
+            d->entity_map[y][x] = NULL;
+        }
+    }
+
     empty_dungeon(d);
 }
 
@@ -852,7 +875,7 @@ static void _calc_travel_costs(dungeon_t *d, bool can_tunnel) {
         }
     }
 
-    GET_PATH[d->player[dim_y]][d->player[dim_x]].cost = 0;
+    GET_PATH[d->player.y][d->player.x].cost = 0;
 
     heap_init(&h, corridor_path_cmp, NULL);
 
@@ -890,12 +913,38 @@ void calc_travel_costs(dungeon_t *d) {
 }
 
 // place a player in a random room
-void place_player(dungeon_t *d) {
-    room_t room =
-        vector_get(&d->rooms, room_t, rand_range(0, d->rooms.length - 1));
+void place_entity(dungeon_t *d, entity_t *entity) {
+    static uint8_t player_room_idx;
 
-    d->player[dim_x] = rand_range(room.position[dim_x],
-                                  room.position[dim_x] + room.size[dim_x] - 1);
-    d->player[dim_y] = rand_range(room.position[dim_y],
-                                  room.position[dim_y] + room.size[dim_y] - 1);
+    uint8_t room_idx;
+
+    do {
+        room_idx = rand_range(0, d->rooms.length - 1);
+    } while(room_idx == player_room_idx && !entity_get_attr(entity, attr_pc));
+
+    if(entity_get_attr(entity, attr_pc)) {
+        player_room_idx = room_idx;
+    }
+
+    room_t room = vector_get(&d->rooms, room_t, room_idx);
+
+    do {
+        entity->x = rand_range(room.position[dim_x],
+                                    room.position[dim_x] + room.size[dim_x] - 1);
+        entity->y = rand_range(room.position[dim_y],
+                                    room.position[dim_y] + room.size[dim_y] - 1);
+    } while(d->entity_map[entity->y][entity->x]);
+
+    heap_insert(&d->turn_queue, entity);
+
+    d->entity_map[entity->y][entity->x] = entity;
+}
+
+void place_monsters(dungeon_t *d, uint32_t num_monsters) {
+    for(uint32_t i = 0; i < num_monsters; ++i) {
+        entity_t *monster = malloc(sizeof(entity_t));
+        entity_init(monster, 0);
+
+        place_entity(d, monster);
+    }
 }

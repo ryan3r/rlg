@@ -3,12 +3,13 @@
 GCC_FLAGS = -std=gnu11 -I include -Wall -ggdb
 
 # objects for the program
-SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/arguments.o
+SRC_OBJECTS = build/dungeon.o build/vector.o build/heap.o build/character.o build/arguments.o \
+	build/monster.o
 
 # build the program
 build/rlg: build src/main.c $(SRC_OBJECTS)
 	@echo Building $@
-	@gcc src/main.c $(SRC_OBJECTS) -o $@ $(GCC_FLAGS)
+	@gcc src/main.c $(SRC_OBJECTS) -o $@ $(GCC_FLAGS) -largp
 
 # include dependency files
 -include $(SRC_OBJECTS:.o=.d)

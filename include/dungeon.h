@@ -16,14 +16,9 @@
 
 #include <heap.h>
 #include <vector.h>
+#include <character.h>
+#include <macros.h>
 
-/* Returns true if random float in [0,1] is less than *
- * numerator/denominator.  Uses only integer math.    */
-#define rand_under(numerator, denominator) \
-    (rand() < ((RAND_MAX / denominator) * numerator))
-
-/* Returns random integer in [min, max]. */
-#define rand_range(min, max) ((rand() % (((max) + 1) - (min))) + (min))
 #define UNUSED(f) ((void)f)
 
 typedef struct corridor_path {
@@ -79,7 +74,9 @@ typedef struct dungeon {
     uint8_t hardness[DUNGEON_Y][DUNGEON_X];
     corridor_path_t **paths_tunneling;
     corridor_path_t **paths;
-    pair_t player;
+    entity_t *entity_map[DUNGEON_Y][DUNGEON_X];
+    entity_t player;
+    heap_t turn_queue;
 } dungeon_t;
 
 int gen_dungeon(dungeon_t *d);
@@ -98,6 +95,8 @@ int load_dungeon(dungeon_t *, char *);
 
 void calc_travel_costs(dungeon_t *d);
 
-void place_player(dungeon_t *d) ;
+void place_entity(dungeon_t *d, entity_t *entity);
+
+void place_monsters(dungeon_t *d, uint32_t num_monsters);
 
 #endif
