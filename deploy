@@ -13,7 +13,7 @@ else
 fi
 
 package_name="Ray_Ryan.assignment-$assignment"
-workspace="/mnt/904A4A084A49EB92/Users/ryan3/Documents/projects/cs327"
+workspace="$(pwd)"
 
 cd $workspace
 
