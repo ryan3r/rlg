@@ -1,35 +1,26 @@
-// Copied from Jeremy's solution
+// Based on Jeremy's solution
 #ifndef MACROS_H
-#define MACROS_H
+# define MACROS_H
 
-#ifdef __cplusplus
+# ifdef __cplusplus
 extern "C" {
-#endif
+# endif
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+# include <stdio.h>
+# include <string.h>
+# include <stdlib.h>
+# include <errno.h>
 
 /* General purpose macros */
 
-#ifdef VERBOSE_DEBUG
-#define dprintf(...) printf(__VA_ARGS__)
-#define dfprintf(file, ...) fprintf(file, __VA_ARGS__)
-#else
-#define dprintf(...)
-#define dfprintf(file, ...)
-#endif
+# ifdef VERBOSE_DEBUG
+#  define dprintf(...) printf(__VA_ARGS__)
+#  define dfprintf(file, ...) fprintf(file, __VA_ARGS__)
+# else
+#  define dprintf(...)
+#  define dfprintf(file, ...)
+# endif
 
-/* Returns true if random float in [0,1] is less than *
- * numerator/denominator.  Uses only integer math.    */
-#define rand_under(numerator, denominator) \
-    (rand() < ((RAND_MAX / denominator) * numerator))
-
-/* Returns random integer in [min, max]. */
-#define rand_range(min, max) ((rand() % (((max) + 1) - (min))) + (min))
-
-// clang-format off
 # define fieldwidth(i) ((i <= -1000000000)                    ? 11 : \
                         ((i >=  1000000000 || i <= -100000000) ? 10 : \
                          ((i >=   100000000 || i <=  -10000000) ?  9 : \
@@ -41,31 +32,27 @@ extern "C" {
                                ((i >=         100 || i <=        -10) ?  3 : \
                                 ((i >=          10 || i <=         -1) ?  2 : \
                                  1))))))))))
-// clang-format on
 
-#ifndef NIAGARA
+# ifndef NIAGARA
 
-#define exit(value)                                                     \
-    {                                                                   \
-        fprintf(stderr, "exit(" #value ") called at " __FILE__ ":%u\n", \
-                __LINE__);                                              \
-        exit(value);                                                    \
-    }
+# define exit(value) {                                                       \
+  fprintf(stderr, "exit(" #value ") called at " __FILE__ ":%u\n", __LINE__); \
+  exit(value);                                                               \
+}
 
-#define fopen(path, mode)                                                      \
-    ({                                                                         \
-        FILE *_f = fopen(path, mode);                                          \
-        if (!_f)                                                               \
-            fprintf(stderr, "Failed to open %s: %s\n", path, strerror(errno)); \
-        _f;                                                                    \
-    })
+# define fopen(path, mode) ({                                          \
+  FILE *_f = fopen(path, mode);                                        \
+  if (!_f)                                                             \
+    fprintf(stderr, "Failed to open %s: %s\n", path, strerror(errno)); \
+  _f;                                                                  \
+})
 
 /* If we turn on optimizations, then there are conflicts between a macro *
  * version of strdup() and the macro below.  To avoid that, add the      *
  * conditional block.  Further, if we're optimizing, let's assume that   *
  * don't want all these safe memory macros, so we'll put them in the     *
  * conditional block, too!                                               */
-#if !defined __OPTIMIZE__
+# if !defined __OPTIMIZE__
 
 /*
 #  define dmalloc(ptr) ({                                                     \
@@ -87,162 +74,113 @@ extern "C" {
 })
 */
 
-#define malloc(size)                                                     \
-    ({                                                                   \
-        void *_tmp;                                                      \
-        /*                                                               \
-           printf("Attempting to allocate %d bytes " __FILE__ "%d\n",    \
-                  size, __LINE__);                                       \
-        */                                                               \
-        _tmp = malloc(size); /* Can't use calloc directly, because it */ \
-        if (!_tmp) {         /* invokes the calloc macro.  Use bzero  */ \
-            fprintf(stderr, "Allocation failed at %s:%d!\n", __FILE__,   \
-                    __LINE__);                                           \
-            exit(1);                                                     \
-        }                                                                \
-        /*   dmalloc(_tmp);*/                                            \
-        bzero(_tmp, size);                                               \
-        _tmp;                                                            \
-    })
+#  define malloc(size) ({                                                  \
+   void *_tmp;                                                             \
+/*                                                                         \
+   printf("Attempting to allocate %d bytes " __FILE__ "%d\n",              \
+          size, __LINE__);                                                 \
+*/                                                                         \
+   _tmp = malloc(size); /* Can't use calloc directly, because it */        \
+   if (!_tmp) {               /* invokes the calloc macro.  Use bzero  */  \
+     fprintf(stderr, "Allocation failed at %s:%d!\n", __FILE__, __LINE__); \
+     exit(1);                                                              \
+   }                                                                       \
+/*   dmalloc(_tmp);*/                                                      \
+   bzero(_tmp, size);                                                      \
+   _tmp;                                                                   \
+})
 
-#define calloc(nmemb, size)                                            \
-    ({                                                                 \
-        void *_tmp;                                                    \
-        /*                                                             \
-           printf("Attempting to allocate %d bytes " __FILE__ "%d\n",  \
-                 (int) (size * nmemb), __LINE__);                      \
-        */                                                             \
-        _tmp = calloc(nmemb, size);                                    \
-        if (!_tmp) {                                                   \
-            fprintf(stderr, "Allocation failed at %s:%d!\n", __FILE__, \
-                    __LINE__);                                         \
-            exit(1);                                                   \
-        }                                                              \
-        /*   dmalloc(_tmp);*/                                          \
-        _tmp;                                                          \
-    })
+#  define calloc(nmemb, size) ({                                           \
+   void *_tmp;                                                             \
+/*                                                                         \
+   printf("Attempting to allocate %d bytes " __FILE__ "%d\n",              \
+         (int) (size * nmemb), __LINE__);                                  \
+*/                                                                         \
+   _tmp = calloc(nmemb, size);                                             \
+   if (!_tmp) {                                                            \
+     fprintf(stderr, "Allocation failed at %s:%d!\n", __FILE__, __LINE__); \
+     exit(1);                                                              \
+   }                                                                       \
+/*   dmalloc(_tmp);*/                                                      \
+   _tmp;                                                                   \
+})
 
-#define strdup(s)                                                      \
-    ({                                                                 \
-        char *_s = strdup(s);                                          \
-        if (!_s) {                                                     \
-            fprintf(stderr, "Allocation failed at %s:%d!\n", __FILE__, \
-                    __LINE__);                                         \
-            exit(1);                                                   \
-        }                                                              \
-        /*     dmalloc(_s);*/                                          \
-        _s;                                                            \
-    })
+#  define strdup(s) ({                                                     \
+   char *_s = strdup(s);                                                   \
+   if (!_s) {                                                              \
+     fprintf(stderr, "Allocation failed at %s:%d!\n", __FILE__, __LINE__); \
+     exit(1);                                                              \
+   }                                                                       \
+/*     dmalloc(_s);*/                                                      \
+   _s;                                                                     \
+})
 
-#define free(ptr)               \
-    ({                          \
-        typeof(ptr) _p = (ptr); \
-        /*   dfree(_p);*/       \
-        free(_p);               \
-    })
+#  define free(ptr) ({                              \
+   typeof (ptr) _p = (ptr);                         \
+/*   dfree(_p);*/                                   \
+   free(_p);                                        \
+})
 
-#endif /* __OPTIMIZE__ */
+# endif /* __OPTIMIZE__ */
 
-#define swap(a, b)            \
-    ({                        \
-        typeof(a) _tmp = (a); \
-        (a) = (b);            \
-        (b) = _tmp;           \
-    })
+# define swap(a, b) ({   \
+  typeof (a) _tmp = (a); \
+  (a) = (b);             \
+  (b) = _tmp;            \
+})
 
-#define memswap(a, b)             \
-    ({                            \
-        typeof(*(a)) _tmp = *(a); \
-        *(a) = *(b);              \
-        *(b) = _tmp;              \
-    })
+# define memswap(a, b) ({    \
+  typeof (*(a)) _tmp = *(a); \
+  *(a) = *(b);               \
+  *(b) = _tmp;               \
+})
 
-#define structdup(s)                     \
-    ({                                   \
-        typeof(s) _tmp;                  \
-        _tmp = malloc(sizeof(*(s)));     \
-        memcpy(_tmp, (s), sizeof(*(s))); \
-        _tmp;                            \
-    })
+# define structdup(s) ({                                                  \
+  typeof (s) _tmp;                                                        \
+  _tmp = malloc(sizeof (*(s)));                                           \
+  memcpy(_tmp, (s), sizeof (*(s)));                                       \
+  _tmp;                                                                   \
+})
 
-#define datacmp(d1, d2)                                                    \
-    ({                                                                     \
-        register char *_t1 = (char *)d1, *_t2 = (char *)d2, *_start;       \
-        for (_start = _t1; _t1 < (_start + sizeof(*(d1))) && *_t1 == *_t2; \
-             _t1++, _t2++)                                                 \
-            ;                                                              \
-        _t1 == (_start + sizeof(*(d1)));                                   \
-    })
+# define datacmp(d1, d2) ({                                      \
+  register char *_t1 = (char *) d1, *_t2 = (char *) d2, *_start; \
+  for (_start = _t1;                                             \
+       _t1 < (_start + sizeof (*(d1))) && *_t1 == *_t2;          \
+       _t1++, _t2++)                                             \
+    ;                                                            \
+  _t1 == (_start + sizeof (*(d1)));                              \
+})
 
-#define max2(a, b)           \
-    ({                       \
-        typeof(a) _a = (a);  \
-        typeof(b) _b = (b);  \
-        (_a > _b) ? _a : _b; \
-    })
+# define max2(a, b)             \
+         ({                     \
+	   typeof (a) _a = (a); \
+           typeof (b) _b = (b); \
+           (_a > _b) ? _a : _b; \
+         })
 
-#define min2(a, b)           \
-    ({                       \
-        typeof(a) _a = (a);  \
-        typeof(b) _b = (b);  \
-        (_a < _b) ? _a : _b; \
-    })
+# define min2(a, b)             \
+         ({                     \
+	   typeof (a) _a = (a); \
+           typeof (b) _b = (b); \
+           (_a < _b) ? _a : _b; \
+         })
 
-#define max max2
-#define min min2
+# define max max2
+# define min min2
 
-#define max3(a, b, c) max(a, max(b, c))
-#define min3(a, b, c) min(a, min(b, c))
+# define max3(a, b, c) max(a, max(b, c))
+# define min3(a, b, c) min(a, min(b, c))
 
-#define frand() (((double)rand()) / ((double)RAND_MAX))
+# define frand() (((double) rand()) / ((double) RAND_MAX))
 
-#ifdef __cplusplus
+# ifdef __cplusplus
 }
-#endif
-#else /* NIAGARA */
+# endif
+# else /* NIAGARA */
 
-#define structdup(s) memcpy(malloc(sizeof(*(s))), (s), sizeof(*(s)))
+# define structdup(s) \
+  memcpy(malloc(sizeof (*(s))), (s), sizeof (*(s)))
 
-#endif /* NIAGARA */
-
-// the typical for each loop
-#define FOR(var, end) for (unsigned int var = 0; var < end; ++var)
-
-// print errors in fread
-#define fread(ptr, size, num, file)                       \
-    ({                                                    \
-        size_t read = fread(ptr, size, num, file);        \
-        if (read < num) {                                 \
-            if (feof(file))                               \
-                fprintf(stderr, "Unexpected EOF\n");      \
-            else                                          \
-                perror("An error occured while loading"); \
-        }                                                 \
-        read;                                             \
-    })
-
-// print errors in fwrite
-#define fwrite(ptr, size, num, file)                                \
-    ({                                                              \
-        size_t written = fwrite(ptr, size, num, file);              \
-        if (written < num) perror("An error occured while saving"); \
-        written;                                                    \
-    })
-
-// allocate a 2d array
-#define d2_malloc(num_rows, num_cols, type)            \
-    ({                                                 \
-        type **d2 = malloc(num_rows * sizeof(type *)); \
-        for (int i = 0; i < num_rows; ++i)             \
-            d2[i] = calloc(num_cols, sizeof(type));    \
-        d2;                                            \
-    })
-
-// free a 2d array
-#define d2_free(d2, num_rows)                           \
-    ({                                                  \
-        for (int i = 0; i < num_rows; ++i) free(d2[i]); \
-        free(d2);                                       \
-    })
+# endif /* NIAGARA */
 
 #endif
