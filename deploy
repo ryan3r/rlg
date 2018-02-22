@@ -53,7 +53,7 @@ rm -f $package_name.tar.gz
 
 # Put the build directory back
 cd $workspace
-mkdir -p build
+rm CHANGELOG
 
 # Tell the user that we are done
 echo "Build complete"
