@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "make",
+            "label": "Make",
             "type": "shell",
             "command": "make",
             "group": {
@@ -22,30 +22,22 @@
             }
         },
         {
-            "label": "rebuild",
+            "label": "Clean",
             "type": "shell",
-            "command": "make",
-            "args": [
-                "rebuild"
-            ],
+            "command": "make clean",
             "group": "build",
-            "problemMatcher": [
-                "$gcc"
-            ],
             "presentation": {
                 "echo": false,
-                "reveal": "silent",
+                "reveal": "never",
                 "focus": true,
                 "panel": "shared"
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "Build tar ball",
             "type": "shell",
-            "command": "./deploy",
-            "args": [
-                "-c"
-            ],
+            "command": "./deploy -c",
             "group": "none",
             "presentation": {
                 "echo": false,
@@ -54,32 +46,6 @@
                 "panel": "shared"
             },
             "problemMatcher": []
-        },
-        {
-            "label": "CI tests",
-            "type": "shell",
-            "command": "./ci-test",
-            "group": "test",
-            "problemMatcher": [],
-            "presentation": {
-                "echo": false,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            }
-        },
-        {
-            "label": "Tests",
-            "type": "shell",
-            "command": "make test",
-            "group": "test",
-            "problemMatcher": [],
-            "presentation": {
-                "echo": false,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
         }
     ]
 }
