@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Get the git function
+git() {
+        /mnt/c/Program\ Files/Git/bin/git.exe $*;
+}
+
 # Clean the terminal before outputing
 if [ "$1" = "-c" ]; then
 	clear
@@ -24,6 +29,9 @@ make clean -s
 if [ -d ".git" ]; then
 	echo "Writing CHANGELOG"
 	git log > CHANGELOG
+
+	echo "Adding a tag for this version"
+	git tag v$assignment
 fi
 
 # Create the submissions directory
