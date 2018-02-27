@@ -107,7 +107,7 @@ void do_moves(dungeon_t *d)
     event_delete(e);
     pc_next_pos(d, next);
 
-    // don't go into hardnesses above 255
+    // don't go into hardnesses above 254
     if(hardnessxy(next[dim_x] + c->position[dim_x], c->position[dim_y]) < 255) {
       next[dim_x] += c->position[dim_x];
     }

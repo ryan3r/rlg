@@ -1,14 +1,14 @@
 // Based on Jeremy's solution
 #include <stdlib.h>
-
+#include <ncurses.h>
 #include<string.h>
 
-#include<dungeon.h>
-#include<pc.h>
-#include<utils.h>
-#include<move.h>
-#include<path.h>
-#include <ncurses.h>
+#include <dungeon.h>
+#include <pc.h>
+#include <npc.h>
+#include <utils.h>
+#include <move.h>
+#include <path.h>
 
 void pc_delete(pc_t *pc)
 {
@@ -57,8 +57,10 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
   dir[dim_x] = 0;
   dir[dim_y] = 0;
 
+  char key;
+
   top:
-  switch(getch()) {
+  switch((key = getch())) {
     case '8': case 'k':
       dir[dim_y] = -1;
       break;
@@ -101,6 +103,26 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
     case 'q': case 'Q':
       endwin();
       exit(0);
+    
+    case '<':
+      // remove the monsters
+      for(uint32_t y = 0; y < DUNGEON_Y; ++y) {
+        for(uint32_t x = 0; x < DUNGEON_X; ++x) {
+          if(d->character[y][x] && !d->character[y][x]->pc) {
+            free(d->character[y][x]->npc);
+            free(d->character[y][x]);
+            d->character[y][x] = NULL;
+          }
+        }
+      }
+
+      free(d->rooms);
+      d->num_rooms = 0;
+
+      gen_dungeon(d);
+      gen_monsters(d);
+      place_stairs(d);
+      break;
 
     default:
       goto top;
