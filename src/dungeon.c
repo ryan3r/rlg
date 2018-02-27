@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <limits.h>
 #include <errno.h>
+#include <ncurses.h>
 
 #include<dungeon.h>
 #include<utils.h>
@@ -601,34 +602,37 @@ void render_dungeon(dungeon_t *d){
 
   pair_t p;
 
-  putchar('\n');
   for (p[dim_y] = 0; p[dim_y] < DUNGEON_Y; p[dim_y]++) {
     for (p[dim_x] = 0; p[dim_x] < DUNGEON_X; p[dim_x]++) {
       if (charpair(p)) {
-        putchar(charpair(p)->symbol);
+        mvaddch(p[dim_y], p[dim_x], charpair(p)->symbol);
       } else {
         switch (mappair(p)) {
+        case ter_staircase_down:
+          mvaddch(p[dim_y], p[dim_x], '>');
+          break;
+        case ter_staircase_up:
+          mvaddch(p[dim_y], p[dim_x], '<');
+          break;
         case ter_wall:
         case ter_wall_immutable:
-          putchar(' ');
+          mvaddch(p[dim_y], p[dim_x], ' ');
           break;
         case ter_floor:
         case ter_floor_room:
-          putchar('.');
+          mvaddch(p[dim_y], p[dim_x], '.');
           break;
         case ter_floor_hall:
-          putchar('#');
+          mvaddch(p[dim_y], p[dim_x], '#');
           break;
         case ter_debug:
-          putchar('*');
+          mvaddch(p[dim_y], p[dim_x], '*');
           fprintf(stderr, "Debug character at %d, %d\n", p[dim_y], p[dim_x]);
           break;
         }
       }
     }
-    putchar('\n');
   }
-  putchar('\n');
 }
 
 void delete_dungeon(dungeon_t *d)
@@ -1004,6 +1008,8 @@ void render_distance_map(dungeon_t *d)
         case ter_wall_immutable:
           putchar(' ');
           break;
+        case ter_staircase_down:
+        case ter_staircase_up:
         case ter_floor:
         case ter_floor_room:
         case ter_floor_hall:
@@ -1036,6 +1042,12 @@ void render_tunnel_distance_map(dungeon_t *d)
         putchar('@');
       } else {
         switch (mappair(p)) {
+        case ter_staircase_down:
+          mvaddch(p[dim_y], p[dim_x], '>');
+          break;
+        case ter_staircase_up:
+          mvaddch(p[dim_y], p[dim_x], '<');
+          break;
         case ter_wall_immutable:
           putchar(' ');
           break;

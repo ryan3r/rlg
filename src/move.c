@@ -107,6 +107,9 @@ void do_moves(dungeon_t *d)
     pc_next_pos(d, next);
     next[dim_x] += c->position[dim_x];
     next[dim_y] += c->position[dim_y];
+
+    if(hardnesspair(next) >= 255) return;
+
     if (mappair(next) <= ter_floor) {
       mappair(next) = ter_floor_hall;
     }

@@ -10,7 +10,7 @@ SRC_OBJECTS = $(foreach file, $(shell echo src/*), \
 # build the program
 build/rlg: build $(SRC_OBJECTS)
 	@echo Linking
-	@gcc $(SRC_OBJECTS) -o $@ $(GCC_FLAGS)
+	@gcc $(SRC_OBJECTS) -o $@ $(GCC_FLAGS) -lncurses
 
 # include dependency files
 -include build/*.d

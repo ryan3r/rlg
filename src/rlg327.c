@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <ncurses.h>
 
 /* Very slow seed: 686846853 */
 
@@ -232,13 +233,18 @@ int main(int argc, char *argv[])
   config_pc(&d);
   gen_monsters(&d);
 
+  initscr();
+  noecho();
+  raw();
+  keypad(stdscr, TRUE);
+  curs_set(0);
+
   while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
     render_dungeon(&d);
     do_moves(&d);
-    usleep(33000);
   }
 
-  render_dungeon(&d);
+  endwin();
 
   if (do_save) {
     if (do_save_seed) {
