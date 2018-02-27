@@ -44,7 +44,7 @@ cp -r  $workspace /tmp/$package_name
 # Remove any empty folders
 cd /tmp/$package_name
 find . -type d -empty -delete
-rm -rf .vscode .gitignore submissions rlg327-s2018* ci-test deploy .git
+rm -rf .vscode .gitignore submissions rlg327-s2018* ci-test deploy .git deb-manifest
 cd ..
 
 echo "Compressing files"

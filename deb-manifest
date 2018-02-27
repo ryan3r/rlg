@@ -1,0 +1,5 @@
+Package: rlg
+Version: 1.04
+Maintainer: Ryan
+Architecture: amd64
+Description: A rogue like game (for coms 327)

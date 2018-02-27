@@ -43,4 +43,17 @@ clean:
 build:
 	@mkdir -p build
 
+# build a deb
+build/rlg.deb: build/rlg
+	@echo Packaging
+	@mkdir -p /tmp/rlg/DEBIAN
+	@mkdir -p /tmp/rlg/usr/local/bin
+	@cp deb-manifest /tmp/rlg/DEBIAN/control
+	@cp build/rlg /tmp/rlg/usr/local/bin
+	@chmod -R 0775 /tmp/rlg
+	@dpkg-deb --build /tmp/rlg > /dev/null
+	@dpkg-sig --sign builder /tmp/rlg.deb
+	@rm -r /tmp/rlg
+	@mv /tmp/rlg.deb build
+
 .PHONY: mem mem-save mem-load clean
