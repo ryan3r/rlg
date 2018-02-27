@@ -8,6 +8,7 @@
 #include<utils.h>
 #include<move.h>
 #include<path.h>
+#include <ncurses.h>
 
 void pc_delete(pc_t *pc)
 {
@@ -99,7 +100,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
     
     case 'q': case 'Q':
       endwin();
-      _exit(0);
+      exit(0);
 
     default:
       goto top;

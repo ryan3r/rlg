@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <ncurses.h>
 
 #include<dungeon.h>
 #include<heap.h>
@@ -105,10 +106,21 @@ void do_moves(dungeon_t *d)
     e->c = NULL;
     event_delete(e);
     pc_next_pos(d, next);
-    next[dim_x] += c->position[dim_x];
-    next[dim_y] += c->position[dim_y];
 
-    if(hardnesspair(next) >= 255) return;
+    // don't go into hardnesses above 255
+    if(hardnessxy(next[dim_x] + c->position[dim_x], c->position[dim_y]) < 255) {
+      next[dim_x] += c->position[dim_x];
+    }
+    else {
+       next[dim_x] = c->position[dim_x];
+    }
+
+    if(hardnessxy(c->position[dim_x], next[dim_y] + c->position[dim_y]) < 255) {
+      next[dim_y] += c->position[dim_y];
+    }
+    else {
+       next[dim_y] = c->position[dim_y];
+    }
 
     if (mappair(next) <= ter_floor) {
       mappair(next) = ter_floor_hall;

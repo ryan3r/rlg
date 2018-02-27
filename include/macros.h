@@ -16,6 +16,11 @@ extern "C" {
 # ifdef VERBOSE_DEBUG
 #  define dprintf(...) printf(__VA_ARGS__)
 #  define dfprintf(file, ...) fprintf(file, __VA_ARGS__)
+
+# define exit(value) {                                                       \
+  fprintf(stderr, "exit(" #value ") called at " __FILE__ ":%u\n", __LINE__); \
+  exit(value);                                                               \
+}
 # else
 #  define dprintf(...)
 #  define dfprintf(file, ...)
@@ -34,11 +39,6 @@ extern "C" {
                                  1))))))))))
 
 # ifndef NIAGARA
-
-# define exit(value) {                                                       \
-  fprintf(stderr, "exit(" #value ") called at " __FILE__ ":%u\n", __LINE__); \
-  exit(value);                                                               \
-}
 
 # define fopen(path, mode) ({                                          \
   FILE *_f = fopen(path, mode);                                        \

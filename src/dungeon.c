@@ -1072,3 +1072,22 @@ void render_tunnel_distance_map(dungeon_t *d)
     putchar('\n');
   }
 }
+
+void place_stairs(dungeon_t *d) {
+  // rooms for stair cases
+  uint32_t stairX1, stairY1, stairX2, stairY2;
+
+  do {
+    stairX1 = rand_range(0, DUNGEON_X - 1);
+    stairY1 = rand_range(0, DUNGEON_Y - 1);
+  } while(hardnessxy(stairX1, stairY1) != 0);
+
+  do {
+    stairX2 = rand_range(0, DUNGEON_X - 1);
+    stairY2 = rand_range(0, DUNGEON_Y - 1);
+  } while(hardnessxy(stairX2, stairY2) != 0 &&
+          stairX2 != stairX1 && stairY2 != stairY1);
+
+  mapxy(stairX1, stairY1) = ter_staircase_down;
+  mapxy(stairX2, stairY2) = ter_staircase_up;
+}

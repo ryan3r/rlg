@@ -232,6 +232,7 @@ int main(int argc, char *argv[])
 
   config_pc(&d);
   gen_monsters(&d);
+  place_stairs(&d);
 
   initscr();
   noecho();

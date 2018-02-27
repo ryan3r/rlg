@@ -85,5 +85,6 @@ int read_dungeon(dungeon_t *d, char *file);
 int read_pgm(dungeon_t *d, char *pgm);
 void render_distance_map(dungeon_t *d);
 void render_tunnel_distance_map(dungeon_t *d);
+void place_stairs(dungeon_t *d);
 
 #endif
