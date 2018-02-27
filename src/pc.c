@@ -100,7 +100,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
     case '5': case ' ':
       break;
     
-    case 'q': case 'Q':
+    case 'Q':
       endwin();
       exit(0);
     
@@ -117,6 +117,8 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
       config_pc(d);
       gen_monsters(d);
       place_stairs(d);
+
+      mappair(d->pc.position) = key == '<' ? ter_staircase_down : ter_staircase_up;
       
       return 1;
 
