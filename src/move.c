@@ -105,7 +105,7 @@ void do_moves(dungeon_t *d)
      * and recreated every time we leave and re-enter this function.    */
     e->c = NULL;
     event_delete(e);
-    pc_next_pos(d, next);
+    if(pc_next_pos(d, next)) return;
 
     // don't go into hardnesses above 254
     if(hardnessxy(next[dim_x] + c->position[dim_x], c->position[dim_y]) < 255) {

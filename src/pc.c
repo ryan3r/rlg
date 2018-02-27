@@ -105,24 +105,20 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
       exit(0);
     
     case '<':
-      // remove the monsters
-      for(uint32_t y = 0; y < DUNGEON_Y; ++y) {
-        for(uint32_t x = 0; x < DUNGEON_X; ++x) {
-          if(d->character[y][x] && !d->character[y][x]->pc) {
-            free(d->character[y][x]->npc);
-            free(d->character[y][x]);
-            d->character[y][x] = NULL;
-          }
-        }
+    case '>':
+      if(mappair(d->pc.position) != (key == '>' ? ter_staircase_down : ter_staircase_up)) {
+        goto top;
       }
 
-      free(d->rooms);
-      d->num_rooms = 0;
-
+      // regenerate the entire dungeon
+      delete_dungeon(d);
+      init_dungeon(d);
       gen_dungeon(d);
+      config_pc(d);
       gen_monsters(d);
       place_stairs(d);
-      break;
+      
+      return 1;
 
     default:
       goto top;
