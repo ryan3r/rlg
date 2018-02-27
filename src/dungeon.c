@@ -605,29 +605,29 @@ void render_dungeon(dungeon_t *d){
   for (p[dim_y] = 0; p[dim_y] < DUNGEON_Y; p[dim_y]++) {
     for (p[dim_x] = 0; p[dim_x] < DUNGEON_X; p[dim_x]++) {
       if (charpair(p)) {
-        mvaddch(p[dim_y], p[dim_x], charpair(p)->symbol);
+        mvaddch(p[dim_y] + 1, p[dim_x], charpair(p)->symbol);
       } else {
         switch (mappair(p)) {
         case ter_staircase_down:
-          mvaddch(p[dim_y], p[dim_x], '>');
+          mvaddch(p[dim_y] + 1, p[dim_x], '>');
           break;
         case ter_staircase_up:
-          mvaddch(p[dim_y], p[dim_x], '<');
+          mvaddch(p[dim_y] + 1, p[dim_x], '<');
           break;
         case ter_wall:
         case ter_wall_immutable:
-          mvaddch(p[dim_y], p[dim_x], ' ');
+          mvaddch(p[dim_y] + 1, p[dim_x], ' ');
           break;
         case ter_floor:
         case ter_floor_room:
-          mvaddch(p[dim_y], p[dim_x], '.');
+          mvaddch(p[dim_y] + 1, p[dim_x], '.');
           break;
         case ter_floor_hall:
-          mvaddch(p[dim_y], p[dim_x], '#');
+          mvaddch(p[dim_y] + 1, p[dim_x], '#');
           break;
         case ter_debug:
-          mvaddch(p[dim_y], p[dim_x], '*');
-          fprintf(stderr, "Debug character at %d, %d\n", p[dim_y], p[dim_x]);
+          mvaddch(p[dim_y] + 1, p[dim_x], '*');
+          mprintf("Debug character at %d, %d\n", p[dim_y], p[dim_x]);
           break;
         }
       }

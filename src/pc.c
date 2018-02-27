@@ -107,6 +107,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
     case '<':
     case '>':
       if(mappair(d->pc.position) != (key == '>' ? ter_staircase_down : ter_staircase_up)) {
+        mprintf("You are not on a%s staircase.", key == '>' ? " down" : "n up");
         goto top;
       }
 
@@ -123,6 +124,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
       return 1;
 
     default:
+      mprintf("%c is not a valid command. (you might need to hold shift)", key);
       goto top;
   }
 

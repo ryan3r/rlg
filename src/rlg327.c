@@ -214,10 +214,7 @@ int main(int argc, char *argv[])
     gettimeofday(&tv, NULL);
     seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
   }
-
-  if (!do_load && !do_image) {
-    printf("Seed is %ld.\n", seed);
-  }
+  
   srand(seed);
 
   init_dungeon(&d);
@@ -241,6 +238,10 @@ int main(int argc, char *argv[])
   curs_set(0);
 
   while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
+    // clear the message line
+    move(0, 0);
+    clrtoeol();
+
     render_dungeon(&d);
     do_moves(&d);
   }
