@@ -126,7 +126,6 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
     
     case 'm':
       list_monsters(d);
-      erase();
       render_dungeon(d);
       goto top;
 

@@ -599,6 +599,7 @@ int gen_dungeon(dungeon_t *d)
 }
 
 void render_dungeon(dungeon_t *d){
+  erase();
 
   pair_t p;
 

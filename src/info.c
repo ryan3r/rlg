@@ -11,18 +11,31 @@
 #define WINDOW_HEIGHT 22
 #define WINDOW_WIDTH 60
 
+// render the monster list to the window
 void print_list(WINDOW *win, dungeon_t *d, char **monster_list, int i) {
     werase(win);
 
-    for(int j = i; j - i < WINDOW_HEIGHT - 2 && j < d->num_monsters; ++j) {
-        mvwprintw(win, j - i, 0, monster_list[j]);
+    mvwprintw(win, 0, 24, "Monster list");
+
+    for(int j = i; j - i < WINDOW_HEIGHT - 4 && j < d->num_monsters; ++j) {
+        mvwprintw(win, j - i + 1, 0, monster_list[j]);
     }
+
+    // % scroll progress
+    double prog = (double) i / (d->num_monsters - (WINDOW_HEIGHT - 4));
+    
+    if(prog > 1) prog = 1;
+
+    int perc = prog * 100;
+
+    mvwprintw(win, WINDOW_HEIGHT - 3, 0, "Use the arrow keys to scroll and ESC or Q to close.   %3d%%", perc);
 
     wrefresh(win);
 }
 
+// open the monster list window and enter the monster list key loop
 void list_monsters(dungeon_t *d) {
-    WINDOW *win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, 1, 10);
+    WINDOW *win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, (DUNGEON_Y - WINDOW_HEIGHT) / 2, (DUNGEON_X - WINDOW_WIDTH) / 2);
     box(win, 0, 0);
     
     wrefresh(win);
@@ -60,7 +73,7 @@ void list_monsters(dungeon_t *d) {
                 goto end;
 
             case KEY_DOWN:
-                if(i < d->num_monsters - 3 - WINDOW_HEIGHT) ++i;
+                if(i < d->num_monsters - (WINDOW_HEIGHT - 4)) ++i;
                 print_list(inner_win, d, monster_list, i);
                 break;
             

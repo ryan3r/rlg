@@ -239,7 +239,6 @@ int main(int argc, char *argv[])
   curs_set(0);
 
   while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
-    erase();
     render_dungeon(&d);
     do_moves(&d);
   }
