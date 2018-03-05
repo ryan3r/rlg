@@ -231,12 +231,18 @@ int main(int argc, char *argv[])
   gen_monsters(&d);
   place_stairs(&d);
 
+  // initiailize ncurses
   initscr();
   noecho();
   raw();
   cbreak();
+  start_color();
   keypad(stdscr, TRUE);
   curs_set(0);
+
+  init_pair(1, COLOR_CYAN, COLOR_BLACK);
+  init_pair(2, COLOR_RED, COLOR_BLACK);
+  init_pair(3, COLOR_GREEN, COLOR_BLACK);
 
   while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
     render_dungeon(&d);

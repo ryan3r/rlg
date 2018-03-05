@@ -606,14 +606,22 @@ void render_dungeon(dungeon_t *d){
   for (p[dim_y] = 0; p[dim_y] < DUNGEON_Y; p[dim_y]++) {
     for (p[dim_x] = 0; p[dim_x] < DUNGEON_X; p[dim_x]++) {
       if (charpair(p)) {
+        int color = (charpair(p)->symbol != '@') + 1;
+
+        attron(COLOR_PAIR(color));
         mvaddch(p[dim_y] + 1, p[dim_x], charpair(p)->symbol);
+        attroff(COLOR_PAIR(color));
       } else {
         switch (mappair(p)) {
         case ter_staircase_down:
+          attron(COLOR_PAIR(3));
           mvaddch(p[dim_y] + 1, p[dim_x], '>');
+          attroff(COLOR_PAIR(3));
           break;
         case ter_staircase_up:
+          attron(COLOR_PAIR(3));
           mvaddch(p[dim_y] + 1, p[dim_x], '<');
+          attroff(COLOR_PAIR(3));
           break;
         case ter_wall:
         case ter_wall_immutable:
