@@ -234,14 +234,12 @@ int main(int argc, char *argv[])
   initscr();
   noecho();
   raw();
+  cbreak();
   keypad(stdscr, TRUE);
   curs_set(0);
 
   while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
-    // clear the message line
-    move(0, 0);
-    clrtoeol();
-
+    erase();
     render_dungeon(&d);
     do_moves(&d);
   }

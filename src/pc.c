@@ -9,6 +9,7 @@
 #include <utils.h>
 #include <move.h>
 #include <path.h>
+#include <info.h>
 
 void pc_delete(pc_t *pc)
 {
@@ -122,6 +123,12 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
       mappair(d->pc.position) = key == '<' ? ter_staircase_down : ter_staircase_up;
       
       return 1;
+    
+    case 'm':
+      list_monsters(d);
+      erase();
+      render_dungeon(d);
+      goto top;
 
     default:
       mprintf("%c is not a valid command. (you might need to hold shift)", key);
