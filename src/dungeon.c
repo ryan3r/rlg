@@ -1089,13 +1089,15 @@ void place_stairs(dungeon_t *d) {
   do {
     stairX1 = rand_range(0, DUNGEON_X - 1);
     stairY1 = rand_range(0, DUNGEON_Y - 1);
-  } while(hardnessxy(stairX1, stairY1) != 0);
+  } while(hardnessxy(stairX1, stairY1) != 0 ||
+          d->character[stairY1][stairX1]);
 
   do {
     stairX2 = rand_range(0, DUNGEON_X - 1);
     stairY2 = rand_range(0, DUNGEON_Y - 1);
-  } while(hardnessxy(stairX2, stairY2) != 0 &&
-          stairX2 != stairX1 && stairY2 != stairY1);
+  } while(hardnessxy(stairX2, stairY2) != 0 ||
+          (stairX2 != stairX1 && stairY2 != stairY1) ||
+          d->character[stairY2][stairX2]);
 
   mapxy(stairX1, stairY1) = ter_staircase_down;
   mapxy(stairX2, stairY2) = ter_staircase_up;
