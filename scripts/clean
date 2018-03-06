@@ -1,0 +1,17 @@
+#!/bin/bash
+
+rm -rf CMakeFiles
+rm -rf Debug
+rm -rf ALL_BUILD.vcxproj
+rm -rf ALL_BUILD.vcxproj.filters
+rm -rf cmake_install.cmake
+rm -rf CMakeCache.txt
+rm -rf rlg.sln
+rm -rf rlg.vcxproj
+rm -rf rlg.vcxproj.filters
+rm -rf ZERO_CHECK.vcxproj
+rm -rf ZERO_CHECK.vcxproj.filters
+rm -rf Win32
+rm -rf rlg
+rm -rf Makefile
+rm -rf rlg.dir

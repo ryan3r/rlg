@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Package the assignment
+scripts/deploy test
+
+/mnt/c/Program\ Files/Git/bin/git.exe tag -d vtest
+
+# Upload it to pyrite
+read -p "Password: " password
+
+pscp.exe -pw $password submissions/Ray_Ryan.assignment-test.tar.gz ryanr@pyrite.cs.iastate.edu:/home/ryanr
+
+putty.exe ryanr@pyrite.cs.iastate.edu -pw $password

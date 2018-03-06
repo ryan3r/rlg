@@ -6,7 +6,7 @@
         {
             "label": "Make",
             "type": "shell",
-            "command": "make",
+            "command": "cmake . && make",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -24,7 +24,7 @@
         {
             "label": "Clean",
             "type": "shell",
-            "command": "make clean",
+            "command": "scripts/clean",
             "group": "build",
             "presentation": {
                 "echo": false,
@@ -37,7 +37,7 @@
         {
             "label": "Build tar ball",
             "type": "shell",
-            "command": "./deploy -c",
+            "command": "scripts/deploy -c",
             "group": "none",
             "presentation": {
                 "echo": false,
