@@ -11,6 +11,7 @@
 #include<pc.h>
 #include<npc.h>
 #include<move.h>
+#include <info.h>
 
 const char *victory =
   "\n                                       o\n"
@@ -243,6 +244,11 @@ int main(int argc, char *argv[])
   init_pair(1, COLOR_CYAN, COLOR_BLACK);
   init_pair(2, COLOR_RED, COLOR_BLACK);
   init_pair(3, COLOR_GREEN, COLOR_BLACK);
+  init_pair(4, COLOR_RED, COLOR_CYAN);
+
+  render_dungeon(&d);
+  refresh();
+  help();
 
   while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
     render_dungeon(&d);

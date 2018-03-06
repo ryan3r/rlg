@@ -4,5 +4,6 @@
 #include <dungeon.h>
 
 void list_monsters(dungeon_t *d);
+void help();
 
 #endif

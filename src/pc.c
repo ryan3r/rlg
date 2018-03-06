@@ -128,9 +128,14 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
       list_monsters(d);
       render_dungeon(d);
       goto top;
+    
+    case '?': case '/':
+      help();
+      render_dungeon(d);
+      goto top;
 
     default:
-      mprintf("%c is not a valid command. (you might need to hold shift)", key);
+      mprintf("%c is not a valid command. (press ? for help)", key);
       goto top;
   }
 

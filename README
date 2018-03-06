@@ -1,24 +1,30 @@
-# Description
+You find your self in a dungeon with no clue how you got
+there. But there's no time to figure it out because the
+dungeon is full of monsters.  Start by exploring the
+dungeon while avoiding monsters.
 
-Distance maps for mosters.  Generates a map of the dungeon and maps showing 
-the distance to any point in the dungeon from the player.  
+Game
+==========================================================
+Monsters are represented by red letters and numbers.
+You are the cyan @ symbol.
+The . symbols are rooms and the # symbols are corridors.
+Finally the < and > are staircases.
 
-# Usage
+The game is turn based so each player takes a turn.  Be
+aware that monsters can move multiple times if they are
+faster than you.
 
-```
-build/rlg [--load=[FILE]] [--save=[FILE]] [--player="(y,x)"]
-```
-
-The optional player flag can be added to set the position of the player.  If 
-the player flag is not specified the player will be randomly placed in a room.
-
-The load flag can be given to load an existing dungeon.  The save flag can be
-given to save the dungeon that is displayed.  If the load flag is not given a
-random dungeon will be generated. The program looks for files in the ~/.rlg327
-folder if one does not exist it will be created.  If you want to load a file
-outside the .rlg327 directory give it an absolute path.
-
-# Tests
-
-There are tests that compare the output of build/rlg to the outputs generated
-by Jeremy.
+Controls
+==========================================================
+7 or y     | Move up and to the left
+8 or k     | Move up
+9 or u     | Move up and to the right
+6 or l     | Move to the right
+3 or n     | Move down and to the right
+2 or j     | Move down
+1 or b     | Move down and to the left
+4 or h     | Move to the left
+>          | Go down stairs (only >)
+<          | Go down stairs (only <)
+5 or space | Skip turn
+m          | Display a list of monsters
