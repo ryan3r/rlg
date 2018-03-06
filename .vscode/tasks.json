@@ -35,6 +35,19 @@
             "problemMatcher": []
         },
         {
+            "label": "CI Test",
+            "type": "shell",
+            "command": "scripts/ci-test",
+            "group": "build",
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Build tar ball",
             "type": "shell",
             "command": "scripts/deploy -c",

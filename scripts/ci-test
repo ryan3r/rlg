@@ -11,3 +11,5 @@ read -p "Password: " password
 pscp.exe -pw $password submissions/Ray_Ryan.assignment-test.tar.gz ryanr@pyrite.cs.iastate.edu:/home/ryanr
 
 putty.exe ryanr@pyrite.cs.iastate.edu -pw $password
+
+rm submissions/Ray_Ryan.assignment-test.tar.gz
