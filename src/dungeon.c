@@ -1,12 +1,14 @@
 // Based on Jeremy's solution
 #include <stdio.h>
 #include <stdint.h>
+#ifdef __linux__
 #include <endian.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <ncurses.h>
+#endif
 #include <limits.h>
 #include <errno.h>
-#include <ncurses.h>
 
 #include<dungeon.h>
 #include<utils.h>
@@ -366,9 +368,9 @@ static int smooth_hardness(dungeon_t *d)
     } while (hardness[y][x]);
     hardness[y][x] = i;
     if (i == 1) {
-      head = tail = malloc(sizeof (*tail));
+      head = tail = (queue_node_t*) malloc(sizeof (*tail));
     } else {
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*) malloc(sizeof (*tail));
       tail = tail->next;
     }
     tail->next = NULL;
@@ -391,7 +393,7 @@ static int smooth_hardness(dungeon_t *d)
 
     if (x - 1 >= 0 && y - 1 >= 0 && !hardness[y - 1][x - 1]) {
       hardness[y - 1][x - 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*)  malloc(sizeof (*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
@@ -399,7 +401,7 @@ static int smooth_hardness(dungeon_t *d)
     }
     if (x - 1 >= 0 && !hardness[y][x - 1]) {
       hardness[y][x - 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*) malloc(sizeof (*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
@@ -407,7 +409,7 @@ static int smooth_hardness(dungeon_t *d)
     }
     if (x - 1 >= 0 && y + 1 < DUNGEON_Y && !hardness[y + 1][x - 1]) {
       hardness[y + 1][x - 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*) malloc(sizeof (*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
@@ -415,7 +417,7 @@ static int smooth_hardness(dungeon_t *d)
     }
     if (y - 1 >= 0 && !hardness[y - 1][x]) {
       hardness[y - 1][x] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*) malloc(sizeof (*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x;
@@ -423,7 +425,7 @@ static int smooth_hardness(dungeon_t *d)
     }
     if (y + 1 < DUNGEON_Y && !hardness[y + 1][x]) {
       hardness[y + 1][x] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*) malloc(sizeof (*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x;
@@ -431,7 +433,7 @@ static int smooth_hardness(dungeon_t *d)
     }
     if (x + 1 < DUNGEON_X && y - 1 >= 0 && !hardness[y - 1][x + 1]) {
       hardness[y - 1][x + 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*) malloc(sizeof (*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
@@ -439,7 +441,7 @@ static int smooth_hardness(dungeon_t *d)
     }
     if (x + 1 < DUNGEON_X && !hardness[y][x + 1]) {
       hardness[y][x + 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*) malloc(sizeof (*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
@@ -447,7 +449,7 @@ static int smooth_hardness(dungeon_t *d)
     }
     if (x + 1 < DUNGEON_X && y + 1 < DUNGEON_Y && !hardness[y + 1][x + 1]) {
       hardness[y + 1][x + 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = (queue_node_t*) malloc(sizeof (*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
@@ -700,6 +702,7 @@ uint32_t calculate_dungeon_size(dungeon_t *d)
 
 int write_dungeon(dungeon_t *d, char *file)
 {
+  #ifdef __linux__
   char *home;
   char *filename;
   FILE *f;
@@ -753,6 +756,7 @@ int write_dungeon(dungeon_t *d, char *file)
   write_rooms(d, f);
 
   fclose(f);
+  #endif
 
   return 0;
 }
@@ -844,6 +848,7 @@ int calculate_num_rooms(uint32_t dungeon_bytes)
 
 int read_dungeon(dungeon_t *d, char *file)
 {
+  #ifdef __linux__
   char semantic[sizeof (DUNGEON_SAVE_SEMANTIC)];
   uint32_t be32;
   FILE *f;
@@ -913,12 +918,14 @@ int read_dungeon(dungeon_t *d, char *file)
   read_rooms(d, f);
 
   fclose(f);
+  #endif
 
   return 0;
 }
 
 int read_pgm(dungeon_t *d, char *pgm)
 {
+  #ifdef __linux__
   FILE *f;
   char s[80];
   uint8_t gm[DUNGEON_Y - 2][DUNGEON_X - 2];
@@ -998,6 +1005,7 @@ int read_pgm(dungeon_t *d, char *pgm)
     d->map[y][DUNGEON_X - 1] = ter_wall_immutable;
     d->hardness[y][DUNGEON_X - 1] = 255;
   }
+  #endif
 
   return 0;
 }

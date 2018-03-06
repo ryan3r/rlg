@@ -1,7 +1,12 @@
 // Based on Jeremy's solution
 #include <stdlib.h>
-#include <ncurses.h>
 #include<string.h>
+
+#ifdef __linux__
+#include <ncurses.h>
+#else
+#include <curses.h>
+#endif
 
 #include <dungeon.h>
 #include <pc.h>

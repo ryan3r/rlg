@@ -1,11 +1,16 @@
 #include <info.h>
-#include <ncurses.h>
 #include <utils.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <dungeon.h>
 #include <pc.h>
 #include <npc.h>
+
+#ifdef __linux__
+#include <ncurses.h>
+#else
+#include <curses.h>
+#endif
 
 #define MONSTER_INFO_SIZE 16
 #define WINDOW_HEIGHT 22

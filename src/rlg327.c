@@ -1,9 +1,15 @@
 // Based on Jeremy's solution
 #include <stdio.h>
 #include <string.h>
+#ifdef __linux__
 #include <sys/time.h>
 #include <unistd.h>
 #include <ncurses.h>
+#else
+#include <curses.h>
+#undef MOUSE_MOVED
+#include <windows.h>
+#endif
 
 /* Very slow seed: 686846853 */
 
@@ -67,11 +73,18 @@ const char *tombstone =
 
 void usage(char *name)
 {
+  #ifdef __linux__
   fprintf(stderr,
           "Usage: %s [-r|--rand <seed>] [-l|--load [<file>]]\n"
           "          [-s|--save [<file>]] [-i|--image <pgm file>]\n"
           "          [-p|--pc <y> <x>] [-n|--nummon <count>]\n",
           name);
+  #else
+  fprintf(stderr,
+          "Usage: %s [-r|--rand <seed>] [-i|--image <pgm file>]\n"
+          "          [-p|--pc <y> <x>] [-n|--nummon <count>]\n",
+          name);
+  #endif
 
   exit(-1);
 }
@@ -80,14 +93,23 @@ int main(int argc, char *argv[])
 {
   dungeon_t d;
   time_t seed;
-  struct timeval tv;
   uint32_t i;
   uint32_t do_load, do_save, do_seed, do_image, do_save_seed,
            do_save_image, do_place_pc;
   uint32_t long_arg;
   char *save_file;
   char *load_file;
-  char *pgm_file;
+  char *pgm_file = NULL;
+  #ifdef __linux__
+  struct timeval tv;
+  #else
+  // change the console title
+  SetConsoleTitle("rlg");
+
+  // resize the window
+  SMALL_RECT window_size = {0, 0, 80, 24};
+  SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), 1, &window_size);
+  #endif
 
   memset(&d, 0, sizeof (d));
 
@@ -125,7 +147,7 @@ int main(int argc, char *argv[])
           if ((!long_arg && argv[i][2]) ||
               (long_arg && strcmp(argv[i], "-rand")) ||
               argc < ++i + 1 /* No more arguments */ ||
-              !sscanf(argv[i], "%lu", &seed) /* Argument is not an integer */) {
+              !sscanf(argv[i], "%lu", (unsigned long*) &seed) /* Argument is not an integer */) {
             usage(argv[0]);
           }
           do_seed = 0;
@@ -138,6 +160,7 @@ int main(int argc, char *argv[])
             usage(argv[0]);
           }
           break;
+        #ifdef __linux__
         case 'l':
           if ((!long_arg && argv[i][2]) ||
               (long_arg && strcmp(argv[i], "-load"))) {
@@ -150,6 +173,7 @@ int main(int argc, char *argv[])
             load_file = argv[++i];
           }
           break;
+      #endif
         case 's':
           if ((!long_arg && argv[i][2]) ||
               (long_arg && strcmp(argv[i], "-save"))) {
@@ -164,14 +188,19 @@ int main(int argc, char *argv[])
 	    if (!strcmp(argv[++i], "seed")) {
 	      do_save_seed = 1;
 	      do_save_image = 0;
-	    } else if (!strcmp(argv[i], "image")) {
+	    }
+      #ifdef __linux__
+      else if (!strcmp(argv[i], "image")) {
 	      do_save_image = 1;
 	      do_save_seed = 0;
-	    } else {
+	    }
+      #endif
+      else {
 	      save_file = argv[i];
 	    }
           }
           break;
+        #ifdef __linux__
         case 'i':
           if ((!long_arg && argv[i][2]) ||
               (long_arg && strcmp(argv[i], "-image"))) {
@@ -184,6 +213,7 @@ int main(int argc, char *argv[])
             pgm_file = argv[++i];
           }
           break;
+        #endif
         case 'p':
           /* PC placement makes no effort to avoid placing *
            * the PC inside solid rock.                     */
@@ -212,8 +242,12 @@ int main(int argc, char *argv[])
   if (do_seed) {
     /* Allows me to generate more than one dungeon *
      * per second, as opposed to time().           */
+    #ifdef __linux__
     gettimeofday(&tv, NULL);
     seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
+    #else
+    seed = time(NULL);
+    #endif
   }
   
   srand(seed);
@@ -256,19 +290,39 @@ int main(int argc, char *argv[])
     do_moves(&d);
   }
 
-  attron(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
-  mvprintw(0, 0, "%s", pc_is_alive(&d) ? victory : tombstone);
-  attroff(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
+  // print the victory/defeat artwork
+  erase();
 
-  printw("You defended your life in the face of %u deadly beasts.\n"
-         "You avenged the cruel and untimely murders of %u "
-         "peaceful dungeon residents.\n",
-         d.pc.kills[kill_direct], d.pc.kills[kill_avenged]);
+  uint32_t yPos = 0;
+
+  char *msg, *last, *orig;
+  orig = msg = last = strdup(pc_is_alive(&d) ? victory : tombstone);
+
+  for(; *msg; ++msg) {
+    if(*msg == '\n') {
+      *msg = '\0';
+
+      attron(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
+      mvprintw(yPos++, 0, "%s", last);
+      attroff(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
+
+      *msg = '\n';
+      last = msg + 1;
+    }
+  }
+
+  free(orig);
+
+  mvprintw(yPos++, 0, "You defended your life in the face of %u deadly beasts.", d.pc.kills[kill_direct]);
+  mvprintw(yPos++, 0, "You avenged the cruel and untimely murders of %u "
+         "peaceful dungeon residents.", d.pc.kills[kill_avenged]);
 
   attron(COLOR_PAIR(1));
-  printw("\n[Press ENTER to quit]");
+  mvprintw(yPos, 0, "[Press ENTER to quit]");
   attroff(COLOR_PAIR(1));
-  while(getch() != 10);
+
+  char key;
+  while((key = getch()) != 10 && key != 13);
 
   endwin();
 
@@ -276,7 +330,7 @@ int main(int argc, char *argv[])
     if (do_save_seed) {
        /* 10 bytes for number, please dot, extention and null terminator. */
       save_file = malloc(18);
-      sprintf(save_file, "%ld.rlg327", seed);
+      sprintf(save_file, "%ld.rlg327", (unsigned long) seed);
     }
     if (do_save_image) {
       if (!pgm_file) {

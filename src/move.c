@@ -1,10 +1,14 @@
 // Based on Jeremy's solution
 #include<move.h>
 
-#include <unistd.h>
+#ifdef __linux__
+#include <ncurses.h>
+#else
+#include <curses.h>
+#endif
+
 #include <stdlib.h>
 #include <assert.h>
-#include <ncurses.h>
 
 #include<dungeon.h>
 #include<heap.h>

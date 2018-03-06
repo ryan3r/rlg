@@ -2,7 +2,11 @@
 #ifndef UTILS_H
 # define UTILS_H
 
+#ifdef __linux__
 #include <ncurses.h>
+#else
+#include <curses.h>
+#endif
 
 /* Returns true if random float in [0,1] is less than *
  * numerator/denominator.  Uses only integer math.    */
@@ -14,10 +18,10 @@
 
 int makedirectory(char *dir);
 
-#define mprintf(...) ({          \
+#define mprintf(...) {           \
   move(0, 0);                    \
   clrtoeol();                    \
   mvprintw(0, 0, __VA_ARGS__);   \
-})
+}
 
 #endif

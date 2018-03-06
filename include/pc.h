@@ -9,6 +9,9 @@
 typedef struct dungeon dungeon_t;
 
 typedef struct pc {
+    #ifndef __linux__
+    char __empty_field;
+    #endif
 } pc_t;
 
 void pc_delete(pc_t *pc);

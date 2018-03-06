@@ -14,26 +14,26 @@ struct heap_node {
   uint32_t mark;
 };
 
-#define splice_heap_node_lists(n1, n2) ({ \
+#define splice_heap_node_lists(n1, n2)  { \
   if ((n1) && (n2)) {                     \
     (n1)->next->prev = (n2)->prev;        \
     (n2)->prev->next = (n1)->next;        \
     (n1)->next = (n2);                    \
     (n2)->prev = (n1);                    \
   }                                       \
-})
+}
 
-#define insert_heap_node_in_list(n, l) ({ \
+#define insert_heap_node_in_list(n, l) {  \
   (n)->next = (l);                        \
   (n)->prev = (l)->prev;                  \
   (n)->prev->next = (n);                  \
   (l)->prev = (n);                        \
-})
+}
 
-#define remove_heap_node_from_list(n) ({ \
+#define remove_heap_node_from_list(n)  { \
   (n)->next->prev = (n)->prev;           \
   (n)->prev->next = (n)->next;           \
-})
+}
 
 void print_heap_node(heap_node_t *n, unsigned indent,
                      char *(*print)(const void *v))
@@ -180,7 +180,7 @@ static void heap_consolidate(heap_t *h)
     while (a[x->degree]) {
       y = a[x->degree];
       if (h->compare(x->datum, y->datum) > 0) {
-        swap(x, y);
+        swap(heap_node_t*, x, y);
       }
       a[x->degree] = NULL;
       heap_link(h, y, x);

@@ -30,7 +30,11 @@
 #define charpair(pair) (d->character[pair[dim_y]][pair[dim_x]])
 #define charxy(x, y) (d->character[y][x])
 
-typedef enum __attribute__ ((__packed__)) terrain_type {
+typedef enum
+#ifdef __linux__
+ __attribute__ ((__packed__))
+ #endif
+ terrain_type {
   ter_debug,
   ter_wall,
   ter_wall_immutable,
