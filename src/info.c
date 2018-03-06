@@ -32,6 +32,8 @@ char *monster_names[] = {
 
 // render the monster list to the window
 void print_list(WINDOW *win, char *title, char **list, size_t i, size_t length) {
+    wattron(win, COLOR_PAIR(1));
+
     // remove anything that was already in the window
     werase(win);
     box(win, 0, 0);
@@ -39,14 +41,21 @@ void print_list(WINDOW *win, char *title, char **list, size_t i, size_t length) 
     // print the title and list
     mvwprintw(win, 0, (WINDOW_WIDTH - strlen(title) - 4) / 2, "| %s |", title);
 
+    wattroff(win, COLOR_PAIR(1));
+
     for(size_t j = i; j - i < WINDOW_HEIGHT - 3 && j < length; ++j) {
         mvwprintw(win, j - i + 1, 1, list[j]);
     }
 
-    attron(COLOR_PAIR(3));
+    wattron(win, COLOR_PAIR(1));
+
+    // draw a grey bar at the bottom
+    for(uint8_t i = 1; i < WINDOW_WIDTH - 1; ++i) {
+        mvwaddch(win, WINDOW_HEIGHT - 2, i, ' ');
+    }
 
     // print a help message
-    mvwprintw(win, WINDOW_HEIGHT - 2, 1, "Scroll with arrow keys. ESC or Q to close.");
+    mvwprintw(win, WINDOW_HEIGHT - 2, 1, "Scroll with arrow keys. Q or ESC to close.");
 
     // print the scroll progress
     if(length > WINDOW_HEIGHT - 3) {
@@ -54,10 +63,14 @@ void print_list(WINDOW *win, char *title, char **list, size_t i, size_t length) 
 
         if(progress > 1) progress = 1;
 
-        mvwprintw(win, WINDOW_HEIGHT - 2, WINDOW_WIDTH - 6, "%3d%%", (int) (progress * 100));
+        uint8_t iProgress = (uint8_t) (progress * 100);
+
+        uint8_t shift = (iProgress > 9) + (iProgress > 99);
+
+        mvwprintw(win, WINDOW_HEIGHT - 2, WINDOW_WIDTH - 4 - shift, "%d%%", iProgress);
     }
 
-    attroff(COLOR_PAIR(3));
+    wattroff(win, COLOR_PAIR(1));
 
     wrefresh(win);
 }
@@ -144,18 +157,18 @@ char *help_msg[] = {
     "",
     "Controls",
     "==========================================================",
-    "7 or y     | Move up and to the left",
-    "8 or k     | Move up",
-    "9 or u     | Move up and to the right",
-    "6 or l     | Move to the right",
-    "3 or n     | Move down and to the right",
-    "2 or j     | Move down",
-    "1 or b     | Move down and to the left",
-    "4 or h     | Move to the left",
-    ">          | Go down stairs (only >)",
-    "<          | Go down stairs (only <)",
-    "5 or space | Skip turn",
-    "m          | Display a list of monsters"
+    "7 or y      | Move up and to the left",
+    "8 or k or w | Move up",
+    "9 or u      | Move up and to the right",
+    "6 or l or d | Move to the right",
+    "3 or n      | Move down and to the right",
+    "2 or j or s | Move down",
+    "1 or b      | Move down and to the left",
+    "4 or h or a | Move to the left",
+    ">           | Go down stairs (only >)",
+    "<           | Go down stairs (only <)",
+    "5 or space  | Skip turn",
+    "m           | Display a list of monsters"
 };
 
 // print the README

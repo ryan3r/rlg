@@ -62,11 +62,11 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
 
   top:
   switch((key = getch())) {
-    case '8': case 'k':
+    case '8': case 'k': case 'w':
       dir[dim_y] = -1;
       break;
     
-    case '2': case 'j':
+    case '2': case 'j': case 's':
       dir[dim_y] = 1;
       break;
 
@@ -75,7 +75,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
       dir[dim_x] = -1;
       break;
     
-    case '4': case 'h':
+    case '4': case 'h': case 'a':
       dir[dim_x] = -1;
       break;
     
@@ -84,7 +84,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t dir)
       dir[dim_y] = -1;
       break;
     
-    case '6': case 'l':
+    case '6': case 'l': case 'd':
       dir[dim_x] = 1;
       break;
     

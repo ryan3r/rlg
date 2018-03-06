@@ -244,7 +244,8 @@ int main(int argc, char *argv[])
   init_pair(1, COLOR_CYAN, COLOR_BLACK);
   init_pair(2, COLOR_RED, COLOR_BLACK);
   init_pair(3, COLOR_GREEN, COLOR_BLACK);
-  init_pair(4, COLOR_RED, COLOR_CYAN);
+  init_pair(4, COLOR_BLACK, COLOR_WHITE);
+  init_pair(5, COLOR_YELLOW, COLOR_BLACK);
 
   render_dungeon(&d);
   refresh();
@@ -254,6 +255,20 @@ int main(int argc, char *argv[])
     render_dungeon(&d);
     do_moves(&d);
   }
+
+  attron(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
+  mvprintw(0, 0, "%s", pc_is_alive(&d) ? victory : tombstone);
+  attroff(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
+
+  printw("You defended your life in the face of %u deadly beasts.\n"
+         "You avenged the cruel and untimely murders of %u "
+         "peaceful dungeon residents.\n",
+         d.pc.kills[kill_direct], d.pc.kills[kill_avenged]);
+
+  attron(COLOR_PAIR(1));
+  printw("\n[Press ENTER to quit]");
+  attroff(COLOR_PAIR(1));
+  while(getch() != 10);
 
   endwin();
 
@@ -280,12 +295,6 @@ int main(int argc, char *argv[])
       free(save_file);
     }
   }
-
-  printf("%s", pc_is_alive(&d) ? victory : tombstone);
-  printf("You defended your life in the face of %u deadly beasts.\n"
-         "You avenged the cruel and untimely murders of %u "
-         "peaceful dungeon residents.\n",
-         d.pc.kills[kill_direct], d.pc.kills[kill_avenged]);
 
   pc_delete(d.pc.pc);
 
