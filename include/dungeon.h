@@ -20,7 +20,7 @@
 #define MAX_MONSTERS           12
 #define DUNGEON_SAVE_FILE      "dungeon"
 #define DUNGEON_VERSION_FILE   "version"
-#define RLG_VERSION            "1.04"
+#define RLG_VERSION            "1.05"
 #define DUNGEON_SAVE_SEMANTIC  "RLG327-S2018"
 #define DUNGEON_SAVE_VERSION   0U
 
