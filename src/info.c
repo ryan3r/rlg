@@ -12,7 +12,7 @@
 #include <curses.h>
 #endif
 
-#define MONSTER_INFO_SIZE 16
+#define MONSTER_INFO_SIZE 35
 #define WINDOW_HEIGHT 22
 #define WINDOW_WIDTH 60
 
@@ -124,7 +124,8 @@ void list_monsters(dungeon_t *d) {
                 size_t size = MONSTER_INFO_SIZE + strlen(name);
                 char *monster_info = malloc(size * sizeof(char));
 
-                snprintf(monster_info, size, "%c: %s at (%d, %d)", monster->symbol, name, monster->position[dim_x], monster->position[dim_y]);
+                snprintf(monster_info, size, "%c: %s at (%d, %d) with a speed of %d",
+                    monster->symbol, name, monster->position[dim_x], monster->position[dim_y], monster->speed);
                 
                 monster_list[i++] = monster_info;
             }

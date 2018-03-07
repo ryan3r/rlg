@@ -19,7 +19,6 @@ void npc_delete(npc_t *n)
 
 static uint32_t max_monster_cells(dungeon_t *d)
 {
-  /*
   uint32_t i;
   uint32_t sum;
 
@@ -30,8 +29,6 @@ static uint32_t max_monster_cells(dungeon_t *d)
   }
 
   return sum;
-  */
-  return 1;
 }
 
 void gen_monsters(dungeon_t *d)
