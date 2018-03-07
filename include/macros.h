@@ -40,13 +40,6 @@ extern "C" {
 
 # ifndef NIAGARA
 
-# define fopen(path, mode) ({                                          \
-  FILE *_f = fopen(path, mode);                                        \
-  if (!_f)                                                             \
-    fprintf(stderr, "Failed to open %s: %s\n", path, strerror(errno)); \
-  _f;                                                                  \
-})
-
 # define swap(type, a, b)  {   \
   type _tmp = (a); \
   (a) = (b);             \

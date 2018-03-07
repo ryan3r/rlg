@@ -18,10 +18,15 @@
 #define VISUAL_RANGE           15
 #define PC_SPEED               10
 #define MAX_MONSTERS           12
-#define SAVE_DIR               ".rlg327"
 #define DUNGEON_SAVE_FILE      "dungeon"
 #define DUNGEON_SAVE_SEMANTIC  "RLG327-S2018"
 #define DUNGEON_SAVE_VERSION   0U
+
+#ifdef __linux__
+#define SAVE_DIR               ".rlg327"
+#else
+#define SAVE_DIR               "rlg327"
+#endif
 
 #define mappair(pair) (d->map[pair[dim_y]][pair[dim_x]])
 #define mapxy(x, y) (d->map[y][x])
@@ -30,11 +35,7 @@
 #define charpair(pair) (d->character[pair[dim_y]][pair[dim_x]])
 #define charxy(x, y) (d->character[y][x])
 
-typedef enum
-#ifdef __linux__
- __attribute__ ((__packed__))
- #endif
- terrain_type {
+typedef enum terrain_type {
   ter_debug,
   ter_wall,
   ter_wall_immutable,

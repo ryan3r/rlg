@@ -5,7 +5,8 @@
 #include <endian.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <ncurses.h>
+#else
+#include <windows.h>
 #endif
 #include <limits.h>
 #include <errno.h>
@@ -700,9 +701,13 @@ uint32_t calculate_dungeon_size(dungeon_t *d)
           (d->num_rooms * 4) /* Four bytes per room */);
 }
 
+#ifdef _WIN32
+int htobe32(int x) { return x; }
+int be32toh(int x) { return x; }
+#endif
+
 int write_dungeon(dungeon_t *d, char *file)
 {
-  #ifdef __linux__
   char *home;
   char *filename;
   FILE *f;
@@ -710,10 +715,27 @@ int write_dungeon(dungeon_t *d, char *file)
   uint32_t be32;
 
   if (!file) {
+    #ifdef __linux__
     if (!(home = getenv("HOME"))) {
       fprintf(stderr, "\"HOME\" is undefined.  Using working directory.\n");
       home = ".";
     }
+    #else 
+    // get the size of the localappdata path
+    DWORD env_size = GetEnvironmentVariable("LOCALAPPDATA", NULL, 0);
+    
+    // no app data
+    if(!env_size) {
+      fprintf(stderr, "\"LOCALAPPDATA\" is undefined.  Using working directory.\n");
+      home = strdup(".");
+    }
+    // get the variable
+    else {
+      home = (char*) malloc(env_size * sizeof(char));
+
+      GetEnvironmentVariable("LOCALAPPDATA", home, env_size * sizeof(char));
+    }
+    #endif
 
     len = (strlen(home) + strlen(SAVE_DIR) + strlen(DUNGEON_SAVE_FILE) +
            1 /* The NULL terminator */                                 +
@@ -724,15 +746,19 @@ int write_dungeon(dungeon_t *d, char *file)
     makedirectory(filename);
     strcat(filename, DUNGEON_SAVE_FILE);
 
-    if (!(f = fopen(filename, "w"))) {
+    if (!(f = fopen(filename, "wb"))) {
       perror(filename);
       free(filename);
 
       return 1;
     }
     free(filename);
+
+    #ifndef __linux__
+    free(home);
+    #endif
   } else {
-    if (!(f = fopen(file, "w"))) {
+    if (!(f = fopen(file, "wb"))) {
       perror(file);
       exit(-1);
     }
@@ -756,7 +782,6 @@ int write_dungeon(dungeon_t *d, char *file)
   write_rooms(d, f);
 
   fclose(f);
-  #endif
 
   return 0;
 }
@@ -848,20 +873,38 @@ int calculate_num_rooms(uint32_t dungeon_bytes)
 
 int read_dungeon(dungeon_t *d, char *file)
 {
-  #ifdef __linux__
   char semantic[sizeof (DUNGEON_SAVE_SEMANTIC)];
   uint32_t be32;
   FILE *f;
   char *home;
   size_t len;
   char *filename;
+  #ifdef __linux__
   struct stat buf;
+  #endif
 
   if (!file) {
+    #ifdef __linux__
     if (!(home = getenv("HOME"))) {
       fprintf(stderr, "\"HOME\" is undefined.  Using working directory.\n");
       home = ".";
     }
+    #else
+    // get the size of the localappdata path
+    DWORD env_size = GetEnvironmentVariable("LOCALAPPDATA", NULL, 0);
+    
+    // no app data
+    if(!env_size) {
+      fprintf(stderr, "\"LOCALAPPDATA\" is undefined.  Using working directory.\n");
+      home = strdup(".");
+    }
+    // get the variable
+    else {
+      home = (char*) malloc(env_size * sizeof(char));
+
+      GetEnvironmentVariable("LOCALAPPDATA", home, env_size * sizeof(char));
+    }
+    #endif
 
     len = (strlen(home) + strlen(SAVE_DIR) + strlen(DUNGEON_SAVE_FILE) +
            1 /* The NULL terminator */                                 +
@@ -870,27 +913,33 @@ int read_dungeon(dungeon_t *d, char *file)
     filename = malloc(len * sizeof (*filename));
     sprintf(filename, "%s/%s/%s", home, SAVE_DIR, DUNGEON_SAVE_FILE);
 
-    if (!(f = fopen(filename, "r"))) {
+    if (!(f = fopen(filename, "rb"))) {
       perror(filename);
       free(filename);
       exit(-1);
     }
 
+    #ifdef __linux__
     if (stat(filename, &buf)) {
       perror(filename);
       exit(-1);
     }
+    #else
+    free(home);
+    #endif
 
     free(filename);
   } else {
-    if (!(f = fopen(file, "r"))) {
+    if (!(f = fopen(file, "rb"))) {
       perror(file);
       exit(-1);
     }
+    #ifdef __linux__
     if (stat(file, &buf)) {
       perror(file);
       exit(-1);
     }
+    #endif
   }
 
   d->num_rooms = 0;
@@ -908,24 +957,25 @@ int read_dungeon(dungeon_t *d, char *file)
     exit(-1);
   }
   fread(&be32, sizeof (be32), 1, f);
-  if (buf.st_size != be32toh(be32)) {
+  int num_rooms = be32toh(be32);
+  #ifdef __linux__
+  if (buf.st_size != num_rooms) {
     fprintf(stderr, "File size mismatch.\n");
     exit(-1);
   }
+  #endif
   read_dungeon_map(d, f);
-  d->num_rooms = calculate_num_rooms(buf.st_size);
+  d->num_rooms = calculate_num_rooms(num_rooms);
   d->rooms = malloc(sizeof (*d->rooms) * d->num_rooms);
   read_rooms(d, f);
 
   fclose(f);
-  #endif
 
   return 0;
 }
 
 int read_pgm(dungeon_t *d, char *pgm)
 {
-  #ifdef __linux__
   FILE *f;
   char s[80];
   uint8_t gm[DUNGEON_Y - 2][DUNGEON_X - 2];
@@ -1005,7 +1055,6 @@ int read_pgm(dungeon_t *d, char *pgm)
     d->map[y][DUNGEON_X - 1] = ter_wall_immutable;
     d->hardness[y][DUNGEON_X - 1] = 255;
   }
-  #endif
 
   return 0;
 }

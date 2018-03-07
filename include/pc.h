@@ -9,7 +9,8 @@
 typedef struct dungeon dungeon_t;
 
 typedef struct pc {
-    #ifndef __linux__
+    // MSVC requires at least one field
+    #ifdef _WIN32
     char __empty_field;
     #endif
 } pc_t;

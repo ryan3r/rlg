@@ -73,18 +73,11 @@ const char *tombstone =
 
 void usage(char *name)
 {
-  #ifdef __linux__
   fprintf(stderr,
           "Usage: %s [-r|--rand <seed>] [-l|--load [<file>]]\n"
           "          [-s|--save [<file>]] [-i|--image <pgm file>]\n"
           "          [-p|--pc <y> <x>] [-n|--nummon <count>]\n",
           name);
-  #else
-  fprintf(stderr,
-          "Usage: %s [-r|--rand <seed>] [-i|--image <pgm file>]\n"
-          "          [-p|--pc <y> <x>] [-n|--nummon <count>]\n",
-          name);
-  #endif
 
   exit(-1);
 }
@@ -99,7 +92,7 @@ int main(int argc, char *argv[])
   uint32_t long_arg;
   char *save_file;
   char *load_file;
-  char *pgm_file = NULL;
+  char *pgm_file;
   #ifdef __linux__
   struct timeval tv;
   #else
@@ -160,7 +153,6 @@ int main(int argc, char *argv[])
             usage(argv[0]);
           }
           break;
-        #ifdef __linux__
         case 'l':
           if ((!long_arg && argv[i][2]) ||
               (long_arg && strcmp(argv[i], "-load"))) {
@@ -173,7 +165,6 @@ int main(int argc, char *argv[])
             load_file = argv[++i];
           }
           break;
-      #endif
         case 's':
           if ((!long_arg && argv[i][2]) ||
               (long_arg && strcmp(argv[i], "-save"))) {
@@ -189,18 +180,15 @@ int main(int argc, char *argv[])
 	      do_save_seed = 1;
 	      do_save_image = 0;
 	    }
-      #ifdef __linux__
       else if (!strcmp(argv[i], "image")) {
 	      do_save_image = 1;
 	      do_save_seed = 0;
 	    }
-      #endif
       else {
 	      save_file = argv[i];
 	    }
           }
           break;
-        #ifdef __linux__
         case 'i':
           if ((!long_arg && argv[i][2]) ||
               (long_arg && strcmp(argv[i], "-image"))) {
@@ -213,7 +201,6 @@ int main(int argc, char *argv[])
             pgm_file = argv[++i];
           }
           break;
-        #endif
         case 'p':
           /* PC placement makes no effort to avoid placing *
            * the PC inside solid rock.                     */
@@ -298,18 +285,20 @@ int main(int argc, char *argv[])
   char *msg, *last, *orig;
   orig = msg = last = strdup(pc_is_alive(&d) ? victory : tombstone);
 
+  attron(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
+
   for(; *msg; ++msg) {
     if(*msg == '\n') {
       *msg = '\0';
 
-      attron(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
       mvprintw(yPos++, 0, "%s", last);
-      attroff(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
 
       *msg = '\n';
       last = msg + 1;
     }
   }
+
+  attroff(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
 
   free(orig);
 
