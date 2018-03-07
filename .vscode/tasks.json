@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Make",
+            "label": "Cmake",
             "type": "shell",
             "command": "cmake . && make",
             "group": {
@@ -17,7 +17,7 @@
             "presentation": {
                 "echo": false,
                 "reveal": "always",
-                "focus": false,
+                "focus": true,
                 "panel": "shared"
             }
         },

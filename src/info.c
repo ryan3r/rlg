@@ -10,6 +10,7 @@
 #include <ncurses.h>
 #else
 #include <curses.h>
+#include <windows.h>
 #endif
 
 #define MONSTER_INFO_SIZE 35
@@ -180,4 +181,75 @@ char *help_msg[] = {
 // print the README
 void help() {
     open_list_window("Help", help_msg, sizeof(help_msg) / sizeof(*help_msg));
+}
+
+int should_show_help() {
+    char *home;
+    #ifdef __linux__
+    if (!(home = getenv("HOME"))) {
+    fprintf(stderr, "\"HOME\" is undefined.  Using working directory.\n");
+    home = ".";
+    }
+    #else
+    // get the size of the localappdata path
+    DWORD env_size = GetEnvironmentVariable("LOCALAPPDATA", NULL, 0);
+
+    // no app data
+    if(!env_size) {
+    fprintf(stderr, "\"LOCALAPPDATA\" is undefined.  Using working directory.\n");
+    home = strdup(".");
+    }
+    // get the variable
+    else {
+    home = (char*) malloc(env_size * sizeof(char));
+
+    GetEnvironmentVariable("LOCALAPPDATA", home, env_size * sizeof(char));
+    }
+    #endif
+
+    uint32_t len = (strlen(home) + strlen(SAVE_DIR) + strlen(DUNGEON_VERSION_FILE) +
+            1 /* The NULL terminator */                                 +
+            2 /* The slashes */);
+
+    char *filename = malloc(len * sizeof (*filename));
+    sprintf(filename, "%s/%s/", home, SAVE_DIR);
+    makedirectory(filename);
+    strcat(filename, DUNGEON_VERSION_FILE);
+
+    #ifndef __linux__
+    free(home);
+    #endif
+
+    FILE *version_file = fopen(filename, "rb");
+
+    char version[10];
+
+    if(version_file) {
+        uint8_t i = 0;
+        while(i < 9 && !feof(version_file)) {
+            version[i++] = fgetc(version_file);
+        }
+
+        version[i - 1] = '\0';
+
+        fclose(version_file);
+
+        // check the versions
+        if(!strcmp(version, RLG_VERSION)) {
+            free(filename);
+            return 0;
+        }
+    }
+
+    // write the new version
+    strcpy(version, RLG_VERSION);
+
+    if((version_file = fopen(filename, "wb"))) {
+        fprintf(version_file, "%s", version);
+        fclose(version_file);
+    }
+
+    free(filename);
+
+    return 1;
 }

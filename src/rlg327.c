@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
   struct timeval tv;
   #else
   // change the console title
-  SetConsoleTitle("rlg");
+  SetConsoleTitle("rlg327");
 
   // resize the window
   SMALL_RECT window_size = {0, 0, 80, 24};
@@ -267,10 +267,12 @@ int main(int argc, char *argv[])
   init_pair(3, COLOR_GREEN, COLOR_BLACK);
   init_pair(4, COLOR_BLACK, COLOR_WHITE);
   init_pair(5, COLOR_YELLOW, COLOR_BLACK);
-
-  render_dungeon(&d);
-  refresh();
-  help();
+  
+  if(should_show_help()) {
+    render_dungeon(&d);
+    refresh();
+    help();
+  }
 
   while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
     render_dungeon(&d);
