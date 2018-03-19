@@ -13,11 +13,11 @@
 
 /* Very slow seed: 686846853 */
 
-#include<dungeon.h>
-#include<pc.h>
-#include<npc.h>
-#include<move.h>
-#include <info.h>
+#include <dungeon.hpp>
+#include <pc.hpp>
+#include <npc.hpp>
+#include <move.hpp>
+#include <info.hpp>
 
 const char *victory =
   "\n                                       o\n"
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
    * And the final switch, '--image', allows me to create a dungeon *
    * from a PGM image, so that I was able to create those more      *
    * interesting test dungeons for you.                             */
- 
+
  if (argc > 1) {
     for (i = 1, long_arg = 0; i < argc; i++, long_arg = 0) {
       if (argv[i][0] == '-') { /* All switches start with a dash */
@@ -208,10 +208,10 @@ int main(int argc, char *argv[])
               (long_arg && strcmp(argv[i], "-pc"))) {
             usage(argv[0]);
           }
-          if ((d.pc.position[dim_y] = atoi(argv[++i])) < 1 ||
-              d.pc.position[dim_y] > DUNGEON_Y - 2         ||
-              (d.pc.position[dim_x] = atoi(argv[++i])) < 1 ||
-              d.pc.position[dim_x] > DUNGEON_X - 2)         {
+          if ((d.pc.position.y = atoi(argv[++i])) < 1 ||
+              d.pc.position.y > DUNGEON_Y - 2         ||
+              (d.pc.position.x = atoi(argv[++i])) < 1 ||
+              d.pc.position.x > DUNGEON_X - 2)         {
             fprintf(stderr, "Invalid PC position.\n");
             usage(argv[0]);
           }
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
     seed = time(NULL);
     #endif
   }
-  
+
   srand(seed);
 
   init_dungeon(&d);
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
   init_pair(3, COLOR_GREEN, COLOR_BLACK);
   init_pair(4, COLOR_BLACK, COLOR_WHITE);
   init_pair(5, COLOR_YELLOW, COLOR_BLACK);
-  
+
   if(should_show_help()) {
     render_dungeon(&d);
     refresh();
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
   if (do_save) {
     if (do_save_seed) {
        /* 10 bytes for number, please dot, extention and null terminator. */
-      save_file = malloc(18);
+      save_file = (char*) malloc(18);
       sprintf(save_file, "%ld.rlg327", (unsigned long) seed);
     }
     if (do_save_image) {
@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 	do_save_image = 0;
       } else {
 	/* Extension of 3 characters longer than image extension + null. */
-	save_file = malloc(strlen(pgm_file) + 4);
+	save_file = (char*) malloc(strlen(pgm_file) + 4);
 	strcpy(save_file, pgm_file);
 	strcpy(strchr(save_file, '.') + 1, "rlg327");
       }

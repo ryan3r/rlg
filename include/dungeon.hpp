@@ -3,9 +3,9 @@
 # define DUNGEON_H
 
 # include "heap.h"
-# include "macros.h"
-# include "dims.h"
-# include "character.h"
+#include <macros.hpp>
+#include <dims.hpp>
+#include <character.hpp>
 
 #define DUNGEON_X              80
 #define DUNGEON_Y              21
@@ -30,11 +30,11 @@
 #define SAVE_DIR               "rlg327"
 #endif
 
-#define mappair(pair) (d->map[pair[dim_y]][pair[dim_x]])
+#define mappair(pair) (d->map[pair.y][pair.x])
 #define mapxy(x, y) (d->map[y][x])
-#define hardnesspair(pair) (d->hardness[pair[dim_y]][pair[dim_x]])
+#define hardnesspair(pair) (d->hardness[pair.y][pair.x])
 #define hardnessxy(x, y) (d->hardness[y][x])
-#define charpair(pair) (d->character[pair[dim_y]][pair[dim_x]])
+#define charpair(pair) (d->character[pair.y][pair.x])
 #define charxy(x, y) (d->character[y][x])
 
 typedef enum terrain_type {

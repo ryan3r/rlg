@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
 project(rlg)
 
+set(CMAKE_CXX_STANDARD 11)
+
 include_directories("include")
 
 if(WIN32)

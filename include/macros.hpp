@@ -40,24 +40,28 @@ extern "C" {
 
 # ifndef NIAGARA
 
+/*
 # define swap(type, a, b)  {   \
   type _tmp = (a); \
   (a) = (b);             \
   (b) = _tmp;            \
 }
+*/
 
 # define memswap(a, b) ({    \
   typeof (*(a)) _tmp = *(a); \
   *(a) = *(b);               \
   *(b) = _tmp;               \
 })
-
+/*
+// TODO: DEAD CODE
 # define structdup(s) ({                                                  \
   typeof (s) _tmp;                                                        \
   _tmp = malloc(sizeof (*(s)));                                           \
   memcpy(_tmp, (s), sizeof (*(s)));                                       \
   _tmp;                                                                   \
 })
+*/
 
 # define datacmp(d1, d2) ({                                      \
   register char *_t1 = (char *) d1, *_t2 = (char *) d2, *_start; \

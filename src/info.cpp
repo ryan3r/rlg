@@ -1,10 +1,10 @@
-#include <info.h>
-#include <utils.h>
+#include <info.hpp>
+#include <utils.hpp>
 #include <stdint.h>
 #include <stdlib.h>
-#include <dungeon.h>
-#include <pc.h>
-#include <npc.h>
+#include <dungeon.hpp>
+#include <pc.hpp>
+#include <npc.hpp>
 
 #ifdef __linux__
 #include <ncurses.h>
@@ -97,7 +97,7 @@ void open_list_window(char *title, char **list, size_t length) {
             case KEY_DOWN:
                 if(length > WINDOW_HEIGHT - 3 && i < length - (WINDOW_HEIGHT - 3)) ++i;
                 break;
-            
+
             case KEY_UP:
                 if(i > 0) --i;
                 break;
@@ -112,7 +112,7 @@ void open_list_window(char *title, char **list, size_t length) {
 // open the monster list window and enter the monster list key loop
 void list_monsters(dungeon_t *d) {
     // get the list of monsters
-    char **monster_list = calloc(d->num_monsters, sizeof(character_t));
+    char **monster_list =  (char**) calloc(d->num_monsters, sizeof(character_t));
     size_t i = 0;
 
     for(uint8_t y = 0; y < DUNGEON_Y && i < d->num_monsters; ++y) {
@@ -123,18 +123,18 @@ void list_monsters(dungeon_t *d) {
                 char *name = monster_names[monster->npc->characteristics];
 
                 size_t size = MONSTER_INFO_SIZE + strlen(name);
-                char *monster_info = malloc(size * sizeof(char));
+                char *monster_info = (char*) malloc(size * sizeof(char));
 
                 snprintf(monster_info, size, "%c: %s at (%d, %d) with a speed of %d",
-                    monster->symbol, name, monster->position[dim_x], monster->position[dim_y], monster->speed);
-                
+                    monster->symbol, name, monster->position.x, monster->position.y, monster->speed);
+
                 monster_list[i++] = monster_info;
             }
         }
     }
 
     open_list_window("Monster list", monster_list, d->num_monsters);
-    
+
     for(i = 0; i < d->num_monsters; ++i) {
         free(monster_list[i]);
     }
@@ -211,7 +211,7 @@ int should_show_help() {
             1 /* The NULL terminator */                                 +
             2 /* The slashes */);
 
-    char *filename = malloc(len * sizeof (*filename));
+    char *filename = (char*) malloc(len * sizeof (*filename));
     sprintf(filename, "%s/%s/", home, SAVE_DIR);
     makedirectory(filename);
     strcat(filename, DUNGEON_VERSION_FILE);

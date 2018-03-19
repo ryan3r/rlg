@@ -4,7 +4,7 @@
 
 # include <stdint.h>
 
-# include "dims.h"
+#include <dims.hpp>
 
 typedef struct dungeon dungeon_t;
 typedef struct npc npc_t;

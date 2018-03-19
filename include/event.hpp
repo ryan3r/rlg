@@ -4,7 +4,7 @@
 
 # include <stdint.h>
 
-# include "dungeon.h"
+#include <dungeon.hpp>
 
 typedef struct character character_t;
 

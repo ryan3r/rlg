@@ -1,8 +1,14 @@
 // Based on Jeremy's solution
 #include<heap.h>
-#include<macros.h>
+#include <macros.hpp>
 
 #undef min
+
+#define swap(type, a, b)  {   \
+  type _tmp = (a); \
+  (a) = (b);             \
+  (b) = _tmp;            \
+}
 
 struct heap_node {
   heap_node_t *next;
@@ -102,7 +108,7 @@ void heap_node_delete(heap_t *h, heap_node_t *hn)
   while (hn) {
     if (hn->child) {
       heap_node_delete(h, hn->child);
-    } 
+    }
     next = hn->next;
     if (h->datum_delete) {
       h->datum_delete(hn->datum);
@@ -368,16 +374,16 @@ int main(int argc, char *argv[])
   heap_init(&h, compare, free);
 
   for (i = 0; i < n; i++) {
-    keys[i] = malloc(sizeof (*keys[i]));
+    keys[i] = (*int) malloc(sizeof (*keys[i]));
     *keys[i] = i;
     a[i] = heap_insert(&h, keys[i]);
   }
 
   print_heap(&h, print_int);
   printf("------------------------------------\n");
-  
+
   heap_remove_min(&h);
-  keys[0] = malloc(sizeof (*keys[0]));
+  keys[0] = (int*) malloc(sizeof (*keys[0]));
   *keys[0] = 0;
   a[0] = heap_insert(&h, keys[0]);
   for (i = 0; i < 100 * n; i++) {
