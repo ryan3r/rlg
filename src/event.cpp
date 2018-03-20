@@ -2,6 +2,9 @@
 #include <event.hpp>
 #include <character.hpp>
 
+#undef min
+#include <iostream>
+
 static uint32_t next_event_number(void)
 {
   static uint32_t sequence_number;

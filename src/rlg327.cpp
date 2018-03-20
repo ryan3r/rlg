@@ -19,6 +19,10 @@
 #include <move.hpp>
 #include <info.hpp>
 
+#undef min
+#include <iostream>
+#include <fstream>
+
 const char *victory =
   "\n                                       o\n"
   "                                      $\"\"$o\n"
@@ -84,6 +88,10 @@ void usage(char *name)
 
 int main(int argc, char *argv[])
 {
+  ofstream log_file("rlg-log.txt");
+  streambuf *orig_log_rd = clog.rdbuf();
+  clog.rdbuf(log_file.rdbuf());
+
   dungeon_t d;
   time_t seed;
   uint32_t i;
@@ -208,10 +216,10 @@ int main(int argc, char *argv[])
               (long_arg && strcmp(argv[i], "-pc"))) {
             usage(argv[0]);
           }
-          if ((d.pc.position.y = atoi(argv[++i])) < 1 ||
-              d.pc.position.y > DUNGEON_Y - 2         ||
-              (d.pc.position.x = atoi(argv[++i])) < 1 ||
-              d.pc.position.x > DUNGEON_X - 2)         {
+          if ((d.pc->position.y = atoi(argv[++i])) < 1 ||
+              d.pc->position.y > DUNGEON_Y - 2         ||
+              (d.pc->position.x = atoi(argv[++i])) < 1 ||
+              d.pc->position.x > DUNGEON_X - 2)         {
             fprintf(stderr, "Invalid PC position.\n");
             usage(argv[0]);
           }
@@ -304,9 +312,9 @@ int main(int argc, char *argv[])
 
   free(orig);
 
-  mvprintw(yPos++, 0, "You defended your life in the face of %u deadly beasts.", d.pc.kills[kill_direct]);
+  mvprintw(yPos++, 0, "You defended your life in the face of %u deadly beasts.", d.pc->kills[kill_direct]);
   mvprintw(yPos++, 0, "You avenged the cruel and untimely murders of %u "
-         "peaceful dungeon residents.", d.pc.kills[kill_avenged]);
+         "peaceful dungeon residents.", d.pc->kills[kill_avenged]);
 
   attron(COLOR_PAIR(1));
   mvprintw(yPos, 0, "[Press ENTER to quit]");
@@ -341,9 +349,9 @@ int main(int argc, char *argv[])
     }
   }
 
-  pc_delete(d.pc.pc);
-
   delete_dungeon(&d);
+
+  clog.rdbuf(orig_log_rd);
 
   return 0;
 }

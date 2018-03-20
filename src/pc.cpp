@@ -15,6 +15,7 @@
 #include <move.hpp>
 #include <path.hpp>
 #include <info.hpp>
+#include <event.hpp>
 
 void pc_delete(pc_t *pc)
 {
@@ -25,34 +26,36 @@ void pc_delete(pc_t *pc)
 
 uint32_t pc_is_alive(dungeon_t *d)
 {
-  return d->pc.alive;
+  return d->pc->alive;
 }
 
 void place_pc(dungeon_t *d)
 {
-  d->pc.position.y = rand_range(d->rooms->position.y,
+  d->pc->position.y = rand_range(d->rooms->position.y,
                                      (d->rooms->position.y +
                                       d->rooms->size.y - 1));
-  d->pc.position.x = rand_range(d->rooms->position.x,
+  d->pc->position.x = rand_range(d->rooms->position.x,
                                      (d->rooms->position.x +
                                       d->rooms->size.x - 1));
 }
 
 void config_pc(dungeon_t *d)
 {
-  memset(&d->pc, 0, sizeof (d->pc));
-  d->pc.symbol = '@';
+  memset(d->pc, 0, sizeof (d->pc));
+  d->pc->symbol = '@';
 
   place_pc(d);
 
-  d->pc.speed = PC_SPEED;
-  d->pc.alive = 1;
-  d->pc.sequence_number = 0;
-  d->pc.pc = (pc_t*) calloc(1, sizeof (*d->pc.pc));
-  d->pc.npc = NULL;
-  d->pc.kills[kill_direct] = d->pc.kills[kill_avenged] = 0;
+  d->pc->speed = PC_SPEED;
+  d->pc->alive = 1;
+  d->pc->sequence_number = 0;
+  d->pc->pc = (pc_t*) calloc(1, sizeof (*d->pc->pc));
+  d->pc->npc = NULL;
+  d->pc->kills[kill_direct] = d->pc->kills[kill_avenged] = 0;
 
-  d->character[d->pc.position.y][d->pc.position.x] = &d->pc;
+  d->character[d->pc->position.y][d->pc->position.x] = d->pc;
+
+  heap_insert(&d->events, new_event(d, event_character_turn, d->pc, 0));
 
   dijkstra(d);
   dijkstra_tunnel(d);
@@ -112,7 +115,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t &dir)
 
     case '<':
     case '>':
-      if(mappair(d->pc.position) != (key == '>' ? ter_staircase_down : ter_staircase_up)) {
+      if(mappair(d->pc->position) != (key == '>' ? ter_staircase_down : ter_staircase_up)) {
         mprintf("You are not on a%s staircase.", key == '>' ? " down" : "n up");
         goto top;
       }
@@ -125,7 +128,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t &dir)
       gen_monsters(d);
       place_stairs(d);
 
-      mappair(d->pc.position) = key == '<' ? ter_staircase_down : ter_staircase_up;
+      mappair(d->pc->position) = key == '<' ? ter_staircase_down : ter_staircase_up;
 
       return 1;
 
@@ -150,11 +153,11 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t &dir)
 uint32_t pc_in_room(dungeon_t *d, uint32_t room)
 {
   if ((room < d->num_rooms)                                     &&
-      (d->pc.position.x >= d->rooms[room].position.x) &&
-      (d->pc.position.x < (d->rooms[room].position.x +
+      (d->pc->position.x >= d->rooms[room].position.x) &&
+      (d->pc->position.x < (d->rooms[room].position.x +
                                 d->rooms[room].size.x))    &&
-      (d->pc.position.y >= d->rooms[room].position.y) &&
-      (d->pc.position.y < (d->rooms[room].position.y +
+      (d->pc->position.y >= d->rooms[room].position.y) &&
+      (d->pc->position.y < (d->rooms[room].position.y +
                                 d->rooms[room].size.y))) {
     return 1;
   }

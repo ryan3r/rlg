@@ -155,8 +155,8 @@ void npc_next_pos_line_of_sight(dungeon_t *d, character_t *c, pair_t &next)
 {
   pair_t dir;
 
-  dir.y = d->pc.position.y - c->position.y;
-  dir.x = d->pc.position.x - c->position.x;
+  dir.y = d->pc->position.y - c->position.y;
+  dir.x = d->pc->position.x - c->position.x;
   if (dir.y) {
     dir.y /= abs(dir.y);
   }
@@ -181,8 +181,8 @@ void npc_next_pos_line_of_sight_tunnel(dungeon_t *d,
 {
   pair_t dir;
 
-  dir.y = d->pc.position.y - c->position.y;
-  dir.x = d->pc.position.x - c->position.x;
+  dir.y = d->pc->position.y - c->position.y;
+  dir.x = d->pc->position.x - c->position.x;
   if (dir.y) {
     dir.y /= abs(dir.y);
   }
@@ -336,9 +336,9 @@ void npc_next_pos_gradient(dungeon_t *d, character_t *c, pair_t &next)
 static void npc_next_pos_00(dungeon_t *d, character_t *c, pair_t &next)
 {
   /* not smart; not telepathic; not tunneling; not erratic */
-  if (can_see(d, c, &d->pc)) {
-    c->npc->pc_last_known_position.y = d->pc.position.y;
-    c->npc->pc_last_known_position.x = d->pc.position.x;
+  if (can_see(d, c, d->pc)) {
+    c->npc->pc_last_known_position.y = d->pc->position.y;
+    c->npc->pc_last_known_position.x = d->pc->position.x;
     npc_next_pos_line_of_sight(d, c, next);
   } else {
     npc_next_pos_rand(d, c, next);
@@ -348,9 +348,9 @@ static void npc_next_pos_00(dungeon_t *d, character_t *c, pair_t &next)
 static void npc_next_pos_01(dungeon_t *d, character_t *c, pair_t &next)
 {
   /*     smart; not telepathic; not tunneling; not erratic */
-  if (can_see(d, c, &d->pc)) {
-    c->npc->pc_last_known_position.y = d->pc.position.y;
-    c->npc->pc_last_known_position.x = d->pc.position.x;
+  if (can_see(d, c, d->pc)) {
+    c->npc->pc_last_known_position.y = d->pc->position.y;
+    c->npc->pc_last_known_position.x = d->pc->position.x;
     c->npc->have_seen_pc = 1;
     npc_next_pos_line_of_sight(d, c, next);
   } else if (c->npc->have_seen_pc) {
@@ -366,8 +366,8 @@ static void npc_next_pos_01(dungeon_t *d, character_t *c, pair_t &next)
 static void npc_next_pos_02(dungeon_t *d, character_t *c, pair_t &next)
 {
   /* not smart;     telepathic; not tunneling; not erratic */
-  c->npc->pc_last_known_position.y = d->pc.position.y;
-  c->npc->pc_last_known_position.x = d->pc.position.x;
+  c->npc->pc_last_known_position.y = d->pc->position.y;
+  c->npc->pc_last_known_position.x = d->pc->position.x;
   npc_next_pos_line_of_sight(d, c, next);
 }
 
@@ -380,9 +380,9 @@ static void npc_next_pos_03(dungeon_t *d, character_t *c, pair_t &next)
 static void npc_next_pos_04(dungeon_t *d, character_t *c, pair_t &next)
 {
   /* not smart; not telepathic;     tunneling; not erratic */
-  if (can_see(d, c, &d->pc)) {
-    c->npc->pc_last_known_position.y = d->pc.position.y;
-    c->npc->pc_last_known_position.x = d->pc.position.x;
+  if (can_see(d, c, d->pc)) {
+    c->npc->pc_last_known_position.y = d->pc->position.y;
+    c->npc->pc_last_known_position.x = d->pc->position.x;
     npc_next_pos_line_of_sight(d, c, next);
   } else {
     npc_next_pos_rand_tunnel(d, c, next);
@@ -392,9 +392,9 @@ static void npc_next_pos_04(dungeon_t *d, character_t *c, pair_t &next)
 static void npc_next_pos_05(dungeon_t *d, character_t *c, pair_t &next)
 {
   /*     smart; not telepathic;     tunneling; not erratic */
-  if (can_see(d, c, &d->pc)) {
-    c->npc->pc_last_known_position.y = d->pc.position.y;
-    c->npc->pc_last_known_position.x = d->pc.position.x;
+  if (can_see(d, c, d->pc)) {
+    c->npc->pc_last_known_position.y = d->pc->position.y;
+    c->npc->pc_last_known_position.x = d->pc->position.x;
     c->npc->have_seen_pc = 1;
     npc_next_pos_line_of_sight(d, c, next);
   } else if (c->npc->have_seen_pc) {
@@ -410,8 +410,8 @@ static void npc_next_pos_05(dungeon_t *d, character_t *c, pair_t &next)
 static void npc_next_pos_06(dungeon_t *d, character_t *c, pair_t &next)
 {
   /* not smart;     telepathic;     tunneling; not erratic */
-  c->npc->pc_last_known_position.y = d->pc.position.y;
-  c->npc->pc_last_known_position.x = d->pc.position.x;
+  c->npc->pc_last_known_position.y = d->pc->position.y;
+  c->npc->pc_last_known_position.x = d->pc->position.x;
   npc_next_pos_line_of_sight_tunnel(d, c, next);
 }
 

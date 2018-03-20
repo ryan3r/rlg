@@ -2,10 +2,14 @@
 #include <stdlib.h>
 
 #include <character.hpp>
-#include<heap.h>
+#include <heap.h>
 #include <npc.hpp>
 #include <pc.hpp>
 #include <dungeon.hpp>
+
+#undef min
+#include <iostream>
+#include <unistd.h>
 
 void character_delete(void *v)
 {
@@ -15,10 +19,10 @@ void character_delete(void *v)
   if (v) {
     c = (character_t*) v;
 
-    if (c->npc) {
-      npc_delete(c->npc);
-      free(c);
-    }
+    if(c->pc) pc_delete(c->pc);
+    if(c->npc) npc_delete(c->npc);
+
+    free(c);
   }
 }
 

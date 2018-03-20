@@ -13,8 +13,12 @@
 
 #include <dungeon.hpp>
 #include <utils.hpp>
-#include<heap.h>
+#include <heap.h>
 #include <event.hpp>
+#include <character.hpp>
+
+#undef min
+#include <iostream>
 
 #define DUMP_HARDNESS_IMAGES 0
 
@@ -659,6 +663,7 @@ void init_dungeon(dungeon_t *d)
   empty_dungeon(d);
   memset(&d->events, 0, sizeof (d->events));
   heap_init(&d->events, compare_events, event_delete);
+  d->pc = new character_t();
 }
 
 int write_dungeon_map(dungeon_t *d, FILE *f)
@@ -1065,8 +1070,8 @@ void render_distance_map(dungeon_t *d)
 
   for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
     for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-      if (p.x ==  d->pc.position.x &&
-          p.y ==  d->pc.position.y) {
+      if (p.x ==  d->pc->position.x &&
+          p.y ==  d->pc->position.y) {
         putchar('@');
       } else {
         switch (mappair(p)) {
@@ -1103,8 +1108,8 @@ void render_tunnel_distance_map(dungeon_t *d)
 
   for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
     for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-      if (p.x ==  d->pc.position.x &&
-          p.y ==  d->pc.position.y) {
+      if (p.x ==  d->pc->position.x &&
+          p.y ==  d->pc->position.y) {
         putchar('@');
       } else {
         switch (mappair(p)) {
