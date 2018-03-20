@@ -5,6 +5,7 @@
 #include <dungeon.hpp>
 #include <pc.hpp>
 #include <npc.hpp>
+#include <string.h>
 
 #ifdef __linux__
 #include <ncurses.h>
@@ -117,7 +118,7 @@ void list_monsters(dungeon_t *d) {
 
     for(uint8_t y = 0; y < DUNGEON_Y && i < d->num_monsters; ++y) {
         for(uint8_t x = 0; x < DUNGEON_X && i < d->num_monsters; ++x) {
-            character_t *monster = d->character[y][x];
+            character_t *monster = d->charxy(x, y);
 
             if(monster != NULL && monster->pc == NULL) {
                 char *name = monster_names[monster->npc->characteristics];

@@ -35,17 +35,17 @@ void do_combat(dungeon_t *d, character_t *atk, character_t *def)
 
 void move_character(dungeon_t *d, character_t *c, pair_t &next)
 {
-  if (charpair(next) &&
+  if (d->charpair(next) &&
       ((next.y != c->position.y) ||
        (next.x != c->position.x))) {
-    do_combat(d, c, charpair(next));
+    do_combat(d, c, d->charpair(next));
   } else {
     /* No character in new position. */
 
-    d->character[c->position.y][c->position.x] = NULL;
+    d->charpair(c->position) = NULL;
     c->position.y = next.y;
     c->position.x = next.x;
-    d->character[c->position.y][c->position.x] = c;
+    d->charpair(c->position) = c;
   }
 }
 
@@ -63,8 +63,8 @@ void do_moves(dungeon_t *d)
       c = e->c;
     }
     if (!c->alive) {
-      if (d->character[c->position.y][c->position.x] == c) {
-        d->character[c->position.y][c->position.x] = NULL;
+      if (d->charpair(c->position) == c) {
+        d->charpair(c->position) = NULL;
       }
       if (c != d->pc) {
         event_delete(e);
@@ -81,28 +81,28 @@ void do_moves(dungeon_t *d)
   if (pc_is_alive(d) && e->c == d->pc) {
     c = e->c;
     d->time = e->time;
-    
+
     heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
 
     if(pc_next_pos(d, next)) return;
 
     // don't go into hardnesses above 254
-    if(hardnessxy(next.x + c->position.x, c->position.y) < 255) {
+    if(d->hardnessxy(next.x + c->position.x, c->position.y) < 255) {
       next.x += c->position.x;
     }
     else {
        next.x = c->position.x;
     }
 
-    if(hardnessxy(c->position.x, next.y + c->position.y) < 255) {
+    if(d->hardnessxy(c->position.x, next.y + c->position.y) < 255) {
       next.y += c->position.y;
     }
     else {
        next.y = c->position.y;
     }
 
-    if (mappair(next) <= ter_floor) {
-      mappair(next) = ter_floor_hall;
+    if (d->mappair(next) <= terrain_type_t::floor) {
+      d->mappair(next) = terrain_type_t::floor_hall;
     }
     move_character(d, c, next);
 
@@ -125,14 +125,14 @@ void dir_nearest_wall(dungeon_t *d, character_t *c, pair_t &dir)
 
 uint32_t against_wall(dungeon_t *d, character_t *c)
 {
-  return ((mapxy(c->position.x - 1,
-                 c->position.y    ) == ter_wall_immutable) ||
-          (mapxy(c->position.x + 1,
-                 c->position.y    ) == ter_wall_immutable) ||
-          (mapxy(c->position.x    ,
-                 c->position.y - 1) == ter_wall_immutable) ||
-          (mapxy(c->position.x    ,
-                 c->position.y + 1) == ter_wall_immutable));
+  return ((d->mapxy(c->position.x - 1,
+                 c->position.y    ) == terrain_type_t::wall_immutable) ||
+          (d->mapxy(c->position.x + 1,
+                 c->position.y    ) == terrain_type_t::wall_immutable) ||
+          (d->mapxy(c->position.x    ,
+                 c->position.y - 1) == terrain_type_t::wall_immutable) ||
+          (d->mapxy(c->position.x    ,
+                 c->position.y + 1) == terrain_type_t::wall_immutable));
 }
 
 uint32_t in_corner(dungeon_t *d, character_t *c)
@@ -141,14 +141,14 @@ uint32_t in_corner(dungeon_t *d, character_t *c)
 
   num_immutable = 0;
 
-  num_immutable += (mapxy(c->position.x - 1,
-                          c->position.y    ) == ter_wall_immutable);
-  num_immutable += (mapxy(c->position.x + 1,
-                          c->position.y    ) == ter_wall_immutable);
-  num_immutable += (mapxy(c->position.x    ,
-                          c->position.y - 1) == ter_wall_immutable);
-  num_immutable += (mapxy(c->position.x    ,
-                          c->position.y + 1) == ter_wall_immutable);
+  num_immutable += (d->mapxy(c->position.x - 1,
+                          c->position.y    ) == terrain_type_t::wall_immutable);
+  num_immutable += (d->mapxy(c->position.x + 1,
+                          c->position.y    ) == terrain_type_t::wall_immutable);
+  num_immutable += (d->mapxy(c->position.x    ,
+                          c->position.y - 1) == terrain_type_t::wall_immutable);
+  num_immutable += (d->mapxy(c->position.x    ,
+                          c->position.y + 1) == terrain_type_t::wall_immutable);
 
   return num_immutable > 1;
 }

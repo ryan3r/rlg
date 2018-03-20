@@ -9,6 +9,7 @@
 #include <path.hpp>
 #include <event.hpp>
 #include <pc.hpp>
+#include <string.h>
 
 void npc_delete(npc_t *n)
 {
@@ -22,7 +23,7 @@ static uint32_t max_monster_cells(dungeon_t *d)
   uint32_t i;
   uint32_t sum;
 
-  for (i = sum = 0; i < d->num_rooms; i++) {
+  for (i = sum = 0; i < d->rooms.size(); i++) {
     if (!pc_in_room(d, i)) {
       sum += d->rooms[i].size.y * d->rooms[i].size.x;
     }
@@ -39,24 +40,24 @@ void gen_monsters(dungeon_t *d)
   pair_t p;
   const static char symbol[] = "0123456789abcdef";
 
-  d->num_monsters = min(d->max_monsters, max_monster_cells(d));
+  d->num_monsters = min((uint32_t) d->max_monsters, max_monster_cells(d));
 
   for (i = 0; i < d->num_monsters; i++) {
     m = (character_t*) malloc(sizeof (*m));
     memset(m, 0, sizeof (*m));
 
     do {
-      room = rand_range(1, d->num_rooms - 1);
+      room = rand_range(1, d->rooms.size() - 1);
       p.y = rand_range(d->rooms[room].position.y,
                             (d->rooms[room].position.y +
                              d->rooms[room].size.y - 1));
       p.x = rand_range(d->rooms[room].position.x,
                             (d->rooms[room].position.x +
                              d->rooms[room].size.x - 1));
-    } while (d->character[p.y][p.x]);
+    } while (d->charpair(p));
     m->position.y = p.y;
     m->position.x = p.x;
-    d->character[p.y][p.x] = m;
+    d->charpair(p) = m;
     m->speed = rand_range(5, 20);
     m->alive = 1;
     m->sequence_number = ++d->character_sequence_number;
@@ -68,7 +69,7 @@ void gen_monsters(dungeon_t *d)
     m->npc->have_seen_pc = 0;
     m->kills[kill_direct] = m->kills[kill_avenged] = 0;
 
-    d->character[p.y][p.x] = m;
+    d->charpair(p) = m;
 
     heap_insert(&d->events, new_event(d, event_character_turn, m, 0));
   }
@@ -100,12 +101,12 @@ void npc_next_pos_rand_tunnel(dungeon_t *d, character_t *c, pair_t &next)
         n.x++;
       }
     }
-  } while (mappair(n) == ter_wall_immutable);
+  } while (d->mappair(n) == terrain_type_t::wall_immutable);
 
-  if (hardnesspair(n) <= 85) {
-    if (hardnesspair(n)) {
-      hardnesspair(n) = 0;
-      mappair(n) = ter_floor_hall;
+  if (d->hardnesspair(n) <= 85) {
+    if (d->hardnesspair(n)) {
+      d->hardnesspair(n) = 0;
+      d->mappair(n) = terrain_type_t::floor_hall;
 
       /* Update distance maps because map has changed. */
       dijkstra(d);
@@ -115,7 +116,7 @@ void npc_next_pos_rand_tunnel(dungeon_t *d, character_t *c, pair_t &next)
     next.x = n.x;
     next.y = n.y;
   } else {
-    hardnesspair(n) -= 85;
+    d->hardnesspair(n) -= 85;
   }
 }
 
@@ -145,7 +146,7 @@ void npc_next_pos_rand(dungeon_t *d, character_t *c, pair_t &next)
         n.x++;
       }
     }
-  } while (mappair(n) < ter_floor);
+  } while (d->mappair(n) < terrain_type_t::floor);
 
   next.y = n.y;
   next.x = n.x;
@@ -164,13 +165,13 @@ void npc_next_pos_line_of_sight(dungeon_t *d, character_t *c, pair_t &next)
     dir.x /= abs(dir.x);
   }
 
-  if (mapxy(next.x + dir.x,
-            next.y + dir.y) >= ter_floor) {
+  if (d->mapxy(next.x + dir.x,
+            next.y + dir.y) >= terrain_type_t::floor) {
     next.x += dir.x;
     next.y += dir.y;
-  } else if (mapxy(next.x + dir.x, next.y) >= ter_floor) {
+  } else if (d->mapxy(next.x + dir.x, next.y) >= terrain_type_t::floor) {
     next.x += dir.x;
-  } else if (mapxy(next.x, next.y + dir.y) >= ter_floor) {
+  } else if (d->mapxy(next.x, next.y + dir.y) >= terrain_type_t::floor) {
     next.y += dir.y;
   }
 }
@@ -193,10 +194,10 @@ void npc_next_pos_line_of_sight_tunnel(dungeon_t *d,
   dir.x += next.x;
   dir.y += next.y;
 
-  if (hardnesspair(dir) <= 60) {
-    if (hardnesspair(dir)) {
-      hardnesspair(dir) = 0;
-      mappair(dir) = ter_floor_hall;
+  if (d->hardnesspair(dir) <= 60) {
+    if (d->hardnesspair(dir)) {
+      d->hardnesspair(dir) = 0;
+      d->mappair(dir) = terrain_type_t::floor_hall;
 
       /* Update distance maps because map has changed. */
       dijkstra(d);
@@ -206,7 +207,7 @@ void npc_next_pos_line_of_sight_tunnel(dungeon_t *d,
     next.x = dir.x;
     next.y = dir.y;
   } else {
-    hardnesspair(dir) -= 60;
+    d->hardnesspair(dir) -= 60;
   }
 }
 
@@ -217,62 +218,62 @@ void npc_next_pos_gradient(dungeon_t *d, character_t *c, pair_t &next)
   uint16_t min_cost;
   if (c->npc->characteristics & NPC_TUNNEL) {
     min_cost = (d->pc_tunnel[next.y - 1][next.x] +
-                (d->hardness[next.y - 1][next.x] / 60));
+                (d->hardnessxy(next.x, next.y - 1) / 60));
     min_next.x = next.x;
     min_next.y = next.y - 1;
     if ((d->pc_tunnel[next.y + 1][next.x    ] +
-         (d->hardness[next.y + 1][next.x] / 60)) < min_cost) {
+         (d->hardnessxy(next.x, next.y + 1) / 60)) < min_cost) {
       min_cost = (d->pc_tunnel[next.y + 1][next.x] +
-                  (d->hardness[next.y + 1][next.x] / 60));
+                  (d->hardnessxy(next.x, next.y + 1) / 60));
       min_next.x = next.x;
       min_next.y = next.y + 1;
     }
     if ((d->pc_tunnel[next.y    ][next.x + 1] +
-         (d->hardness[next.y    ][next.x + 1] / 60)) < min_cost) {
+         (d->hardnessxy(next.x + 1, next.y) / 60)) < min_cost) {
       min_cost = (d->pc_tunnel[next.y][next.x + 1] +
-                  (d->hardness[next.y][next.x + 1] / 60));
+                  (d->hardnessxy(next.x + 1, next.y) / 60));
       min_next.x = next.x + 1;
       min_next.y = next.y;
     }
     if ((d->pc_tunnel[next.y    ][next.x - 1] +
-         (d->hardness[next.y    ][next.x - 1] / 60)) < min_cost) {
+         (d->hardnessxy(next.x - 1, next.y) / 60)) < min_cost) {
       min_cost = (d->pc_tunnel[next.y][next.x - 1] +
-                  (d->hardness[next.y][next.x - 1] / 60));
+                  (d->hardnessxy(next.x - 1, next.y) / 60));
       min_next.x = next.x - 1;
       min_next.y = next.y;
     }
     if ((d->pc_tunnel[next.y - 1][next.x + 1] +
-         (d->hardness[next.y - 1][next.x + 1] / 60)) < min_cost) {
+         (d->hardnessxy(next.x + 1, next.y - 1) / 60)) < min_cost) {
       min_cost = (d->pc_tunnel[next.y - 1][next.x + 1] +
-                  (d->hardness[next.y - 1][next.x + 1] / 60));
+                  (d->hardnessxy(next.x + 1, next.y - 1) / 60));
       min_next.x = next.x + 1;
       min_next.y = next.y - 1;
     }
     if ((d->pc_tunnel[next.y + 1][next.x + 1] +
-         (d->hardness[next.y + 1][next.x + 1] / 60)) < min_cost) {
+         (d->hardnessxy(next.x + 1, next.y + 1) / 60)) < min_cost) {
       min_cost = (d->pc_tunnel[next.y + 1][next.x + 1] +
-                  (d->hardness[next.y + 1][next.x + 1] / 60));
+                  (d->hardnessxy(next.x + 1, next.y + 1) / 60));
       min_next.x = next.x + 1;
       min_next.y = next.y + 1;
     }
     if ((d->pc_tunnel[next.y - 1][next.x - 1] +
-         (d->hardness[next.y - 1][next.x - 1] / 60)) < min_cost) {
+         (d->hardnessxy(next.x - 1, next.y - 1) / 60)) < min_cost) {
       min_cost = (d->pc_tunnel[next.y - 1][next.x - 1] +
-                  (d->hardness[next.y - 1][next.x - 1] / 60));
+                  (d->hardnessxy(next.x - 1, next.y - 1) / 60));
       min_next.x = next.x - 1;
       min_next.y = next.y - 1;
     }
     if ((d->pc_tunnel[next.y + 1][next.x - 1] +
-         (d->hardness[next.y + 1][next.x - 1] / 60)) < min_cost) {
+         (d->hardnessxy(next.x - 1, next.y + 1) / 60)) < min_cost) {
       min_cost = (d->pc_tunnel[next.y + 1][next.x - 1] +
-                  (d->hardness[next.y + 1][next.x - 1] / 60));
+                  (d->hardnessxy(next.x - 1, next.y + 1) / 60));
       min_next.x = next.x - 1;
       min_next.y = next.y + 1;
     }
-    if (hardnesspair(min_next) <= 60) {
-      if (hardnesspair(min_next)) {
-        hardnesspair(min_next) = 0;
-        mappair(min_next) = ter_floor_hall;
+    if (d->hardnesspair(min_next) <= 60) {
+      if (d->hardnesspair(min_next)) {
+        d->hardnesspair(min_next) = 0;
+        d->mappair(min_next) = terrain_type_t::floor_hall;
 
         /* Update distance maps because map has changed. */
         dijkstra(d);
@@ -282,7 +283,7 @@ void npc_next_pos_gradient(dungeon_t *d, character_t *c, pair_t &next)
       next.x = min_next.x;
       next.y = min_next.y;
     } else {
-      hardnesspair(min_next) -= 60;
+      d->hardnesspair(min_next) -= 60;
     }
   } else {
     /* Make monsters prefer cardinal directions */

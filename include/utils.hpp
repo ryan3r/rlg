@@ -1,6 +1,5 @@
 // Based on Jeremy's solution
-#ifndef UTILS_H
-# define UTILS_H
+#pragma once
 
 #ifdef __linux__
 #include <ncurses.h>
@@ -24,4 +23,6 @@ int makedirectory(char *dir);
   mvprintw(0, 0, __VA_ARGS__);   \
 }
 
-#endif
+template<typename T> T min(T a, T b) {
+  return a < b ? a : b;
+}

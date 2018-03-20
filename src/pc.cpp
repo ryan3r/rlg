@@ -16,6 +16,7 @@
 #include <path.hpp>
 #include <info.hpp>
 #include <event.hpp>
+#include <iostream>
 
 void pc_delete(pc_t *pc)
 {
@@ -31,17 +32,16 @@ uint32_t pc_is_alive(dungeon_t *d)
 
 void place_pc(dungeon_t *d)
 {
-  d->pc->position.y = rand_range(d->rooms->position.y,
-                                     (d->rooms->position.y +
-                                      d->rooms->size.y - 1));
-  d->pc->position.x = rand_range(d->rooms->position.x,
-                                     (d->rooms->position.x +
-                                      d->rooms->size.x - 1));
+  d->pc->position.y = rand_range(d->rooms[0].position.y,
+                                     (d->rooms[0].position.y +
+                                      d->rooms[0].size.y - 1));
+  d->pc->position.x = rand_range(d->rooms[0].position.x,
+                                     (d->rooms[0].position.x +
+                                      d->rooms[0].size.x - 1));
 }
 
 void config_pc(dungeon_t *d)
 {
-  memset(d->pc, 0, sizeof (d->pc));
   d->pc->symbol = '@';
 
   place_pc(d);
@@ -53,7 +53,7 @@ void config_pc(dungeon_t *d)
   d->pc->npc = NULL;
   d->pc->kills[kill_direct] = d->pc->kills[kill_avenged] = 0;
 
-  d->character[d->pc->position.y][d->pc->position.x] = d->pc;
+  d->charpair(d->pc->position) = d->pc;
 
   heap_insert(&d->events, new_event(d, event_character_turn, d->pc, 0));
 
@@ -115,31 +115,34 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t &dir)
 
     case '<':
     case '>':
-      if(mappair(d->pc->position) != (key == '>' ? ter_staircase_down : ter_staircase_up)) {
+      if(d->mappair(d->pc->position) != (key == '>' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up)) {
         mprintf("You are not on a%s staircase.", key == '>' ? " down" : "n up");
         goto top;
       }
 
       // regenerate the entire dungeon
+      // TODO: Replace this
+      /*
       delete_dungeon(d);
       init_dungeon(d);
       gen_dungeon(d);
       config_pc(d);
       gen_monsters(d);
       place_stairs(d);
+      */
 
-      mappair(d->pc->position) = key == '<' ? ter_staircase_down : ter_staircase_up;
+      d->mappair(d->pc->position) = key == '<' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up;
 
       return 1;
 
     case 'm':
       list_monsters(d);
-      render_dungeon(d);
+      d->render_dungeon();
       goto top;
 
     case '?': case '/':
       help();
-      render_dungeon(d);
+      d->render_dungeon();
       goto top;
 
     default:
@@ -152,7 +155,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t &dir)
 
 uint32_t pc_in_room(dungeon_t *d, uint32_t room)
 {
-  if ((room < d->num_rooms)                                     &&
+  if ((room < d->rooms.size())                                     &&
       (d->pc->position.x >= d->rooms[room].position.x) &&
       (d->pc->position.x < (d->rooms[room].position.x +
                                 d->rooms[room].size.x))    &&

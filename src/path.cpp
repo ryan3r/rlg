@@ -63,7 +63,7 @@ void dijkstra(dungeon_t *d)
 
   for (y = 0; y < DUNGEON_Y; y++) {
     for (x = 0; x < DUNGEON_X; x++) {
-      if (mapxy(x, y) >= ter_floor) {
+      if (d->mapxy(x, y) >= terrain_type_t::floor) {
         p[y][x].hn = heap_insert(&h, &p[y][x]);
       }
     }
@@ -142,7 +142,7 @@ void dijkstra(dungeon_t *d)
 /* Ignores the case of hardness == 255, because if *
  * that gets here, there's already been an error.  */
 #define tunnel_movement_cost(x, y)                      \
-  ((d->hardness[y][x] / 85) + 1)
+  ((d->hardnessxy(x, y) / 85) + 1)
 
 void dijkstra_tunnel(dungeon_t *d)
 {
@@ -177,7 +177,7 @@ void dijkstra_tunnel(dungeon_t *d)
 
   for (y = 0; y < DUNGEON_Y; y++) {
     for (x = 0; x < DUNGEON_X; x++) {
-      if (mapxy(x, y) != ter_wall_immutable) {
+      if (d->mapxy(x, y) != terrain_type_t::wall_immutable) {
         p[y][x].hn = heap_insert(&h, &p[y][x]);
       }
     }

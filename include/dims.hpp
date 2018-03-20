@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <ostream>
 
-using namespace std;
-
 // NOTE: Renamed to avoid collisions with std::pair
 class pair_t {
 public:
@@ -33,7 +31,7 @@ public:
 	bool operator >(const pair_t &p) const { return !((*this == p) || (*this < p)); }
 };
 
-inline ostream& operator <<(ostream &out, const pair_t &p) {
+inline std::ostream& operator <<(std::ostream &out, const pair_t &p) {
 	out << "(" << p.x << ", " << p.y << ")";
 	return out;
 }

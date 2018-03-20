@@ -1,11 +1,10 @@
 // Based on Jeremy's solution
-#ifndef DUNGEON_H
-# define DUNGEON_H
+#pragma once
 
-# include "heap.h"
-#include <macros.hpp>
+#include "heap.h"
 #include <dims.hpp>
 #include <character.hpp>
+#include <vector>
 
 #define DUNGEON_X              80
 #define DUNGEON_Y              21
@@ -30,32 +29,25 @@
 #define SAVE_DIR               "rlg327"
 #endif
 
-#define mappair(pair) (d->map[pair.y][pair.x])
-#define mapxy(x, y) (d->map[y][x])
-#define hardnesspair(pair) (d->hardness[pair.y][pair.x])
-#define hardnessxy(x, y) (d->hardness[y][x])
-#define charpair(pair) (d->character[pair.y][pair.x])
-#define charxy(x, y) (d->character[y][x])
+enum class terrain_type_t {
+  debug,
+  wall,
+  wall_immutable,
+  floor,
+  floor_room,
+  floor_hall,
+  staircase_up,
+  staircase_down,
+};
 
-typedef enum terrain_type {
-  ter_debug,
-  ter_wall,
-  ter_wall_immutable,
-  ter_floor,
-  ter_floor_room,
-  ter_floor_hall,
-  ter_staircase_up,
-  ter_staircase_down,
-} terrain_type_t;
-
-typedef struct room {
+class room_t {
+public:
   pair_t position;
   pair_t size;
-} room_t;
+};
 
-typedef struct dungeon {
-  uint32_t num_rooms;
-  room_t *rooms;
+class dungeon_t {
+private:
   terrain_type_t map[DUNGEON_Y][DUNGEON_X];
   /* Since hardness is usually not used, it would be expensive to pull it *
    * into cache every time we need a map cell, so we store it in a        *
@@ -66,9 +58,34 @@ typedef struct dungeon {
    * and pulling in unnecessary data with each map cell would add a lot   *
    * of overhead to the memory system.                                    */
   uint8_t hardness[DUNGEON_Y][DUNGEON_X];
+  character_t *character[DUNGEON_Y][DUNGEON_X];
+
+  int32_t adjacent_to_room(int32_t, int32_t);
+  void connect_two_rooms(const room_t*, const room_t*);
+  void create_cycle();
+  void connect_rooms();
+  void smooth_hardness();
+  void empty_dungeon();
+  void place_rooms();
+  void make_rooms();
+  void write_rooms(std::ostream&);
+  uint32_t calculate_dungeon_size();
+  void read_dungeon_map(std::istream&);
+  void write_dungeon_map(std::ostream &out);
+  void read_rooms(std::istream &in, int num_rooms);
+  int calculate_num_rooms(uint32_t);
+
+  void dijkstra_corridor_inv(const pair_t &from, const pair_t &to);
+  void dijkstra_corridor(const pair_t &from, const pair_t &to);
+
+  int32_t is_open_space(int32_t y, int32_t x) {
+      return !hardnessxy(x, y);
+  }
+
+public:
+  std::vector<room_t> rooms;
   uint8_t pc_distance[DUNGEON_Y][DUNGEON_X];
   uint8_t pc_tunnel[DUNGEON_Y][DUNGEON_X];
-  character_t *character[DUNGEON_Y][DUNGEON_X];
   character_t *pc;
   heap_t events;
   uint16_t num_monsters;
@@ -81,17 +98,27 @@ typedef struct dungeon {
    * information from the current event.                                   */
   uint32_t time;
   uint32_t is_new;
-} dungeon_t;
 
-void init_dungeon(dungeon_t *d);
-void delete_dungeon(dungeon_t *d);
-int gen_dungeon(dungeon_t *d);
-void render_dungeon(dungeon_t *d);
-int write_dungeon(dungeon_t *d, char *file);
-int read_dungeon(dungeon_t *d, char *file);
-int read_pgm(dungeon_t *d, char *pgm);
-void render_distance_map(dungeon_t *d);
-void render_tunnel_distance_map(dungeon_t *d);
-void place_stairs(dungeon_t *d);
+  dungeon_t();
+  ~dungeon_t();
 
-#endif
+  void gen_dungeon();
+  void render_dungeon();
+  void write_dungeon(std::string file);
+  void write_dungeon();
+  void read_dungeon(std::string file);
+  void read_dungeon();
+  void render_distance_map();
+  void render_tunnel_distance_map();
+  void place_stairs();
+  bool has_npcs();
+
+  terrain_type_t& mappair(const pair_t &pair) { return map[pair.y][pair.x]; }
+  terrain_type_t& mapxy(int32_t x, int32_t y) { return map[y][x]; }
+
+  uint8_t& hardnesspair(const pair_t &pair) { return hardness[pair.y][pair.x]; }
+  uint8_t& hardnessxy(int32_t x, int32_t y) { return hardness[y][x]; }
+
+  character_t*& charpair(const pair_t &pair) { return character[pair.y][pair.x]; }
+  character_t*& charxy(int32_t x, int32_t y) { return character[y][x]; }
+};

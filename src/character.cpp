@@ -51,8 +51,8 @@ uint32_t can_see(dungeon_t *d, character_t *voyeur, character_t *exhibitionist)
   }
 
   /*
-  mappair(first) = ter_debug;
-  mappair(second) = ter_debug;
+  d->mappair(first) = terrain_type_t::debug;
+  d->mappair(second) = terrain_type_t::debug;
   */
 
   if (second.x > first.x) {
@@ -76,10 +76,10 @@ uint32_t can_see(dungeon_t *d, character_t *voyeur, character_t *exhibitionist)
     c = a - del.x;
     b = c - del.x;
     for (i = 0; i <= del.x; i++) {
-      if ((mappair(first) < ter_floor) && i && (i != del.x)) {
+      if ((d->mappair(first) < terrain_type_t::floor) && i && (i != del.x)) {
         return 0;
       }
-      /*      mappair(first) = ter_debug;*/
+      /*      d->mappair(first) = terrain_type_t::debug;*/
       first.x += f.x;
       if (c < 0) {
         c += a;
@@ -94,10 +94,10 @@ uint32_t can_see(dungeon_t *d, character_t *voyeur, character_t *exhibitionist)
     c = a - del.y;
     b = c - del.y;
     for (i = 0; i <= del.y; i++) {
-      if ((mappair(first) < ter_floor) && i && (i != del.y)) {
+      if ((d->mappair(first) < terrain_type_t::floor) && i && (i != del.y)) {
         return 0;
       }
-      /*      mappair(first) = ter_debug;*/
+      /*      d->mappair(first) = terrain_type_t::debug;*/
       first.y += f.y;
       if (c < 0) {
         c += a;

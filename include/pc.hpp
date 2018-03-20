@@ -6,7 +6,7 @@
 
 #include <dims.hpp>
 
-typedef struct dungeon dungeon_t;
+class dungeon_t;
 
 typedef struct pc {
     // MSVC requires at least one field

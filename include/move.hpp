@@ -6,7 +6,7 @@
 
 #include <dims.hpp>
 
-typedef struct dungeon dungeon_t;
+class dungeon_t;
 typedef struct character character_t;
 
 void next_move(dungeon_t *d,

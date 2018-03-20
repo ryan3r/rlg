@@ -88,9 +88,9 @@ void usage(char *name)
 
 int main(int argc, char *argv[])
 {
-  ofstream log_file("rlg-log.txt");
-  streambuf *orig_log_rd = clog.rdbuf();
-  clog.rdbuf(log_file.rdbuf());
+  std::ofstream log_file("rlg-log.txt");
+  std::streambuf *orig_log_rd = std::clog.rdbuf();
+  std::clog.rdbuf(log_file.rdbuf());
 
   dungeon_t d;
   time_t seed;
@@ -111,8 +111,6 @@ int main(int argc, char *argv[])
   SMALL_RECT window_size = {0, 0, 80, 24};
   SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), 1, &window_size);
   #endif
-
-  memset(&d, 0, sizeof (d));
 
   /* Default behavior: Seed with the time, generate a new dungeon, *
    * and don't write to disk.                                      */
@@ -247,19 +245,16 @@ int main(int argc, char *argv[])
 
   srand(seed);
 
-  init_dungeon(&d);
-
   if (do_load) {
-    read_dungeon(&d, load_file);
-  } else if (do_image) {
-    read_pgm(&d, pgm_file);
+    if(load_file) d.read_dungeon(load_file);
+    else d.read_dungeon();
   } else {
-    gen_dungeon(&d);
+    d.gen_dungeon();
   }
 
   config_pc(&d);
   gen_monsters(&d);
-  place_stairs(&d);
+  d.place_stairs();
 
   // initiailize ncurses
   initscr();
@@ -277,13 +272,13 @@ int main(int argc, char *argv[])
   init_pair(5, COLOR_YELLOW, COLOR_BLACK);
 
   if(should_show_help()) {
-    render_dungeon(&d);
+    d.render_dungeon();
     refresh();
     help();
   }
 
   while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
-    render_dungeon(&d);
+    d.render_dungeon();
     do_moves(&d);
   }
 
@@ -333,25 +328,24 @@ int main(int argc, char *argv[])
     }
     if (do_save_image) {
       if (!pgm_file) {
-	fprintf(stderr, "No image file was loaded.  Using default.\n");
-	do_save_image = 0;
+      	fprintf(stderr, "No image file was loaded.  Using default.\n");
+      	do_save_image = 0;
       } else {
-	/* Extension of 3 characters longer than image extension + null. */
-	save_file = (char*) malloc(strlen(pgm_file) + 4);
-	strcpy(save_file, pgm_file);
-	strcpy(strchr(save_file, '.') + 1, "rlg327");
+      	/* Extension of 3 characters longer than image extension + null. */
+      	save_file = (char*) malloc(strlen(pgm_file) + 4);
+      	strcpy(save_file, pgm_file);
+      	strcpy(strchr(save_file, '.') + 1, "rlg327");
       }
     }
-    write_dungeon(&d, save_file);
+    if(save_file) d.write_dungeon(save_file);
+    else d.write_dungeon();
 
     if (do_save_seed || do_save_image) {
       free(save_file);
     }
   }
 
-  delete_dungeon(&d);
-
-  clog.rdbuf(orig_log_rd);
+  std::clog.rdbuf(orig_log_rd);
 
   return 0;
 }
