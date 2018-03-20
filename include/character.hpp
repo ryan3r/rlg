@@ -1,27 +1,21 @@
 // Based on Jeremy's solution
-#ifndef CHARACTER_H
-# define CHARACTER_H
+#pragma once
 
-# include <stdint.h>
-
+#include <stdint.h>
 #include <dims.hpp>
 
 class dungeon_t;
-typedef struct npc npc_t;
 typedef struct pc pc_t;
-typedef struct dice_t dice_t;
 
-typedef enum kill_type {
-  kill_direct,
-  kill_avenged,
-  num_kill_types
-} kill_type_t;
+class character_t {
+protected:
+  dungeon_t *d;
 
-typedef struct character {
+public:
   char symbol;
   pair_t position;
   int32_t speed;
-  uint32_t alive;
+  bool alive = true;
   /* Characters use to have a next_turn for the move queue.  Now that it is *
    * an event queue, there's no need for that here.  Instead it's in the    *
    * event.  Similarly, sequence_number was introduced in order to ensure   *
@@ -30,14 +24,23 @@ typedef struct character {
    * metadata: locally, how old is this character; and globally, how many   *
    * characters have been created by the game.                              */
   uint32_t sequence_number;
-  npc_t *npc;
-  pc_t *pc;
-  uint32_t kills[num_kill_types];
-} character_t;
+  pc_t *pc = nullptr;
+  uint32_t kills_direct = 0;
+  uint32_t kills_avenged = 0;
 
-int32_t compare_characters_by_next_turn(const void *character1,
-                                        const void *character2);
-uint32_t can_see(dungeon_t *d, character_t *voyeur, character_t *exhibitionist);
-void character_delete(void *c);
+  character_t(dungeon_t *du, char sy, int32_t sp, uint32_t se):
+    d{du}, symbol{sy}, speed{sp}, sequence_number{se} {}
 
-#endif
+  ~character_t() {
+    if(pc) free(pc);
+  }
+
+  // TODO: Update to pure virtual
+  virtual bool next_pos(pair_t &next) {};
+
+  uint32_t can_see(const pair_t &target) const;
+
+  uint32_t can_see(const character_t *target) const {
+    return can_see(target->position);
+  };
+};

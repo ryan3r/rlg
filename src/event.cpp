@@ -57,7 +57,7 @@ void event_delete(void *e)
 
   switch (event->type) {
   case event_character_turn:
-    character_delete(event->c);
+    delete event->c;
     break;
   }
 

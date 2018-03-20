@@ -18,3 +18,6 @@ Win32
 rlg
 Makefile
 rlg.dir
+
+rlg-log.txt
+log.txt

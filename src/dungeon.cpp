@@ -628,7 +628,7 @@ dungeon_t::dungeon_t()
   memset(&character, 0, sizeof(character));
   memset(&events, 0, sizeof (events));
   heap_init(&events, compare_events, event_delete);
-  pc = new character_t();
+  pc = new character_t(this, '@', PC_SPEED, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

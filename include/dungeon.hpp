@@ -90,7 +90,6 @@ public:
   heap_t events;
   uint16_t num_monsters;
   uint16_t max_monsters;
-  uint32_t character_sequence_number;
   /* Game time isn't strictly necessary.  It's implicit in the turn number *
    * of the most recent thing removed from the event queue; however,       *
    * including it here--and keeping it up to date--provides a measure of   *
@@ -111,7 +110,8 @@ public:
   void render_distance_map();
   void render_tunnel_distance_map();
   void place_stairs();
-  bool has_npcs();
+
+  bool has_npcs() { return num_monsters > 0; }
 
   terrain_type_t& mappair(const pair_t &pair) { return map[pair.y][pair.x]; }
   terrain_type_t& mapxy(int32_t x, int32_t y) { return map[y][x]; }

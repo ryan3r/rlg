@@ -19,7 +19,6 @@
 #include <move.hpp>
 #include <info.hpp>
 
-#undef min
 #include <iostream>
 #include <fstream>
 
@@ -253,7 +252,7 @@ int main(int argc, char *argv[])
   }
 
   config_pc(&d);
-  gen_monsters(&d);
+  npc_t::gen_monsters(&d);
   d.place_stairs();
 
   // initiailize ncurses
@@ -277,7 +276,7 @@ int main(int argc, char *argv[])
     help();
   }
 
-  while (pc_is_alive(&d) && dungeon_has_npcs(&d)) {
+  while (pc_is_alive(&d) && d.has_npcs()) {
     d.render_dungeon();
     do_moves(&d);
   }
@@ -307,9 +306,9 @@ int main(int argc, char *argv[])
 
   free(orig);
 
-  mvprintw(yPos++, 0, "You defended your life in the face of %u deadly beasts.", d.pc->kills[kill_direct]);
+  mvprintw(yPos++, 0, "You defended your life in the face of %u deadly beasts.", d.pc->kills_direct);
   mvprintw(yPos++, 0, "You avenged the cruel and untimely murders of %u "
-         "peaceful dungeon residents.", d.pc->kills[kill_avenged]);
+         "peaceful dungeon residents.", d.pc->kills_avenged);
 
   attron(COLOR_PAIR(1));
   mvprintw(yPos, 0, "[Press ENTER to quit]");

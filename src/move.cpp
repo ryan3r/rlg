@@ -27,9 +27,8 @@ void do_combat(dungeon_t *d, character_t *atk, character_t *def)
     if (def != d->pc) {
       d->num_monsters--;
     }
-    atk->kills[kill_direct]++;
-    atk->kills[kill_avenged] += (def->kills[kill_direct] +
-                                  def->kills[kill_avenged]);
+    atk->kills_direct++;
+    atk->kills_avenged += (def->kills_direct + def->kills_avenged);
   }
 }
 
@@ -72,7 +71,7 @@ void do_moves(dungeon_t *d)
       continue;
     }
 
-    npc_next_pos(d, c, next);
+    c->next_pos(next);
     move_character(d, c, next);
 
     heap_insert(&d->events, update_event(d, e, 1000 / c->speed));

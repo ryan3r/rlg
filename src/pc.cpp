@@ -21,7 +21,7 @@
 void pc_delete(pc_t *pc)
 {
   if (pc) {
-    free(pc);
+    delete pc;
   }
 }
 
@@ -42,16 +42,9 @@ void place_pc(dungeon_t *d)
 
 void config_pc(dungeon_t *d)
 {
-  d->pc->symbol = '@';
 
   place_pc(d);
-
-  d->pc->speed = PC_SPEED;
-  d->pc->alive = 1;
-  d->pc->sequence_number = 0;
   d->pc->pc = (pc_t*) calloc(1, sizeof (*d->pc->pc));
-  d->pc->npc = NULL;
-  d->pc->kills[kill_direct] = d->pc->kills[kill_avenged] = 0;
 
   d->charpair(d->pc->position) = d->pc;
 

@@ -120,8 +120,8 @@ void list_monsters(dungeon_t *d) {
         for(uint8_t x = 0; x < DUNGEON_X && i < d->num_monsters; ++x) {
             character_t *monster = d->charxy(x, y);
 
-            if(monster != NULL && monster->pc == NULL) {
-                char *name = monster_names[monster->npc->characteristics];
+            if(monster != NULL && monster->symbol != '@') {
+                char *name = monster_names[((npc_t*) monster)->attrs];
 
                 size_t size = MONSTER_INFO_SIZE + strlen(name);
                 char *monster_info = (char*) malloc(size * sizeof(char));
