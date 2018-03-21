@@ -108,3 +108,5 @@ public:
   character_t*& charpair(const pair_t &pair) { return character[pair.y][pair.x]; }
   character_t*& charxy(int32_t x, int32_t y) { return character[y][x]; }
 };
+
+std::string get_default_file(const char *target);

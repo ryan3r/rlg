@@ -680,7 +680,7 @@ int be32toh(int x) { return x; }
 #endif
 
 std::string get_default_file(const char *target) {
-  std::stringstream filename_s; // DO NOT MOVE THIS
+  std::stringstream filename_s;
 
   const char *home;
   #ifdef __linux__

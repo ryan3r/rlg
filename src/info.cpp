@@ -14,11 +14,13 @@
 #include <windows.h>
 #endif
 
+#include <fstream>
+
 #define MONSTER_INFO_SIZE 35
 #define WINDOW_HEIGHT 22
 #define WINDOW_WIDTH 60
 
-char *monster_names[] = {
+const char *monster_names[] = {
     "Troll",
     "Goblin",
     "Pixie",
@@ -38,7 +40,7 @@ char *monster_names[] = {
 };
 
 // render the monster list to the window
-void print_list(WINDOW *win, char *title, char **list, size_t i, size_t length) {
+void print_list(WINDOW *win, const char *title, const char **list, size_t i, size_t length) {
     wattron(win, COLOR_PAIR(1));
 
     // remove anything that was already in the window
@@ -82,7 +84,7 @@ void print_list(WINDOW *win, char *title, char **list, size_t i, size_t length) 
     wrefresh(win);
 }
 
-void open_list_window(char *title, char **list, size_t length) {
+void open_list_window(const char *title, const char **list, size_t length) {
     WINDOW *win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, (DUNGEON_Y - WINDOW_HEIGHT) / 2, (DUNGEON_X - WINDOW_WIDTH) / 2);
 
     size_t i = 0;
@@ -121,7 +123,7 @@ void list_monsters(dungeon_t *d) {
             character_t *monster = d->charxy(x, y);
 
             if(monster != NULL && monster->symbol != '@') {
-                char *name = monster_names[((npc_t*) monster)->attrs];
+                const char *name = monster_names[((npc_t*) monster)->attrs];
 
                 size_t size = MONSTER_INFO_SIZE + strlen(name);
                 char *monster_info = (char*) malloc(size * sizeof(char));
@@ -134,7 +136,7 @@ void list_monsters(dungeon_t *d) {
         }
     }
 
-    open_list_window("Monster list", monster_list, d->num_monsters);
+    open_list_window("Monster list", (const char**) monster_list, d->num_monsters);
 
     for(i = 0; i < d->num_monsters; ++i) {
         free(monster_list[i]);
@@ -143,7 +145,7 @@ void list_monsters(dungeon_t *d) {
     free(monster_list);
 }
 
-char *help_msg[] = {
+const char *help_msg[] = {
     "Welcome adventurer",
     "==========================================================",
     "You find your self in a dungeon with no clue how you got",
@@ -184,73 +186,38 @@ void help() {
     open_list_window("Help", help_msg, sizeof(help_msg) / sizeof(*help_msg));
 }
 
-int should_show_help() {
-    char *home;
-    #ifdef __linux__
-    if (!(home = getenv("HOME"))) {
-    fprintf(stderr, "\"HOME\" is undefined.  Using working directory.\n");
-    home = ".";
-    }
-    #else
-    // get the size of the localappdata path
-    DWORD env_size = GetEnvironmentVariable("LOCALAPPDATA", NULL, 0);
+bool should_show_help() {
+    std::string filename = get_default_file(DUNGEON_VERSION_FILE);
 
-    // no app data
-    if(!env_size) {
-    fprintf(stderr, "\"LOCALAPPDATA\" is undefined.  Using working directory.\n");
-    home = strdup(".");
-    }
-    // get the variable
-    else {
-    home = (char*) malloc(env_size * sizeof(char));
-
-    GetEnvironmentVariable("LOCALAPPDATA", home, env_size * sizeof(char));
-    }
-    #endif
-
-    uint32_t len = (strlen(home) + strlen(SAVE_DIR) + strlen(DUNGEON_VERSION_FILE) +
-            1 /* The NULL terminator */                                 +
-            2 /* The slashes */);
-
-    char *filename = (char*) malloc(len * sizeof (*filename));
-    sprintf(filename, "%s/%s/", home, SAVE_DIR);
-    makedirectory(filename);
-    strcat(filename, DUNGEON_VERSION_FILE);
-
-    #ifndef __linux__
-    free(home);
-    #endif
-
-    FILE *version_file = fopen(filename, "rb");
+    std::ifstream version_file(filename);
 
     char version[10];
 
-    if(version_file) {
+    if(!version_file.fail()) {
         uint8_t i = 0;
-        while(i < 9 && !feof(version_file)) {
-            version[i++] = fgetc(version_file);
+        char ch;
+        while(i < 9 && version_file) {
+            version_file >> ch;
+            version[i++] = ch;
         }
 
         version[i - 1] = '\0';
 
-        fclose(version_file);
+        version_file.close();
 
         // check the versions
-        if(!strcmp(version, RLG_VERSION)) {
-            free(filename);
-            return 0;
-        }
+        if(!strcmp(version, RLG_VERSION)) return false;
     }
 
     // write the new version
     strcpy(version, RLG_VERSION);
 
-    if((version_file = fopen(filename, "wb"))) {
-        fprintf(version_file, "%s", version);
-        fclose(version_file);
+    std::ofstream vfile_out(filename);
+
+    if(!vfile_out.fail()) {
+        vfile_out << version;
+        vfile_out.close();
     }
 
-    free(filename);
-
-    return 1;
+    return true;
 }

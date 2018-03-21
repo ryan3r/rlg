@@ -5,6 +5,6 @@
 
 void list_monsters(dungeon_t *d);
 void help();
-int should_show_help();
+bool should_show_help();
 
 #endif
