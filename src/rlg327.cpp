@@ -267,13 +267,15 @@ int main(int argc, char *argv[])
   init_pair(5, COLOR_YELLOW, COLOR_BLACK);
 
   if(should_show_help()) {
-    d.render_dungeon();
+    d.pc->look_around();
+    d.pc->render_dungeon();
     refresh();
     help();
   }
 
   while (d.pc->alive && d.has_npcs()) {
-    d.render_dungeon();
+    d.pc->look_around();
+    d.pc->render_dungeon();
     do_moves(&d);
   }
 

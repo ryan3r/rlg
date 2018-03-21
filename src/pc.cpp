@@ -97,15 +97,8 @@ bool pc_t::next_pos(pair_t &dir) {
       }
 
       // regenerate the entire dungeon
-      // TODO: Replace this
-      /*
-      delete_dungeon(d);
-      init_dungeon(d);
-      gen_dungeon(d);
-      config_pc(d);
-      gen_monsters(d);
-      place_stairs(d);
-      */
+      // TODO: fix this
+      d->regenerate();
 
       d->mappair(d->pc->position) = key == '<' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up;
 
@@ -113,17 +106,46 @@ bool pc_t::next_pos(pair_t &dir) {
 
     case 'm':
       list_monsters(d);
-      d->render_dungeon();
+      render_dungeon();
       goto top;
+
+    case 'f':
+      is_fogged = !is_fogged;
+      break;
 
     case '?': case '/':
       help();
-      d->render_dungeon();
+      render_dungeon();
       goto top;
+
+    case 't':
+      if(!teleporing) {
+        d->charpair(position) = nullptr;
+        charpair(position) = nullptr;
+        teleport_target = position;
+        teleporing = true;
+      }
+      else {
+        teleporing = false;
+        position = teleport_target;
+        d->charpair(position) = this;
+        if (d->mappair(position) <= terrain_type_t::floor) {
+          d->mappair(position) = terrain_type_t::floor_hall;
+        }
+      }
+
+      break;
 
     default:
       mprintf("%c is not a valid command. (press ? for help)", key);
       goto top;
+  }
+
+  if(teleporing) {
+    teleport_target += dir;
+    dir = pair_t();
+    d->render_dungeon();
+    goto top;
   }
 
   return false;
@@ -141,4 +163,77 @@ bool pc_t::in_room(uint32_t room) {
   }
 
   return false;
+}
+
+void pc_t::look_around() {
+  pair_t p = position;
+  p.y -= 3;
+
+  int32_t startX = p.x - 3;
+
+  if(startX < 0) startX = 0;
+  if(p.y < 0) p.y = 0;
+
+  for(; p.y < DUNGEON_Y && p.y < position.y + 3; ++p.y) {
+    for(p.x = startX; p.x < DUNGEON_X && p.x < position.x + 3; ++p.x) {
+      charpair(p) = d->charpair(p);
+      mappair(p) = d->mappair(p);
+    }
+  }
+}
+
+void pc_t::render_dungeon() {
+  if(!is_fogged) {
+    d->render_dungeon();
+    return;
+  }
+
+  erase();
+
+  pair_t p;
+
+  for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
+    for (p.x = 0; p.x < DUNGEON_X; p.x++) {
+      if(p == teleport_target && teleporing) {
+        attron(COLOR_PAIR(1));
+        mvaddch(p.y + 1, p.x, '*');
+        attroff(COLOR_PAIR(1));
+      }
+      else if (charpair(p)) {
+        int color = (charpair(p)->symbol != '@') + 1;
+
+        attron(COLOR_PAIR(color));
+        mvaddch(p.y + 1, p.x, charpair(p)->symbol);
+        attroff(COLOR_PAIR(color));
+      } else {
+        switch (mappair(p)) {
+        case terrain_type_t::staircase_down:
+          attron(COLOR_PAIR(3));
+          mvaddch(p.y + 1, p.x, '>');
+          attroff(COLOR_PAIR(3));
+          break;
+        case terrain_type_t::staircase_up:
+          attron(COLOR_PAIR(3));
+          mvaddch(p.y + 1, p.x, '<');
+          attroff(COLOR_PAIR(3));
+          break;
+        case terrain_type_t::wall:
+        case terrain_type_t::wall_immutable:
+          mvaddch(p.y + 1, p.x, ' ');
+          break;
+        case terrain_type_t::floor:
+        case terrain_type_t::floor_room:
+          mvaddch(p.y + 1, p.x, '.');
+          break;
+        case terrain_type_t::floor_hall:
+          mvaddch(p.y + 1, p.x, '#');
+          break;
+        case terrain_type_t::debug:
+          mvaddch(p.y + 1, p.x, '*');
+          mprintf("Debug character at %d, %d\n", p.y, p.x);
+          break;
+        }
+      }
+    }
+  }
 }

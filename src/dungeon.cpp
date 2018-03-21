@@ -530,6 +530,7 @@ void dungeon_t::place_rooms()
              p.x++) {
           if (mappair(p) >= terrain_type_t::floor) {
             success = 0;
+
             empty_dungeon();
           } else if ((p.y != r->position.y - 1)              &&
                      (p.y != r->position.y + r->size.y) &&
@@ -565,7 +566,6 @@ void dungeon_t::make_rooms()
 void dungeon_t::gen_dungeon()
 {
   empty_dungeon();
-
   make_rooms();
   place_rooms();
   connect_rooms();
@@ -580,7 +580,12 @@ void dungeon_t::render_dungeon() {
 
   for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
     for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-      if (charpair(p)) {
+      if(p == pc->teleport_target && pc->teleporing) {
+        attron(COLOR_PAIR(1));
+        mvaddch(p.y + 1, p.x, '*');
+        attroff(COLOR_PAIR(1));
+      }
+      else if (charpair(p)) {
         int color = (charpair(p)->symbol != '@') + 1;
 
         attron(COLOR_PAIR(color));
@@ -619,12 +624,6 @@ void dungeon_t::render_dungeon() {
   }
 }
 
-dungeon_t::~dungeon_t()
-{
-  heap_delete(&events);
-  memset(character, 0, sizeof (character));
-}
-
 dungeon_t::dungeon_t()
 {
   empty_dungeon();
@@ -640,7 +639,24 @@ void dungeon_t::init() {
   place_stairs();
 }
 
-////////////////////////////////////////////////////////////////////////////////
+void dungeon_t::regenerate() {
+  int step = 0;
+
+  rooms.empty();
+  heap_delete(&events);
+
+  empty_dungeon();
+
+  memset(&character, 0, sizeof(character));
+  memset(&events, 0, sizeof (events));
+
+  heap_init(&events, compare_events, event_delete);
+
+  pc = new pc_t(this);
+
+  gen_dungeon();
+
+}
 
 void dungeon_t::write_dungeon_map(std::ostream &out) {
   int32_t x, y;
@@ -885,8 +901,6 @@ void dungeon_t::read_dungeon(std::string file) {
 
   init();
 }
-
-////////////////////////////////////////////////////////////////////////////////
 
 void dungeon_t::render_distance_map()
 {

@@ -14,17 +14,6 @@
 #define SAVE_DIR               "rlg327"
 #endif
 
-enum class terrain_type_t {
-  debug,
-  wall,
-  wall_immutable,
-  floor,
-  floor_room,
-  floor_hall,
-  staircase_up,
-  staircase_down,
-};
-
 class room_t {
 public:
   pair_t position;
@@ -85,7 +74,10 @@ public:
   uint32_t is_new;
 
   dungeon_t();
-  ~dungeon_t();
+
+  ~dungeon_t() {
+    heap_delete(&events);
+  }
 
   void gen_dungeon();
   void render_dungeon();
@@ -96,6 +88,7 @@ public:
   void render_distance_map();
   void render_tunnel_distance_map();
   void place_stairs();
+  void regenerate();
 
   bool has_npcs() { return num_monsters > 0; }
 

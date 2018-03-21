@@ -1,3 +1,5 @@
+#pragma once
+
 #define DUNGEON_X              80
 #define DUNGEON_Y              21
 #define MIN_ROOMS              5
@@ -14,3 +16,16 @@
 #define RLG_VERSION            "1.05"
 #define DUNGEON_SAVE_SEMANTIC  "RLG327-S2018"
 #define DUNGEON_SAVE_VERSION   0U
+
+// TODO: Put this somewhere better
+enum class terrain_type_t {
+  debug,
+  wall,
+  wall_immutable,
+  floor,
+  floor_room,
+  floor_hall,
+  staircase_up,
+  staircase_down,
+  teleport
+};
