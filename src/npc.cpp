@@ -17,7 +17,7 @@ uint32_t max_monster_cells(dungeon_t *d)
   uint32_t sum;
 
   for (i = sum = 0; i < d->rooms.size(); i++) {
-    if (!pc_in_room(d, i)) {
+    if (!d->pc->in_room(i)) {
       sum += d->rooms[i].size.y * d->rooms[i].size.x;
     }
   }

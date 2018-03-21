@@ -54,7 +54,7 @@ void do_moves(dungeon_t *d)
   character_t *c;
   event_t *e;
 
-  while (pc_is_alive(d) &&
+  while (d->pc->alive &&
          (e = (event_t*) heap_remove_min(&d->events)) &&
          ((e->type != event_character_turn) || (e->c != d->pc))) {
     d->time = e->time;
@@ -77,13 +77,13 @@ void do_moves(dungeon_t *d)
     heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
   }
 
-  if (pc_is_alive(d) && e->c == d->pc) {
+  if (d->pc->alive && e->c == d->pc) {
     c = e->c;
     d->time = e->time;
 
     heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
 
-    if(pc_next_pos(d, next)) return;
+    if(c->next_pos(next)) return;
 
     // don't go into hardnesses above 254
     if(d->hardnessxy(next.x + c->position.x, c->position.y) < 255) {

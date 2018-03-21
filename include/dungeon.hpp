@@ -5,23 +5,8 @@
 #include <dims.hpp>
 #include <character.hpp>
 #include <vector>
-
-#define DUNGEON_X              80
-#define DUNGEON_Y              21
-#define MIN_ROOMS              5
-#define MAX_ROOMS              9
-#define ROOM_MIN_X             4
-#define ROOM_MIN_Y             2
-#define ROOM_MAX_X             14
-#define ROOM_MAX_Y             8
-#define VISUAL_RANGE           15
-#define PC_SPEED               10
-#define MAX_MONSTERS           12
-#define DUNGEON_SAVE_FILE      "dungeon"
-#define DUNGEON_VERSION_FILE   "version"
-#define RLG_VERSION            "1.05"
-#define DUNGEON_SAVE_SEMANTIC  "RLG327-S2018"
-#define DUNGEON_SAVE_VERSION   0U
+#include <const.hpp>
+#include <pc.hpp>
 
 #ifdef __linux__
 #define SAVE_DIR               ".rlg327"
@@ -74,6 +59,7 @@ private:
   void write_dungeon_map(std::ostream &out);
   void read_rooms(std::istream &in, int num_rooms);
   int calculate_num_rooms(uint32_t);
+  void init();
 
   void dijkstra_corridor_inv(const pair_t &from, const pair_t &to);
   void dijkstra_corridor(const pair_t &from, const pair_t &to);
@@ -86,7 +72,7 @@ public:
   std::vector<room_t> rooms;
   uint8_t pc_distance[DUNGEON_Y][DUNGEON_X];
   uint8_t pc_tunnel[DUNGEON_Y][DUNGEON_X];
-  character_t *pc;
+  pc_t *pc;
   heap_t events;
   uint16_t num_monsters;
   uint16_t max_monsters;

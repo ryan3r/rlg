@@ -17,6 +17,7 @@
 #include <heap.h>
 #include <event.hpp>
 #include <character.hpp>
+#include <npc.hpp>
 
 #include <iostream>
 #include <string>
@@ -568,6 +569,8 @@ void dungeon_t::gen_dungeon()
   make_rooms();
   place_rooms();
   connect_rooms();
+
+  init();
 }
 
 void dungeon_t::render_dungeon() {
@@ -628,7 +631,13 @@ dungeon_t::dungeon_t()
   memset(&character, 0, sizeof(character));
   memset(&events, 0, sizeof (events));
   heap_init(&events, compare_events, event_delete);
-  pc = new character_t(this, '@', PC_SPEED, 0);
+  pc = new pc_t(this);
+}
+
+void dungeon_t::init() {
+  pc->config_pc();
+  npc_t::gen_monsters(this);
+  place_stairs();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -873,6 +882,8 @@ void dungeon_t::read_dungeon(std::string file) {
   read_rooms(f, calculate_num_rooms(be32toh(be32)));
 
   f.close();
+
+  init();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

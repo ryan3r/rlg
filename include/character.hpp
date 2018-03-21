@@ -5,7 +5,6 @@
 #include <dims.hpp>
 
 class dungeon_t;
-typedef struct pc pc_t;
 
 class character_t {
 protected:
@@ -24,19 +23,13 @@ public:
    * metadata: locally, how old is this character; and globally, how many   *
    * characters have been created by the game.                              */
   uint32_t sequence_number;
-  pc_t *pc = nullptr;
   uint32_t kills_direct = 0;
   uint32_t kills_avenged = 0;
 
   character_t(dungeon_t *du, char sy, int32_t sp, uint32_t se):
     d{du}, symbol{sy}, speed{sp}, sequence_number{se} {}
 
-  ~character_t() {
-    if(pc) free(pc);
-  }
-
-  // TODO: Update to pure virtual
-  virtual bool next_pos(pair_t &next) {};
+  virtual bool next_pos(pair_t &next) = 0;
 
   uint32_t can_see(const pair_t &target) const;
 

@@ -1,6 +1,6 @@
 // Based on Jeremy's solution
 #include <stdlib.h>
-#include<string.h>
+#include <string.h>
 
 #ifdef __linux__
 #include <ncurses.h>
@@ -18,44 +18,27 @@
 #include <event.hpp>
 #include <iostream>
 
-void pc_delete(pc_t *pc)
-{
-  if (pc) {
-    delete pc;
-  }
-}
-
-uint32_t pc_is_alive(dungeon_t *d)
-{
-  return d->pc->alive;
-}
-
-void place_pc(dungeon_t *d)
-{
-  d->pc->position.y = rand_range(d->rooms[0].position.y,
+void pc_t::place_pc() {
+  position.y = rand_range(d->rooms[0].position.y,
                                      (d->rooms[0].position.y +
                                       d->rooms[0].size.y - 1));
-  d->pc->position.x = rand_range(d->rooms[0].position.x,
+  position.x = rand_range(d->rooms[0].position.x,
                                      (d->rooms[0].position.x +
                                       d->rooms[0].size.x - 1));
 }
 
-void config_pc(dungeon_t *d)
-{
+void pc_t::config_pc() {
+  place_pc();
 
-  place_pc(d);
-  d->pc->pc = (pc_t*) calloc(1, sizeof (*d->pc->pc));
+  d->charpair(position) = this;
 
-  d->charpair(d->pc->position) = d->pc;
-
-  heap_insert(&d->events, new_event(d, event_character_turn, d->pc, 0));
+  heap_insert(&d->events, new_event(d, event_character_turn, this, 0));
 
   dijkstra(d);
   dijkstra_tunnel(d);
 }
 
-uint32_t pc_next_pos(dungeon_t *d, pair_t &dir)
-{
+bool pc_t::next_pos(pair_t &dir) {
   dir.x = 0;
   dir.y = 0;
 
@@ -126,7 +109,7 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t &dir)
 
       d->mappair(d->pc->position) = key == '<' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up;
 
-      return 1;
+      return true;
 
     case 'm':
       list_monsters(d);
@@ -143,20 +126,19 @@ uint32_t pc_next_pos(dungeon_t *d, pair_t &dir)
       goto top;
   }
 
-  return 0;
+  return false;
 }
 
-uint32_t pc_in_room(dungeon_t *d, uint32_t room)
-{
-  if ((room < d->rooms.size())                                     &&
-      (d->pc->position.x >= d->rooms[room].position.x) &&
-      (d->pc->position.x < (d->rooms[room].position.x +
+bool pc_t::in_room(uint32_t room) {
+  if ((room < d->rooms.size()) &&
+      (position.x >= d->rooms[room].position.x) &&
+      (position.x < (d->rooms[room].position.x +
                                 d->rooms[room].size.x))    &&
-      (d->pc->position.y >= d->rooms[room].position.y) &&
-      (d->pc->position.y < (d->rooms[room].position.y +
+      (position.y >= d->rooms[room].position.y) &&
+      (position.y < (d->rooms[room].position.y +
                                 d->rooms[room].size.y))) {
-    return 1;
+    return true;
   }
 
-  return 0;
+  return false;
 }

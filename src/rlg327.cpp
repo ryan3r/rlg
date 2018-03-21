@@ -251,10 +251,6 @@ int main(int argc, char *argv[])
     d.gen_dungeon();
   }
 
-  config_pc(&d);
-  npc_t::gen_monsters(&d);
-  d.place_stairs();
-
   // initiailize ncurses
   initscr();
   noecho();
@@ -276,7 +272,7 @@ int main(int argc, char *argv[])
     help();
   }
 
-  while (pc_is_alive(&d) && d.has_npcs()) {
+  while (d.pc->alive && d.has_npcs()) {
     d.render_dungeon();
     do_moves(&d);
   }
@@ -287,9 +283,9 @@ int main(int argc, char *argv[])
   uint32_t yPos = 0;
 
   char *msg, *last, *orig;
-  orig = msg = last = strdup(pc_is_alive(&d) ? victory : tombstone);
+  orig = msg = last = strdup(d.pc->alive ? victory : tombstone);
 
-  attron(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
+  attron(COLOR_PAIR(d.pc->alive ? 5 : 2));
 
   for(; *msg; ++msg) {
     if(*msg == '\n') {
@@ -302,7 +298,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  attroff(COLOR_PAIR(pc_is_alive(&d) ? 5 : 2));
+  attroff(COLOR_PAIR(d.pc->alive ? 5 : 2));
 
   free(orig);
 
