@@ -1,8 +1,9 @@
-// Based on Jeremy's solution
-#include<heap.h>
-#include <macros.hpp>
-
-#undef min
+// Based on Jeremy's solution for 1.04
+#include <heap.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #define swap(type, a, b)  {   \
   type _tmp = (a); \

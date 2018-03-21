@@ -16,6 +16,7 @@
 #define RLG_VERSION            "1.05"
 #define DUNGEON_SAVE_SEMANTIC  "RLG327-S2018"
 #define DUNGEON_SAVE_VERSION   0U
+#define VISUAL_DISTANCE        3
 
 // TODO: Put this somewhere better
 enum class terrain_type_t {

@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #include <path.hpp>
 #include <dungeon.hpp>
 

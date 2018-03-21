@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #include <move.hpp>
 
 #ifdef __linux__
@@ -83,7 +83,7 @@ void do_moves(dungeon_t *d)
 
     heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
 
-    if(c->next_pos(next)) return;
+    c->next_pos(next);
 
     // don't go into hardnesses above 254
     if(d->hardnessxy(c->position.x + next.x, c->position.y) > 0) {

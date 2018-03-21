@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #pragma once
 
 #include <stdint.h>
@@ -51,7 +51,7 @@ public:
 	}
 
 	static void gen_monsters(dungeon_t *d);
-	virtual bool next_pos(pair_t &next);
+	virtual void next_pos(pair_t &next);
 
 	bool has_attr(uint8_t index) {
 		return attrs & (1 << index);

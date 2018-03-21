@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #pragma once
 
 #include <stdint.h>
@@ -29,7 +29,7 @@ public:
   character_t(dungeon_t *du, char sy, int32_t sp, uint32_t se):
     d{du}, symbol{sy}, speed{sp}, sequence_number{se} {}
 
-  virtual bool next_pos(pair_t &next) = 0;
+  virtual void next_pos(pair_t &next) = 0;
 
   uint32_t can_see(const pair_t &target) const;
 

@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #include <stdlib.h>
 
 #include <utils.hpp>
@@ -478,7 +478,7 @@ void npc_t::next_pos_0f(pair_t &next)
   }
 }
 
-bool npc_t::next_pos(pair_t &next)
+void npc_t::next_pos(pair_t &next)
 {
   next = position;
 
@@ -498,6 +498,4 @@ bool npc_t::next_pos(pair_t &next)
 	if(attrs == 0x0d) next_pos_0d(next);
 	if(attrs == 0x0e) next_pos_0e(next);
 	if(attrs == 0x0f) next_pos_0f(next);
-
-  return false;
 }

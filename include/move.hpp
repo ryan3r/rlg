@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #ifndef MOVE_H
 # define MOVE_H
 

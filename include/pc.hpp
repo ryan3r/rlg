@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #pragma once
 
 #include <stdint.h>
@@ -27,7 +27,7 @@ public:
     memset(&character, 0, sizeof(character));
   }
 
-  virtual bool next_pos(pair_t &dir);
+  virtual void next_pos(pair_t &dir);
   bool in_room(uint32_t room);
   void config_pc();
   void render_dungeon();

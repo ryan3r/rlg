@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #include <stdio.h>
 #include <stdint.h>
 #ifdef __linux__

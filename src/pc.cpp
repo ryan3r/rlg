@@ -1,4 +1,4 @@
-// Based on Jeremy's solution
+// Based on Jeremy's solution for 1.04
 #include <stdlib.h>
 #include <string.h>
 
@@ -38,7 +38,7 @@ void pc_t::config_pc() {
   dijkstra_tunnel(d);
 }
 
-bool pc_t::next_pos(pair_t &dir) {
+void pc_t::next_pos(pair_t &dir) {
   dir.x = 0;
   dir.y = 0;
 
@@ -101,7 +101,7 @@ bool pc_t::next_pos(pair_t &dir) {
 
       d->mappair(d->pc->position) = key == '<' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up;
 
-      return true;
+      break;
 
     case 'm':
       list_monsters(d);
@@ -138,6 +138,22 @@ bool pc_t::next_pos(pair_t &dir) {
 
       break;
 
+    case 'r':
+      if(teleporing) {
+        teleporing = false;
+
+        position.x = rand_range(1, DUNGEON_X - 2);
+        position.y = rand_range(1, DUNGEON_Y - 2);
+
+        d->charpair(position) = this;
+
+        if (d->mappair(position) <= terrain_type_t::floor) {
+          d->mappair(position) = terrain_type_t::floor_hall;
+        }
+
+        break;
+      }
+
     default:
       mprintf("%c is not a valid command. (press ? for help)", key);
       goto top;
@@ -150,8 +166,6 @@ bool pc_t::next_pos(pair_t &dir) {
     d->render_dungeon();
     goto top;
   }
-
-  return false;
 }
 
 bool pc_t::in_room(uint32_t room) {
@@ -170,15 +184,15 @@ bool pc_t::in_room(uint32_t room) {
 
 void pc_t::look_around() {
   pair_t p = position;
-  p.y -= 3;
+  p.y -= VISUAL_DISTANCE;
 
-  int32_t startX = p.x - 3;
+  int32_t startX = p.x - VISUAL_DISTANCE;
 
   if(startX < 0) startX = 0;
   if(p.y < 0) p.y = 0;
 
-  for(; p.y < DUNGEON_Y && p.y < position.y + 3; ++p.y) {
-    for(p.x = startX; p.x < DUNGEON_X && p.x < position.x + 3; ++p.x) {
+  for(; p.y < DUNGEON_Y && p.y < position.y + VISUAL_DISTANCE; ++p.y) {
+    for(p.x = startX; p.x < DUNGEON_X && p.x < position.x + VISUAL_DISTANCE; ++p.x) {
       if(can_see(p)) {
         charpair(p) = d->charpair(p);
         mappair(p) = d->mappair(p);
