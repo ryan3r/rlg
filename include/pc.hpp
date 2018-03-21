@@ -12,7 +12,6 @@ private:
   void place_pc();
 
   terrain_type_t map[DUNGEON_Y][DUNGEON_X];
-  character_t *character[DUNGEON_Y][DUNGEON_X];
 
 public:
   // fog of war enabled/disabled state
@@ -24,7 +23,6 @@ public:
   pc_t(dungeon_t *d): character_t(d, '@', PC_SPEED, 0) {
     // initialize the fog of war map
     memset(&map, (int) terrain_type_t::wall, sizeof(map));
-    memset(&character, 0, sizeof(character));
   }
 
   virtual void next_pos(pair_t &dir);
@@ -34,7 +32,6 @@ public:
   void look_around();
 
   terrain_type_t& mappair(const pair_t &pair) { return map[pair.y][pair.x]; }
-  character_t*& charpair(const pair_t &pair) { return character[pair.y][pair.x]; }
 
   virtual ~pc_t() {}
 };

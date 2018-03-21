@@ -38,48 +38,58 @@ void pc_t::config_pc() {
   dijkstra_tunnel(d);
 }
 
-void pc_t::next_pos(pair_t &dir) {
-  dir.x = 0;
-  dir.y = 0;
-
+void pc_t::next_pos(pair_t &next) {
   char key;
+  next = position;
 
   top:
   switch((key = getch())) {
     case '8': case 'k': case 'w':
-      dir.y = -1;
+      if(d->hardnessxy(next.x, next.y - 1) < (teleporing ? 255 : 1))
+        --next.y;
       break;
 
     case '2': case 'j': case 's':
-      dir.y = 1;
+      if(d->hardnessxy(next.x, next.y + 1) < (teleporing ? 255 : 1))
+        ++next.y;
       break;
 
     case '1': case 'b':
-      dir.y = 1;
-      dir.x = -1;
+      if(d->hardnessxy(next.x, next.y + 1) < (teleporing ? 255 : 1))
+        ++next.y;
+      if(d->hardnessxy(next.x - 1, next.y) < (teleporing ? 255 : 1))
+        --next.x;
       break;
 
     case '4': case 'h': case 'a':
-      dir.x = -1;
+      if(d->hardnessxy(next.x - 1, next.y) < (teleporing ? 255 : 1))
+        --next.x;
       break;
 
     case '7': case 'y':
-      dir.x = -1;
-      dir.y = -1;
+      if(d->hardnessxy(next.x - 1, next.y) < (teleporing ? 255 : 1))
+        --next.x;
+      if(d->hardnessxy(next.x, next.y - 1) < (teleporing ? 255 : 1))
+        --next.y;
       break;
 
     case '6': case 'l': case 'd':
-      dir.x = 1;
+      if(d->hardnessxy(next.x + 1, next.y) < (teleporing ? 255 : 1))
+        ++next.x;
       break;
 
     case '3': case 'n':
-      dir.x = 1;
-      dir.y = 1;
+      if(d->hardnessxy(next.x + 1, next.y) < (teleporing ? 255 : 1))
+        ++next.x;
+      if(d->hardnessxy(next.x, next.y + 1) < (teleporing ? 255 : 1))
+        ++next.y;
       break;
 
     case '9': case 'u':
-      dir.x = 1;
-      dir.y = -1;
+      if(d->hardnessxy(next.x + 1, next.y) < (teleporing ? 255 : 1))
+        ++next.x;
+      if(d->hardnessxy(next.x, next.y - 1) < (teleporing ? 255 : 1))
+        --next.y;
       break;
 
     case '5': case ' ':
@@ -121,7 +131,6 @@ void pc_t::next_pos(pair_t &dir) {
       // enter teleporting mode
       if(!teleporing) {
         d->charpair(position) = nullptr;
-        charpair(position) = nullptr;
         teleport_target = position;
         teleporing = true;
       }
@@ -142,8 +151,10 @@ void pc_t::next_pos(pair_t &dir) {
       if(teleporing) {
         teleporing = false;
 
-        position.x = rand_range(1, DUNGEON_X - 2);
-        position.y = rand_range(1, DUNGEON_Y - 2);
+        next.x = rand_range(1, DUNGEON_X - 2);
+        next.y = rand_range(1, DUNGEON_Y - 2);
+
+        position = next;
 
         d->charpair(position) = this;
 
@@ -161,8 +172,7 @@ void pc_t::next_pos(pair_t &dir) {
 
   // move the cursor and rerender
   if(teleporing) {
-    teleport_target += dir;
-    dir = pair_t();
+    teleport_target = next;
     d->render_dungeon();
     goto top;
   }
@@ -194,7 +204,6 @@ void pc_t::look_around() {
   for(; p.y < DUNGEON_Y && p.y < position.y + VISUAL_DISTANCE; ++p.y) {
     for(p.x = startX; p.x < DUNGEON_X && p.x < position.x + VISUAL_DISTANCE; ++p.x) {
       if(can_see(p)) {
-        charpair(p) = d->charpair(p);
         mappair(p) = d->mappair(p);
       }
     }
@@ -218,11 +227,11 @@ void pc_t::render_dungeon() {
         mvaddch(p.y + 1, p.x, '*');
         attroff(COLOR_PAIR(1));
       }
-      else if (charpair(p)) {
-        int color = (charpair(p)->symbol != '@') + 1;
+      else if (d->charpair(p) && can_see(p)) {
+        int color = (d->charpair(p)->symbol != '@') + 1;
 
         attron(COLOR_PAIR(color));
-        mvaddch(p.y + 1, p.x, charpair(p)->symbol);
+        mvaddch(p.y + 1, p.x, d->charpair(p)->symbol);
         attroff(COLOR_PAIR(color));
       } else {
         switch (mappair(p)) {
