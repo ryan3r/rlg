@@ -15,3 +15,4 @@ rm -rf Win32
 rm -rf rlg
 rm -rf Makefile
 rm -rf rlg.dir
+rm -rf build

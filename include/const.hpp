@@ -26,6 +26,5 @@ enum class terrain_type_t {
   floor_room,
   floor_hall,
   staircase_up,
-  staircase_down,
-  teleport
+  staircase_down
 };

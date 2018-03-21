@@ -56,4 +56,6 @@ public:
 	bool has_attr(uint8_t index) {
 		return attrs & (1 << index);
 	}
+
+	virtual ~npc_t() {}
 };

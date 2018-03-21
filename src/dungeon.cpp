@@ -68,7 +68,7 @@ void dungeon_t::dijkstra_corridor(const pair_t &from, const pair_t &to)
   static corridor_path_t path[DUNGEON_Y][DUNGEON_X], *p;
   static uint32_t initialized = 0;
   heap_t h;
-  uint32_t x, y;
+  int32_t x, y;
 
   if (!initialized) {
     for (y = 0; y < DUNGEON_Y; y++) {
@@ -167,7 +167,7 @@ void dungeon_t::dijkstra_corridor_inv(const pair_t &from, const pair_t &to)
   static corridor_path_t path[DUNGEON_Y][DUNGEON_X], *p;
   static uint32_t initialized = 0;
   heap_t h;
-  uint32_t x, y;
+  int32_t x, y;
 
   if (!initialized) {
     for (y = 0; y < DUNGEON_Y; y++) {
@@ -286,7 +286,8 @@ void dungeon_t::create_cycle()
   /* Find the (approximately) farthest two rooms, then connect *
    * them by the shortest path using inverted hardnesses.      */
 
-  int32_t max, tmp, i, j, p, q;
+  int32_t max, tmp, p, q;
+  size_t i, j;
   pair_t e1, e2;
 
   for (i = max = 0; i < rooms.size() - 1; i++) {

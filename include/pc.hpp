@@ -35,4 +35,6 @@ public:
 
   terrain_type_t& mappair(const pair_t &pair) { return map[pair.y][pair.x]; }
   character_t*& charpair(const pair_t &pair) { return character[pair.y][pair.x]; }
+
+  virtual ~pc_t() {}
 };

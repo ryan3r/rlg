@@ -13,3 +13,4 @@ Remove-Item -Recurse -Force Win32
 Remove-Item -Recurse -Force rlg
 Remove-Item -Recurse -Force Makefile
 Remove-Item -Recurse -Force rlg.dir
+Remove-Item -Recurse -Force build

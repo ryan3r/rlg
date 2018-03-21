@@ -36,4 +36,6 @@ public:
   uint32_t can_see(const character_t *target) const {
     return can_see(target->position);
   };
+
+  virtual ~character_t() {}
 };

@@ -151,7 +151,7 @@ void dijkstra_tunnel(dungeon_t *d)
 
   heap_t h;
   uint32_t x, y;
-  int size;
+  uint32_t size;
   static path_t p[DUNGEON_Y][DUNGEON_X], *c;
   static uint32_t initialized = 0;
 
