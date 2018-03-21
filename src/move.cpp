@@ -86,23 +86,20 @@ void do_moves(dungeon_t *d)
     if(c->next_pos(next)) return;
 
     // don't go into hardnesses above 254
-    if(d->hardnessxy(next.x + c->position.x, c->position.y) < 255) {
+    if(d->hardnessxy(c->position.x + next.x, c->position.y) > 0) {
+      next.x = c->position.x;
+    }
+    else {
       next.x += c->position.x;
     }
-    else {
-       next.x = c->position.x;
-    }
 
-    if(d->hardnessxy(c->position.x, next.y + c->position.y) < 255) {
+    if(d->hardnessxy(c->position.x, c->position.y + next.y) > 0) {
+      next.y = c->position.y;
+    }
+    else {
       next.y += c->position.y;
     }
-    else {
-       next.y = c->position.y;
-    }
 
-    if (d->mappair(next) <= terrain_type_t::floor) {
-      d->mappair(next) = terrain_type_t::floor_hall;
-    }
     move_character(d, c, next);
 
     dijkstra(d);
