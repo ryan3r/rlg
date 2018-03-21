@@ -179,8 +179,10 @@ void pc_t::look_around() {
 
   for(; p.y < DUNGEON_Y && p.y < position.y + 3; ++p.y) {
     for(p.x = startX; p.x < DUNGEON_X && p.x < position.x + 3; ++p.x) {
-      charpair(p) = d->charpair(p);
-      mappair(p) = d->mappair(p);
+      if(can_see(p)) {
+        charpair(p) = d->charpair(p);
+        mappair(p) = d->mappair(p);
+      }
     }
   }
 }
