@@ -20,8 +20,7 @@
 #include <path.hpp>
 #include <event.hpp>
 
-void do_combat(dungeon_t *d, character_t *atk, character_t *def)
-{
+void do_combat(dungeon_t *d, character_t *atk, character_t *def) {
   if (def->alive) {
     def->alive = 0;
     if (def != d->pc) {
@@ -107,7 +106,7 @@ void do_moves(dungeon_t *d)
   }
 }
 
-void dir_nearest_wall(dungeon_t *d, character_t *c, pair_t &dir)
+void dir_nearest_wall(character_t *c, pair_t &dir)
 {
   dir.x = dir.y = 0;
 
@@ -147,9 +146,4 @@ uint32_t in_corner(dungeon_t *d, character_t *c)
                           c->position.y + 1) == terrain_type_t::wall_immutable);
 
   return num_immutable > 1;
-}
-
-uint32_t move_pc(dungeon_t *d, uint32_t dir)
-{
-  return 1;
 }
