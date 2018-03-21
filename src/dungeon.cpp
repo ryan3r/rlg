@@ -640,9 +640,11 @@ void dungeon_t::init() {
 }
 
 void dungeon_t::regenerate() {
-  int step = 0;
+  num_monsters = 0;
+  time = 0;
+  is_new = true;
 
-  rooms.empty();
+  rooms.clear();
   heap_delete(&events);
 
   empty_dungeon();
@@ -655,7 +657,6 @@ void dungeon_t::regenerate() {
   pc = new pc_t(this);
 
   gen_dungeon();
-
 }
 
 void dungeon_t::write_dungeon_map(std::ostream &out) {

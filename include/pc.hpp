@@ -22,6 +22,7 @@ public:
   bool teleporing = false;
 
   pc_t(dungeon_t *d): character_t(d, '@', PC_SPEED, 0) {
+    // initialize the fog of war map
     memset(&map, (int) terrain_type_t::wall, sizeof(map));
     memset(&character, 0, sizeof(character));
   }

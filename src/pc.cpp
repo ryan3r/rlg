@@ -97,7 +97,6 @@ bool pc_t::next_pos(pair_t &dir) {
       }
 
       // regenerate the entire dungeon
-      // TODO: fix this
       d->regenerate();
 
       d->mappair(d->pc->position) = key == '<' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up;
