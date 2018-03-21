@@ -119,16 +119,19 @@ bool pc_t::next_pos(pair_t &dir) {
       goto top;
 
     case 't':
+      // enter teleporting mode
       if(!teleporing) {
         d->charpair(position) = nullptr;
         charpair(position) = nullptr;
         teleport_target = position;
         teleporing = true;
       }
+      // exit teleporting mode and move the pc
       else {
         teleporing = false;
         position = teleport_target;
         d->charpair(position) = this;
+
         if (d->mappair(position) <= terrain_type_t::floor) {
           d->mappair(position) = terrain_type_t::floor_hall;
         }
@@ -141,6 +144,7 @@ bool pc_t::next_pos(pair_t &dir) {
       goto top;
   }
 
+  // move the cursor and rerender
   if(teleporing) {
     teleport_target += dir;
     dir = pair_t();

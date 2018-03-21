@@ -1,7 +1,7 @@
 # Based on Jeremy's solution
 
 GCC_FLAGS = -std=gnu11 -I include -Wall -ggdb
-GPP_FLAGS = -I include -Wall -ggdb
+GPP_FLAGS = -std=c++11 -I include -Wall -ggdb
 
 # get all the objects based on the c files
 SRC_OBJECTS = $(foreach file, $(shell echo src/*), \
@@ -10,7 +10,7 @@ SRC_OBJECTS = $(foreach file, $(shell echo src/*), \
 # build the program
 build/rlg: build $(SRC_OBJECTS)
 	@echo Linking
-	@gcc $(SRC_OBJECTS) -o $@ $(GCC_FLAGS) -lncurses
+	@g++ $(SRC_OBJECTS) -o $@ $(GCC_FLAGS) -lncurses
 
 # include dependency files
 -include build/*.d

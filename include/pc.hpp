@@ -15,8 +15,10 @@ private:
   character_t *character[DUNGEON_Y][DUNGEON_X];
 
 public:
+  // fog of war enabled/disabled state
   bool is_fogged = true;
   pair_t teleport_target;
+  // teleporting mode
   bool teleporing = false;
 
   pc_t(dungeon_t *d): character_t(d, '@', PC_SPEED, 0) {
