@@ -84,21 +84,6 @@ void do_moves(dungeon_t *d)
 
     c->next_pos(next);
 
-    // don't go into hardnesses above 254
-    if(d->hardnessxy(c->position.x + next.x, c->position.y) > 0) {
-      next.x = c->position.x;
-    }
-    else {
-      next.x += c->position.x;
-    }
-
-    if(d->hardnessxy(c->position.x, c->position.y + next.y) > 0) {
-      next.y = c->position.y;
-    }
-    else {
-      next.y += c->position.y;
-    }
-
     move_character(d, c, next);
 
     dijkstra(d);

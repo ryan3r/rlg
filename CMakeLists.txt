@@ -18,7 +18,7 @@ file(GLOB rlg_src "src/*.c" "src/*.cpp")
 add_executable(rlg ${rlg_src})
 
 if (WIN32)
-    set(EXTRA_LIBS ${EXTRA_LIBS} pdcurs36/wincon/pdcurses)
+    set(EXTRA_LIBS ${EXTRA_LIBS} pdcurs36/pdcurses)
 else()
     set(EXTRA_LIBS ${EXTRA_LIBS} ${CURSES_LIBRARIES})
 endif()
