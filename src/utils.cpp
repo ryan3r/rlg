@@ -4,9 +4,15 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
-
 #include <utils.hpp>
+
+#ifdef _WIN32
+#include <direct.h>
+
+#define mkdir(dir, perm) _mkdir(dir)
+#endif
 
 int makedirectory(char *dir)
 {

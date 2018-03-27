@@ -700,13 +700,14 @@ int be32toh(int x) { return x; }
 std::string get_default_file(const char *target) {
   std::stringstream filename_s;
 
-  const char *home;
   #ifdef __linux__
+  const char *home;
   if (!(home = getenv("HOME"))) {
     std::cerr << "\"HOME\" is undefined.  Using working directory." << std::endl;
     home = ".";
   }
   #else
+  char *home;
   // get the size of the localappdata path
   DWORD env_size = GetEnvironmentVariable("LOCALAPPDATA", NULL, 0);
 

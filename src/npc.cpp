@@ -25,6 +25,10 @@ uint32_t max_monster_cells(dungeon_t *d)
   return sum;
 }
 
+inline uint16_t min(uint16_t a, uint16_t b) {
+    return a < b ? a : b;
+}
+
 void npc_t::gen_monsters(dungeon_t *d)
 {
   uint32_t i;

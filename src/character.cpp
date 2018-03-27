@@ -6,7 +6,6 @@
 #include <pc.hpp>
 #include <dungeon.hpp>
 #include <iostream>
-#include <unistd.h>
 
 uint32_t character_t::can_see(const pair_t &target) const {
   /* Application of Bresenham's Line Drawing Algorithm.  If we can draw *

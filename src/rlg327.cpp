@@ -1,6 +1,7 @@
 // Based on Jeremy's solution for 1.04
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #ifdef __linux__
 #include <sys/time.h>
 #include <unistd.h>
@@ -9,6 +10,7 @@
 #include <curses.h>
 #undef MOUSE_MOVED
 #include <windows.h>
+#include <ctime>
 #endif
 
 /* Very slow seed: 686846853 */
