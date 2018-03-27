@@ -13,7 +13,7 @@ else()
     include_directories(${CURSES_INCLUDE_DIR})
 endif()
 
-file(GLOB rlg_src "src/*.c" "src/*.cpp")
+file(GLOB rlg_src "src/*.c" "src/*.cpp" "include/*.h" "include/*.hpp")
 
 add_executable(rlg ${rlg_src})
 
