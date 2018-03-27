@@ -120,7 +120,8 @@ void pc_t::next_pos(pair_t &next) {
 
     case 'f':
       is_fogged = !is_fogged;
-      break;
+      render_dungeon();
+      goto top;
 
     case '?': case '/':
       help();
@@ -143,6 +144,10 @@ void pc_t::next_pos(pair_t &next) {
         if (d->mappair(position) <= terrain_type_t::floor) {
           d->mappair(position) = terrain_type_t::floor_hall;
         }
+
+        look_around();
+        render_dungeon();
+        goto top;
       }
 
       break;
@@ -162,7 +167,9 @@ void pc_t::next_pos(pair_t &next) {
           d->mappair(position) = terrain_type_t::floor_hall;
         }
 
-        break;
+        look_around();
+        render_dungeon();
+        goto top;
       }
 
     default:
@@ -227,7 +234,8 @@ void pc_t::render_dungeon() {
         mvaddch(p.y + 1, p.x, '*');
         attroff(COLOR_PAIR(1));
       }
-      else if (d->charpair(p) && can_see(p)) {
+      else if (d->charpair(p) && can_see(p) && -VISUAL_DISTANCE <= d->pc->position.x - p.x && d->pc->position.x - p.x <= VISUAL_DISTANCE &&
+            d->pc->position.y - p.y <= VISUAL_DISTANCE && d->pc->position.y - p.y >= -VISUAL_DISTANCE) {
         int color = (d->charpair(p)->symbol != '@') + 1;
 
         attron(COLOR_PAIR(color));

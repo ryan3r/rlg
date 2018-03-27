@@ -4,6 +4,7 @@
 #include <const.hpp>
 #include <stdint.h>
 #include <ostream>
+#include <math.h>
 
 // NOTE: Renamed to avoid collisions with std::pair
 class pair_t {
