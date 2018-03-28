@@ -1,30 +1,4 @@
-You find your self in a dungeon with no clue how you got
-there. But there's no time to figure it out because the
-dungeon is full of monsters.  Start by exploring the
-dungeon while avoiding monsters.
-
-Game
-==========================================================
-Monsters are represented by red letters and numbers.
-You are the cyan @ symbol.
-The . symbols are rooms and the # symbols are corridors.
-Finally the < and > are staircases.
-
-The game is turn based so each player takes a turn.  Be
-aware that monsters can move multiple times if they are
-faster than you.
-
-Controls
-==========================================================
-7 or y     | Move up and to the left
-8 or k     | Move up
-9 or u     | Move up and to the right
-6 or l     | Move to the right
-3 or n     | Move down and to the right
-2 or j     | Move down
-1 or b     | Move down and to the left
-4 or h     | Move to the left
->          | Go down stairs (only >)
-<          | Go down stairs (only <)
-5 or space | Skip turn
-m          | Display a list of monsters
+Add monster and object parsing.  Both parsers are derived from a base parser class
+that implements the core parsing logic.  Each child overrides the methods that
+determine how to process each field. To parse a file run Parser::parse_file which
+will determine which type of file you have given it based on the header.

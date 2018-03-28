@@ -25,7 +25,6 @@
 #include <iostream>
 #include <fstream>
 
-/*
 const char *victory =
   "\n                                       o\n"
   "                                      $\"\"$o\n"
@@ -88,10 +87,8 @@ void usage(char *name)
 
   exit(-1);
 }
-*/
 
-
-int main(int argc, char *argv[])
+int main()
 {
 	try {
 		auto builders = Parser::parse_file(get_default_file("monster_desc.txt"));
@@ -102,7 +99,7 @@ int main(int argc, char *argv[])
 			std::cout << builder->name << std::endl;
 			std::cout << builder->desc << std::endl;
 			std::cout << builder->symbol << std::endl;
-			
+
 			for (auto &color : builder->color) {
 				std::cout << color << " ";
 			}
@@ -110,7 +107,7 @@ int main(int argc, char *argv[])
 
 			std::cout << std::get<0>(builder->speed) << "+" << std::get<1>(builder->speed)
 				<< "d" << std::get<2>(builder->speed) << std::endl;
-			
+
 			for (auto &abil : builder->abilities) {
 				std::cout << abil << " ";
 			}
@@ -131,9 +128,6 @@ int main(int argc, char *argv[])
 	catch (ParserError e) {
 		std::cerr << e.what() << std::endl;
 	}
-
-	std::cout << "[Press any key to exit]" << std::endl;
-	std::cin.get();
 
 #ifdef NEVER_DEFINED
   std::ofstream log_file("rlg-log.txt");
