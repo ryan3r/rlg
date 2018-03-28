@@ -7,6 +7,10 @@ include_directories("include")
 
 if(WIN32)
     include_directories("pdcurs36")
+
+    if(${CMAKE_VERSION} VERSION_GREATER "3.6.0")
+        set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT rlg)
+    endif()
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
     find_package(Curses REQUIRED)
