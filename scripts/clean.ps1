@@ -1,18 +1,22 @@
-Remove-Item -Recurse -Force CMakeFiles
-Remove-Item -Recurse -Force Debug
-Remove-Item -Recurse -Force ALL_BUILD.vcxproj
-Remove-Item -Recurse -Force ALL_BUILD.vcxproj.filters
-Remove-Item -Recurse -Force cmake_install.cmake
-Remove-Item -Recurse -Force CMakeCache.txt
-Remove-Item -Recurse -Force rlg.sln
-Remove-Item -Recurse -Force rlg.vcxproj
-Remove-Item -Recurse -Force rlg.vcxproj.filters
-Remove-Item -Recurse -Force ZERO_CHECK.vcxproj
-Remove-Item -Recurse -Force ZERO_CHECK.vcxproj.filters
-Remove-Item -Recurse -Force Win32
-Remove-Item -Recurse -Force rlg
-Remove-Item -Recurse -Force Makefile
-Remove-Item -Recurse -Force rlg.dir
-Remove-Item -Recurse -Force build
-Remove-Item -Recurse -Force ALL_BUILD.vcxproj.user
-Remove-Item -Recurse -Force rlg.vcxproj.user
+Remove-Item -Recurse -Force CMakeFiles 2> $null
+Remove-Item -Recurse -Force Debug 2> $null
+Remove-Item -Recurse -Force ALL_BUILD.vcxproj 2> $null
+Remove-Item -Recurse -Force ALL_BUILD.vcxproj.filters 2> $null
+Remove-Item -Recurse -Force cmake_install.cmake 2> $null
+Remove-Item -Recurse -Force CMakeCache.txt 2> $null
+Remove-Item -Recurse -Force rlg.sln 2> $null
+Remove-Item -Recurse -Force rlg.vcxproj 2> $null
+Remove-Item -Recurse -Force rlg.vcxproj.filters 2> $null
+Remove-Item -Recurse -Force ZERO_CHECK.vcxproj 2> $null
+Remove-Item -Recurse -Force ZERO_CHECK.vcxproj.filters 2> $null
+Remove-Item -Recurse -Force Win32 2> $null
+Remove-Item -Recurse -Force rlg 2> $null
+Remove-Item -Recurse -Force Makefile 2> $null
+Remove-Item -Recurse -Force rlg.dir 2> $null
+Remove-Item -Recurse -Force build 2> $null
+Remove-Item -Recurse -Force ALL_BUILD.vcxproj.user 2> $null
+Remove-Item -Recurse -Force rlg.vcxproj.user 2> $null
+Remove-Item -Recurse -Force pdcurs36.vcxproj 2> $null
+Remove-Item -Recurse -Force pdcurs36.vcxproj.filters 2> $null
+Remove-Item -Recurse -Force pdcurs36.dir 2> $null
+Remove-Item -Recurse -Force .vs 2> $null

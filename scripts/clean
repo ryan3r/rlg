@@ -19,3 +19,6 @@ rm -rf build
 rm -rf ALL_BUILD.vcxproj.user
 rm -rf rlg.vcxproj.user
 rm -rf .vs
+rm -rf pdcurs36.vcxproj
+rm -rf pdcurs36.vcxproj.filters
+rm -rf pdcurs36.dir
