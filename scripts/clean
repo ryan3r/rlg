@@ -16,3 +16,5 @@ rm -rf rlg
 rm -rf Makefile
 rm -rf rlg.dir
 rm -rf build
+rm -rf ALL_BUILD.vcxproj.user
+rm -rf rlg.vcxproj.user

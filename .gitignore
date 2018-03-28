@@ -18,6 +18,8 @@ Win32
 rlg
 Makefile
 rlg.dir
+ALL_BUILD.vcxproj.user
+rlg.vcxproj.user
 
 rlg-log.txt
 log.txt

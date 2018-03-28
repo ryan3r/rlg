@@ -14,3 +14,5 @@ Remove-Item -Recurse -Force rlg
 Remove-Item -Recurse -Force Makefile
 Remove-Item -Recurse -Force rlg.dir
 Remove-Item -Recurse -Force build
+Remove-Item -Recurse -Force ALL_BUILD.vcxproj.user
+Remove-Item -Recurse -Force rlg.vcxproj.user
