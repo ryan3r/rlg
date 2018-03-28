@@ -86,3 +86,46 @@ public:
 
 	virtual void validate();
 };
+
+class ObjectParser : public Parser {
+	virtual void parse_field(const std::string&);
+	virtual Builder* alloc_builder();
+
+public:
+	ObjectParser(std::istream &i) : Parser(i, FileType::object) {}
+};
+
+class ObjectBuilder : public Builder {
+public:
+	bool has_name = false;
+	bool has_desc = false;
+	bool has_type = false;
+	bool has_color = false;
+	bool has_hit = false;
+	bool has_dam = false;
+	bool has_dodge = false;
+	bool has_def = false;
+	bool has_weight = false;
+	bool has_speed = false;
+	bool has_attr = false;
+	bool has_val = false;
+	bool has_art = false;
+	bool has_rrty = false;
+
+	std::string name;
+	std::string desc;
+	std::string type;
+	std::vector<std::string> color;
+	std::tuple<uint32_t, uint32_t, uint32_t> hit;
+	std::tuple<uint32_t, uint32_t, uint32_t> damage;
+	std::tuple<uint32_t, uint32_t, uint32_t> dodge;
+	std::tuple<uint32_t, uint32_t, uint32_t> defense;
+	std::tuple<uint32_t, uint32_t, uint32_t> weight;
+	std::tuple<uint32_t, uint32_t, uint32_t> speed;
+	std::tuple<uint32_t, uint32_t, uint32_t> attr;
+	std::tuple<uint32_t, uint32_t, uint32_t> value;
+	bool artifact;
+	uint16_t rarity;
+
+	virtual void validate();
+};

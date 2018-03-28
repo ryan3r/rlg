@@ -81,7 +81,7 @@ std::vector<std::string> Parser::parse_list() {
 	return words;
 }
 
-std::regex dice_expr("^\\s*(\\d+)\\+(\\d+)d(\\d+)\\s*$");
+std::regex dice_expr("^\\s*(-?\\d+)\\+(-?\\d+)d(-?\\d+)\\s*$");
 
 // Parse a dice specifier
 std::tuple<uint32_t, uint32_t, uint32_t> Parser::parse_dice() {
@@ -178,8 +178,8 @@ std::vector<std::shared_ptr<Builder>> Parser::parse_file(const std::string &file
 
 	std::shared_ptr<Parser> parser(
 		(type == FileType::monster) ?
-			new MonsterParser(file):
-			/*new ObjectParser(file)*/ nullptr
+			(Parser*) new MonsterParser(file) :
+			(Parser*) new ObjectParser(file)
 	);
 
 	return parser->parse();
@@ -247,4 +247,100 @@ void MonsterBuilder::validate() {
 	if (!has_damage) throw ParserError("Monster is missing DAM field");
 	if (!has_rarity) throw ParserError("Monster is missing RRTY field");
 	if (!has_symbol) throw ParserError("Monster is missing SYMB field");
+}
+
+
+// pick the appropriate parser for each field
+void ObjectParser::parse_field(const std::string &name) {
+	ObjectBuilder *builder = (ObjectBuilder*)$builder.get();
+
+	if (name == "NAME") {
+		// remove leading spaces
+		while (isspace(in.peek())) in.get();
+
+		std::getline(in, builder->name);
+		builder->has_name = true;
+	}
+	else if (name == "DESC") {
+		builder->desc = parse_text_block();
+		builder->has_desc = true;
+	}
+	else if (name == "TYPE") {
+		// remove leading spaces
+		while (isspace(in.peek())) in.get();
+
+		std::getline(in, builder->type);
+		builder->has_type = true;
+	}
+	else if (name == "COLOR") {
+		builder->color = parse_list();
+		builder->has_color = true;
+	}
+	else if (name == "HIT") {
+		builder->hit = parse_dice();
+		builder->has_hit = true;
+	}
+	else if (name == "DAM") {
+		builder->damage = parse_dice();
+		builder->has_dam = true;
+	}
+	else if (name == "DODGE") {
+		builder->dodge = parse_dice();
+		builder->has_dodge = true;
+	}
+	else if (name == "DEF") {
+		builder->defense = parse_dice();
+		builder->has_def = true;
+	}
+	else if (name == "WEIGHT") {
+		builder->weight = parse_dice();
+		builder->has_weight = true;
+	}
+	else if (name == "SPEED") {
+		builder->weight = parse_dice();
+		builder->has_speed = true;
+	}
+	else if (name == "ATTR") {
+		builder->attr = parse_dice();
+		builder->has_attr = true;
+	}
+	else if (name == "VAL") {
+		builder->value = parse_dice();
+		builder->has_val = true;
+	}
+	else if (name == "ART") {
+		std::string word;
+		in >> word;
+
+		builder->artifact = word == "TRUE";
+		builder->has_art = true;
+	}
+	else if (name == "RRTY") {
+		in >> builder->rarity;
+		builder->has_rrty = true;
+	}
+	else {
+		throw ParserError("Unknown field name " + name);
+	}
+}
+
+Builder* ObjectParser::alloc_builder() {
+	return new ObjectBuilder();
+}
+
+void ObjectBuilder::validate() {
+	if (!has_name) throw ParserError("Object is missing name field");
+	if (!has_desc) throw ParserError("Object is missing desc field");
+	if (!has_type) throw ParserError("Object is missing type field");
+	if (!has_color) throw ParserError("Object is missing color field");
+	if (!has_hit) throw ParserError("Object is missing hit field");
+	if (!has_dam) throw ParserError("Object is missing dam field");
+	if (!has_dodge) throw ParserError("Object is missing dodge field");
+	if (!has_def) throw ParserError("Object is missing def field");
+	if (!has_weight) throw ParserError("Object is missing weight field");
+	if (!has_speed) throw ParserError("Object is missing speed field");
+	if (!has_attr) throw ParserError("Object is missing attr field");
+	if (!has_val) throw ParserError("Object is missing val field");
+	if (!has_art) throw ParserError("Object is missing art field");
+	if (!has_rrty) throw ParserError("Object is missing rrty field");
 }
