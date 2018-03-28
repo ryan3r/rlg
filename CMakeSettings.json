@@ -2,7 +2,8 @@
   "configurations": [
     {
       "name": "Debug Rlg",
-      "generator": "Visual Studio 15 2017 Win64"
+      "generator": "Visual Studio 15 2017 Win64",
+      "configurationType": "Debug"
     }
   ]
 }
