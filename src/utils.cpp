@@ -9,9 +9,11 @@
 #include <utils.hpp>
 
 #ifdef _WIN32
+#undef MOUSE_MOVED
 #include <direct.h>
 
 #define mkdir(dir, perm) _mkdir(dir)
+#pragma warning(disable:4996)
 #endif
 
 int makedirectory(char *dir)

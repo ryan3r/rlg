@@ -11,7 +11,9 @@
 #include <ncurses.h>
 #else
 #include <curses.h>
+#undef MOUSE_MOVED
 #include <windows.h>
+#define strncpy strncpy_s
 #endif
 
 #include <fstream>
@@ -210,7 +212,7 @@ bool should_show_help() {
     }
 
     // write the new version
-    strcpy(version, RLG_VERSION);
+    strncpy(version, RLG_VERSION, sizeof(RLG_VERSION));
 
     std::ofstream vfile_out(filename);
 

@@ -152,6 +152,7 @@ typedef struct
 #define PDC_MOUSE_WHEEL_LEFT    0x0080
 #define PDC_MOUSE_WHEEL_RIGHT   0x0100
 
+#undef MOUSE_MOVED
 #define A_BUTTON_CHANGED        (Mouse_status.changes & 7)
 #define MOUSE_MOVED             (Mouse_status.changes & PDC_MOUSE_MOVED)
 #define MOUSE_POS_REPORT        (Mouse_status.changes & PDC_MOUSE_POSITION)

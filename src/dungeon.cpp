@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #else
+#undef MOUSE_MOVED
 #include <windows.h>
 #endif
 #include <limits.h>
@@ -707,6 +708,7 @@ std::string get_default_file(const char *target) {
     home = ".";
   }
   #else
+  #define strdup _strdup
   char *home;
   // get the size of the localappdata path
   DWORD env_size = GetEnvironmentVariable("LOCALAPPDATA", NULL, 0);
@@ -734,6 +736,8 @@ std::string get_default_file(const char *target) {
 
   #ifndef __linux__
   free(home);
+  #else
+  #undef strdup
   #endif
 
   return filename_s.str();
@@ -869,7 +873,7 @@ void dungeon_t::read_dungeon(std::string file) {
 
   // get the file size
   f.seekg(0, f.end);
-  long file_size = f.tellg();
+  std::streamoff file_size = f.tellg();
   f.seekg(0);
 
   // --- SEAM ---- (file_size == -1 if not file)
