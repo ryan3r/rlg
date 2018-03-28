@@ -16,7 +16,7 @@ Remove-Item -Recurse -Force rlg.dir 2> $null
 Remove-Item -Recurse -Force build 2> $null
 Remove-Item -Recurse -Force ALL_BUILD.vcxproj.user 2> $null
 Remove-Item -Recurse -Force rlg.vcxproj.user 2> $null
-Remove-Item -Recurse -Force pdcurs36.vcxproj 2> $null
-Remove-Item -Recurse -Force pdcurs36.vcxproj.filters 2> $null
-Remove-Item -Recurse -Force pdcurs36.dir 2> $null
+Remove-Item -Recurse -Force PDCurses.vcxproj 2> $null
+Remove-Item -Recurse -Force PDCurses.vcxproj.filters 2> $null
+Remove-Item -Recurse -Force PDCurses.dir 2> $null
 Remove-Item -Recurse -Force .vs 2> $null

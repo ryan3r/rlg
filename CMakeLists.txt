@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD 11)
 include_directories(rlg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if(WIN32)
-    include_directories("pdcurs36")
+    include_directories("PDCurses")
 
 	# build pdcurses
-	file(GLOB pdcurs_src "pdcurs36/wincon/*.c" "pdcurs36/pdcurses/*.c")
+	file(GLOB pdcurses_src "PDCurses/wincon/*.c" "PDCurses/pdcurses/*.c")
 
-	add_library(pdcurs36 ${pdcurs_src})
+	add_library(PDCurses ${pdcurses_src})
 
-	target_link_libraries(pdcurs36 ${EXTRA_LIBS})
+	target_link_libraries(PDCurses ${EXTRA_LIBS})
 
 	# Make sure rlg is the project that is open when visual studio starts
     if(${CMAKE_VERSION} VERSION_GREATER "3.6.0")
@@ -36,7 +36,7 @@ add_executable(rlg ${rlg_src})
 
 # Link libraries
 if (WIN32)
-    set(EXTRA_LIBS ${EXTRA_LIBS} pdcurs36)
+    set(EXTRA_LIBS ${EXTRA_LIBS} PDCurses)
 else()
     set(EXTRA_LIBS ${EXTRA_LIBS} ${CURSES_LIBRARIES})
 endif()

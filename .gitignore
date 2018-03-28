@@ -20,11 +20,9 @@ Makefile
 rlg.dir
 ALL_BUILD.vcxproj.user
 rlg.vcxproj.user
-pdcurs36.vcxproj
-pdcurs36.vcxproj.filters
-pdcurs36.dir
+PDCurses.vcxproj
+PDCurses.vcxproj.filters
+PDCurses.dir
 .vs
 
 rlg-log.txt
-
-pdcurs36

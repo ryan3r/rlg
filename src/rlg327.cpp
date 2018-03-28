@@ -88,8 +88,9 @@ void usage(char *name)
   exit(-1);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    /*
 	try {
 		auto builders = Parser::parse_file(get_default_file("monster_desc.txt"));
 
@@ -130,6 +131,7 @@ int main()
 	}
 
 #ifdef NEVER_DEFINED
+*/
   std::ofstream log_file("rlg-log.txt");
   std::streambuf *orig_log_rd = std::clog.rdbuf();
   std::clog.rdbuf(log_file.rdbuf());
@@ -386,6 +388,6 @@ int main()
   }
 
   std::clog.rdbuf(orig_log_rd);
-#endif
+//#endif
   return 0;
 }
