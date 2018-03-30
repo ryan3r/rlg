@@ -118,16 +118,19 @@ void pc_t::next_pos(pair_t &next) {
       render_dungeon();
       goto top;
 
+#ifdef CHEETS
     case 'f':
       is_fogged = !is_fogged;
       render_dungeon();
       goto top;
+#endif
 
     case '?': case '/':
       help();
       render_dungeon();
       goto top;
 
+#ifdef CHEETS
     case 't':
       // enter teleporting mode
       if(!teleporing) {
@@ -171,18 +174,21 @@ void pc_t::next_pos(pair_t &next) {
         render_dungeon();
         goto top;
       }
+#endif
 
     default:
       mprintf("%c is not a valid command. (press ? for help)", key);
       goto top;
   }
 
+#ifdef CHEETS
   // move the cursor and rerender
   if(teleporing) {
     teleport_target = next;
     d->render_dungeon();
     goto top;
   }
+#endif
 }
 
 bool pc_t::in_room(uint32_t room) {
