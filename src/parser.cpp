@@ -84,7 +84,7 @@ std::vector<std::string> Parser::parse_list() {
 std::regex dice_expr("^\\s*(-?\\d+)\\+(-?\\d+)d(-?\\d+)\\s*$");
 
 // Parse a dice specifier
-std::tuple<uint32_t, uint32_t, uint32_t> Parser::parse_dice() {
+Dice Parser::parse_dice() {
 	std::string line;
 	in >> line;
 
@@ -98,7 +98,7 @@ std::tuple<uint32_t, uint32_t, uint32_t> Parser::parse_dice() {
 		throw ParserError(error.str());
 	}
 
-	return std::make_tuple(stoi(matches[1].str()), stoi(matches[2].str()), stoi(matches[3].str()));
+	return Dice(stoi(matches[1].str()), stoi(matches[2].str()), stoi(matches[3].str()));
 }
 
 // Parse a block of text like the DESC field

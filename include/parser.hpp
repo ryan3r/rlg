@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <cstring>
 #include <tuple>
+#include <dice.hpp>
+#include <functional>
 
 enum class FileType {
 	monster,
@@ -46,7 +48,7 @@ protected:
 	Parser(std::istream &i, FileType t) : in{ i }, type{ t } {}
 
 	std::vector<std::string> parse_list();
-	std::tuple<uint32_t, uint32_t, uint32_t> parse_dice();
+	Dice parse_dice();
 	std::string parse_text_block();
 
 	virtual void parse_field(const std::string&) = 0;
@@ -81,10 +83,10 @@ public:
 	std::string name;
 	std::string desc;
 	std::vector<std::string> color;
-	std::tuple<uint32_t, uint32_t, uint32_t> speed;
+	Dice speed;
 	std::vector<std::string> abilities;
-	std::tuple<uint32_t, uint32_t, uint32_t> hp;
-	std::tuple<uint32_t, uint32_t, uint32_t> damage;
+	Dice hp;
+	Dice damage;
 	uint16_t rarity;
 	char symbol;
 
@@ -120,14 +122,14 @@ public:
 	std::string desc;
 	std::string type;
 	std::vector<std::string> color;
-	std::tuple<uint32_t, uint32_t, uint32_t> hit;
-	std::tuple<uint32_t, uint32_t, uint32_t> damage;
-	std::tuple<uint32_t, uint32_t, uint32_t> dodge;
-	std::tuple<uint32_t, uint32_t, uint32_t> defense;
-	std::tuple<uint32_t, uint32_t, uint32_t> weight;
-	std::tuple<uint32_t, uint32_t, uint32_t> speed;
-	std::tuple<uint32_t, uint32_t, uint32_t> attr;
-	std::tuple<uint32_t, uint32_t, uint32_t> value;
+	Dice hit;
+	Dice damage;
+	Dice dodge;
+	Dice defense;
+	Dice weight;
+	Dice speed;
+	Dice attr;
+	Dice value;
 	bool artifact;
 	uint16_t rarity;
 

@@ -7,6 +7,8 @@
 #include <vector>
 #include <const.hpp>
 #include <pc.hpp>
+#include <memory>
+#include <parser.hpp>
 
 #ifdef __linux__
 #define SAVE_DIR               ".rlg327"
@@ -72,8 +74,9 @@ public:
    * information from the current event.                                   */
   uint32_t time;
   uint32_t is_new;
+  std::vector<std::shared_ptr<Builder>> monster_builders;
 
-  dungeon_t();
+  dungeon_t(std::vector<std::shared_ptr<Builder>>);
 
   ~dungeon_t() {
     heap_delete(&events);

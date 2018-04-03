@@ -588,7 +588,8 @@ void dungeon_t::render_dungeon() {
         attroff(COLOR_PAIR(1));
       }
       else if (charpair(p)) {
-        int color = (charpair(p)->symbol != '@') + 1;
+		  int color = charpair(p)->symbol == '@' ?
+			  1 : resolve_color(((npc_t*)charpair(p))->color[0]);
 
         attron(COLOR_PAIR(color));
         mvaddch(p.y + 1, p.x, charpair(p)->symbol);
@@ -626,7 +627,7 @@ void dungeon_t::render_dungeon() {
   }
 }
 
-dungeon_t::dungeon_t()
+dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m): monster_builders{m}
 {
   empty_dungeon();
   memset(&character, 0, sizeof(character));
@@ -637,7 +638,7 @@ dungeon_t::dungeon_t()
 
 void dungeon_t::init() {
   pc->config_pc();
-  npc_t::gen_monsters(this);
+  npc_t::gen_monsters(this, monster_builders);
   place_stairs();
 }
 
@@ -730,7 +731,7 @@ std::string get_default_file(const char *target) {
 
   char *path = strdup(filename_s.str().c_str());
   makedirectory(path);
-  delete path;
+  free(path);
 
   filename_s << "/" << target;
 

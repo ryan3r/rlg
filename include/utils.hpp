@@ -7,6 +7,8 @@
 #include <curses.h>
 #endif
 
+#include <string>
+
 /* Returns true if random float in [0,1] is less than *
  * numerator/denominator.  Uses only integer math.    */
 #define rand_under(numerator, denominator) \
@@ -22,3 +24,5 @@ int makedirectory(char *dir);
   clrtoeol();                    \
   mvprintw(0, 0, __VA_ARGS__);   \
 }
+
+int resolve_color(std::string);

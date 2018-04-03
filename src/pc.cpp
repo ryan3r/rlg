@@ -108,9 +108,8 @@ void pc_t::next_pos(pair_t &next) {
 
       // regenerate the entire dungeon
       d->regenerate();
-
-      d->mappair(d->pc->position) = key == '<' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up;
-
+	  return;
+	
       break;
 
     case 'm':
@@ -242,7 +241,8 @@ void pc_t::render_dungeon() {
       }
       else if (d->charpair(p) && can_see(p) && -VISUAL_DISTANCE <= d->pc->position.x - p.x && d->pc->position.x - p.x <= VISUAL_DISTANCE &&
             d->pc->position.y - p.y <= VISUAL_DISTANCE && d->pc->position.y - p.y >= -VISUAL_DISTANCE) {
-        int color = (d->charpair(p)->symbol != '@') + 1;
+        int color = d->charpair(p)->symbol == '@' ?
+			1 : resolve_color(((npc_t*) d->charpair(p))->color[0]);
 
         attron(COLOR_PAIR(color));
         mvaddch(p.y + 1, p.x, d->charpair(p)->symbol);

@@ -19,6 +19,7 @@
 #include <utils.hpp>
 #include <path.hpp>
 #include <event.hpp>
+#include <iostream>
 
 void do_combat(dungeon_t *d, character_t *atk, character_t *def) {
   if (def->alive) {
@@ -65,8 +66,25 @@ void do_moves(dungeon_t *d)
         d->charpair(c->position) = NULL;
       }
       if (c != d->pc) {
-        event_delete(e);
+		npc_t* monster = (npc_t*) c;
+
+		// don't allow any more instances of this monster
+		if (monster->has_attr(npc_t::UNIQUE)) {
+			auto it = d->monster_builders.begin();
+
+			for (; it != d->monster_builders.end(); ++it) {
+				MonsterBuilder *builder = dynamic_cast<MonsterBuilder*>((*it).get());
+
+				if (builder->name == monster->name) {
+					break;
+				}
+			}
+
+			if (it != d->monster_builders.end())
+				d->monster_builders.erase(it);
+		}
       }
+	  event_delete(e);
       continue;
     }
 

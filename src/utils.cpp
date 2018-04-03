@@ -5,8 +5,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <utils.hpp>
+#include <algorithm>
 
 #ifdef _WIN32
 #undef MOUSE_MOVED
@@ -49,4 +49,20 @@ int makedirectory(char *dir)
   }
 
   return 0;
+}
+
+int resolve_color(std::string color) {
+	// make it case insensitive
+	std::transform(color.begin(), color.end(), color.begin(), tolower);
+
+	if (color == "cyan") return 1;
+	if (color == "red") return 2;
+	if (color == "green") return 3;
+	if (color == "black") return 4;
+	if (color == "yellow") return 5;
+	if (color == "magenta") return 6;
+	if (color == "white") return 7;
+	if (color == "blue") return 8;
+
+	return 0;
 }

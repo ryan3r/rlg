@@ -6,6 +6,8 @@
 #include <character.hpp>
 #include <stdlib.h>
 #include <utils.hpp>
+#include <parser.hpp>
+#include <memory>
 
 class dungeon_t;
 
@@ -41,16 +43,23 @@ public:
 	static constexpr uint8_t TELEPATH = 1;
 	static constexpr uint8_t TUNNEL = 2;
 	static constexpr uint8_t ERRATIC = 3;
+	static constexpr uint8_t UNIQUE = 4;
 
 	int32_t attrs;
 	bool have_seen_pc = false;
 	pair_t pc_last_known_position;
+	std::string name;
+	std::vector<std::string> color;
+	int32_t damage;
+	std::string desc;
+	int32_t hp;
 
-	npc_t(dungeon_t *_d): character_t(_d, 'x', rand_range(5, 20), ++character_sequence_number), attrs{rand() & 0xf} {
-		symbol = symbols[attrs];
-	}
+	npc_t(dungeon_t *_d, char sym, int32_t s, int32_t a) : character_t(_d, sym, s, ++character_sequence_number), attrs{ a } {}
 
-	static void gen_monsters(dungeon_t *d);
+	// npc factory
+	static npc_t* from(dungeon_t*, MonsterBuilder*);
+
+	static void gen_monsters(dungeon_t *d, std::vector<std::shared_ptr<Builder>> builders);
 	virtual void next_pos(pair_t &next);
 
 	bool has_attr(uint8_t index) {

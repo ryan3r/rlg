@@ -1,6 +1,5 @@
 // Based on Jeremy's solution for 1.04
 #include <stdlib.h>
-
 #include <utils.hpp>
 #include <npc.hpp>
 #include <dungeon.hpp>
@@ -10,6 +9,9 @@
 #include <event.hpp>
 #include <pc.hpp>
 #include <string.h>
+#include <algorithm>
+#include <iostream>
+#include <set>
 
 uint32_t max_monster_cells(dungeon_t *d)
 {
@@ -29,7 +31,7 @@ inline uint16_t min(uint16_t a, uint16_t b) {
     return a < b ? a : b;
 }
 
-void npc_t::gen_monsters(dungeon_t *d)
+void npc_t::gen_monsters(dungeon_t *d, std::vector<std::shared_ptr<Builder>> builders)
 {
   uint32_t i;
   character_t *m;
@@ -37,6 +39,8 @@ void npc_t::gen_monsters(dungeon_t *d)
   pair_t p;
 
   d->num_monsters = min((uint32_t) d->max_monsters, max_monster_cells(d));
+
+  std::set<MonsterBuilder*> unique_created;
 
   for (i = 0; i < d->num_monsters; i++) {
     do {
@@ -49,11 +53,35 @@ void npc_t::gen_monsters(dungeon_t *d)
                              d->rooms[room].size.x - 1));
     } while (d->charpair(p));
 
-    m = new npc_t(d);
-    m->position = p;
-    d->charpair(p) = m;
+	for (;;) {
+		// no more builders stop trying to build monsters
+		if (builders.size() == 0 || builders.size() == unique_created.size()) {
+			d->num_monsters = i;
+			return;
+		}
 
-    heap_insert(&d->events, new_event(d, event_character_turn, m, 0));
+		MonsterBuilder *builder = dynamic_cast<MonsterBuilder*>(
+			builders[rand_range(0, builders.size() - 1)].get());
+
+		if (rand_range(0, 99) >= builder->rarity) continue;
+
+		m = npc_t::from(d, builder);
+		m->position = p;
+		d->charpair(p) = m;
+
+		// check if this monster is unique
+		if (((npc_t*) m)->has_attr(npc_t::UNIQUE)) {
+			// already created can't recreate
+			if (unique_created.find(builder) != unique_created.end()) {
+				continue;
+			}
+
+			unique_created.insert(builder);
+		}
+
+		heap_insert(&d->events, new_event(d, event_character_turn, m, 0));
+		break;
+	}
   }
 }
 
@@ -502,4 +530,34 @@ void npc_t::next_pos(pair_t &next)
 	if(attrs == 0x0d) next_pos_0d(next);
 	if(attrs == 0x0e) next_pos_0e(next);
 	if(attrs == 0x0f) next_pos_0f(next);
+}
+
+
+// create an npc form a Builder
+// preconditon: Builder must have a dynamic type of MonsterBuilder
+npc_t* npc_t::from(dungeon_t *d, MonsterBuilder* builder) {
+	int32_t attrs = 0;
+
+	for (auto &attr_name : builder->abilities) {
+		// make it case insensitive
+		std::transform(attr_name.begin(), attr_name.end(), attr_name.begin(), tolower);
+
+		if (attr_name == "smart") attrs |= (1 << npc_t::SMART);
+		else if (attr_name == "tele") attrs |= (1 << npc_t::TELEPATH);
+		else if (attr_name == "tunnel") attrs |= (1 << npc_t::TUNNEL);
+		else if (attr_name == "erratic") attrs |= (1 << npc_t::ERRATIC);
+		else if (attr_name == "uniq") attrs |= (1 << npc_t::UNIQUE);
+		//else std::cerr << "Invalid " << attr_name << std::endl;
+		//else throw std::invalid_argument("Invalid monster ability " + attr_name);
+	}
+
+	npc_t *npc = new npc_t(d, builder->symbol, builder->speed.roll(), attrs);
+
+	npc->name = builder->name;
+	npc->color = builder->color;
+	npc->damage = builder->damage.roll();
+	npc->desc = builder->desc;
+	npc->hp = builder->hp.roll();
+
+	return npc;
 }

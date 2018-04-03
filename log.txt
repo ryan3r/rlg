@@ -1,0 +1,78 @@
+==562== Memcheck, a memory error detector
+==562== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==562== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==562== Command: ./rlg
+==562== Parent PID: 2
+==562== 
+==562== 
+==562== Process terminating with default action of signal 6 (SIGABRT)
+==562==    at 0x5852428: raise (raise.c:54)
+==562==    by 0x5854029: abort (abort.c:89)
+==562==    by 0x531484C: __gnu_cxx::__verbose_terminate_handler() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21)
+==562==    by 0x53126B5: ??? (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21)
+==562==    by 0x5312700: std::terminate() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21)
+==562==    by 0x5312918: __cxa_throw (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21)
+==562==    by 0x4652B5: npc_t::gen_monsters(dungeon_t*, std::vector<std::shared_ptr<Builder>, std::allocator<std::shared_ptr<Builder> > >) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46083F: dungeon_t::init() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x4601EB: dungeon_t::gen_dungeon() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x498BBB: main (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562== 
+==562== HEAP SUMMARY:
+==562==     in use at exit: 93,737 bytes in 20 blocks
+==562==   total heap usage: 23,249 allocs, 23,229 frees, 788,142 bytes allocated
+==562== 
+==562== 32 bytes in 1 blocks are definitely lost in loss record 3 of 16
+==562==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==562==    by 0x468755: __gnu_cxx::new_allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::allocate(unsigned long, void const*) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x4684FC: std::allocator_traits<std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::allocate(std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >&, unsigned long) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46829D: std::_Vector_base<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_allocate(unsigned long) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46D46D: void std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_emplace_back_aux<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46CD94: std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::push_back(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x4695F3: Parser::parse_list[abi:cxx11]() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46A3EE: MonsterParser::parse_field(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46A014: Parser::parse() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46A24B: Parser::parse_file(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x498252: main (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562== 
+==562== 36 bytes in 1 blocks are definitely lost in loss record 4 of 16
+==562==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==562==    by 0x58A8489: strdup (strdup.c:42)
+==562==    by 0x46C25B: ParserError::what() const (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46A0E7: Parser::parse() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46A24B: Parser::parse_file(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x498252: main (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562== 
+==562== 64 bytes in 1 blocks are definitely lost in loss record 7 of 16
+==562==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==562==    by 0x468755: __gnu_cxx::new_allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::allocate(unsigned long, void const*) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x4684FC: std::allocator_traits<std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::allocate(std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >&, unsigned long) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46829D: std::_Vector_base<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_allocate(unsigned long) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46D46D: void std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_emplace_back_aux<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46CD94: std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::push_back(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x4695F3: Parser::parse_list[abi:cxx11]() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46A48D: MonsterParser::parse_field(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46A014: Parser::parse() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46A24B: Parser::parse_file(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x498252: main (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562== 
+==562== 144 bytes in 1 blocks are possibly lost in loss record 10 of 16
+==562==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==562==    by 0x531141F: __cxa_allocate_exception (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21)
+==562==    by 0x465293: npc_t::gen_monsters(dungeon_t*, std::vector<std::shared_ptr<Builder>, std::allocator<std::shared_ptr<Builder> > >) (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x46083F: dungeon_t::init() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x4601EB: dungeon_t::gen_dungeon() (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562==    by 0x498BBB: main (in /mnt/c/Users/ryan3/Documents/projects/cs327/rlg)
+==562== 
+==562== LEAK SUMMARY:
+==562==    definitely lost: 132 bytes in 3 blocks
+==562==    indirectly lost: 0 bytes in 0 blocks
+==562==      possibly lost: 144 bytes in 1 blocks
+==562==    still reachable: 93,461 bytes in 16 blocks
+==562==                       of which reachable via heuristic:
+==562==                         stdstring          : 53 bytes in 1 blocks
+==562==         suppressed: 0 bytes in 0 blocks
+==562== Reachable blocks (those to which a pointer was found) are not shown.
+==562== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==562== 
+==562== For counts of detected and suppressed errors, rerun with: -v
+==562== ERROR SUMMARY: 4 errors from 4 contexts (suppressed: 0 from 0)

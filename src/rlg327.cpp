@@ -90,53 +90,14 @@ void usage(char *name)
 
 int main(int argc, char *argv[])
 {
-    /*
-	try {
-		auto builders = Parser::parse_file(get_default_file("monster_desc.txt"));
-
-		for (std::shared_ptr<Builder> &builder_ptr : builders) {
-			MonsterBuilder *builder = (MonsterBuilder*)builder_ptr.get();
-
-			std::cout << builder->name << std::endl;
-			std::cout << builder->desc << std::endl;
-			std::cout << builder->symbol << std::endl;
-
-			for (auto &color : builder->color) {
-				std::cout << color << " ";
-			}
-			std::cout << std::endl;
-
-			std::cout << std::get<0>(builder->speed) << "+" << std::get<1>(builder->speed)
-				<< "d" << std::get<2>(builder->speed) << std::endl;
-
-			for (auto &abil : builder->abilities) {
-				std::cout << abil << " ";
-			}
-
-			std::cout << std::endl;
-
-			std::cout << std::get<0>(builder->hp) << "+" << std::get<1>(builder->hp)
-				<< "d" << std::get<2>(builder->hp) << std::endl;
-
-			std::cout << std::get<0>(builder->damage) << "+" << std::get<1>(builder->damage)
-				<< "d" << std::get<2>(builder->damage) << std::endl;
-
-			std::cout << builder->rarity << std::endl;
-
-			std::cout << std::endl;
-		}
-	}
-	catch (ParserError e) {
-		std::cerr << e.what() << std::endl;
-	}
-
-#ifdef NEVER_DEFINED
-*/
   std::ofstream log_file("rlg-log.txt");
   std::streambuf *orig_log_rd = std::clog.rdbuf();
   std::clog.rdbuf(log_file.rdbuf());
 
-  dungeon_t d;
+  dungeon_t d(
+	  Parser::parse_file(get_default_file("monster_desc.txt"))
+  );
+
   time_t seed;
   int i;
   uint32_t do_load, do_save, do_seed, do_image, do_save_seed,
@@ -310,6 +271,9 @@ int main(int argc, char *argv[])
   init_pair(3, COLOR_GREEN, COLOR_BLACK);
   init_pair(4, COLOR_BLACK, COLOR_WHITE);
   init_pair(5, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+  init_pair(7, COLOR_WHITE, COLOR_BLACK);
+  init_pair(8, COLOR_BLUE, COLOR_BLACK);
 
   if(should_show_help()) {
     d.pc->look_around();
@@ -388,6 +352,6 @@ int main(int argc, char *argv[])
   }
 
   std::clog.rdbuf(orig_log_rd);
-//#endif
+
   return 0;
 }
