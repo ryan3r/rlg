@@ -247,7 +247,16 @@ void pc_t::render_dungeon() {
         attron(COLOR_PAIR(color));
         mvaddch(p.y + 1, p.x, d->charpair(p)->symbol);
         attroff(COLOR_PAIR(color));
-      } else {
+      }
+	  else if (d->objpair(p) && can_see(p) && -VISUAL_DISTANCE <= d->pc->position.x - p.x && d->pc->position.x - p.x <= VISUAL_DISTANCE &&
+		  d->pc->position.y - p.y <= VISUAL_DISTANCE && d->pc->position.y - p.y >= -VISUAL_DISTANCE) {
+		  int color = resolve_color(d->objpair(p)->color[0]);
+
+		  attron(COLOR_PAIR(color));
+		  mvaddch(p.y + 1, p.x, d->objpair(p)->symbol());
+		  attroff(COLOR_PAIR(color));
+	  }
+	  else {
         switch (mappair(p)) {
         case terrain_type_t::staircase_down:
           attron(COLOR_PAIR(3));

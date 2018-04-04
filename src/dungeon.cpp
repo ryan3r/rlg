@@ -594,7 +594,15 @@ void dungeon_t::render_dungeon() {
         attron(COLOR_PAIR(color));
         mvaddch(p.y + 1, p.x, charpair(p)->symbol);
         attroff(COLOR_PAIR(color));
-      } else {
+      }
+	  else if (objpair(p)) {
+		  int color = resolve_color(objpair(p)->color[0]);
+
+		  attron(COLOR_PAIR(color));
+		  mvaddch(p.y + 1, p.x, objpair(p)->symbol());
+		  attroff(COLOR_PAIR(color));
+	  }
+	  else {
         switch (mappair(p)) {
         case terrain_type_t::staircase_down:
           attron(COLOR_PAIR(3));
@@ -627,10 +635,12 @@ void dungeon_t::render_dungeon() {
   }
 }
 
-dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m): monster_builders{m}
+dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m, std::vector<std::shared_ptr<Builder>> o):
+	monster_builders{m}, object_builders{o}
 {
   empty_dungeon();
   memset(&character, 0, sizeof(character));
+  memset(&objects, 0, sizeof(objects));
   memset(&events, 0, sizeof (events));
   heap_init(&events, compare_events, event_delete);
   pc = new pc_t(this);
@@ -639,6 +649,7 @@ dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m): monster_builders{
 void dungeon_t::init() {
   pc->config_pc();
   npc_t::gen_monsters(this, monster_builders);
+  Object::gen_objects(this, object_builders);
   place_stairs();
 }
 
@@ -649,6 +660,13 @@ void dungeon_t::regenerate() {
 
   rooms.clear();
   heap_delete(&events);
+
+  for (size_t y = 0; y < DUNGEON_Y; ++y)
+	  for (size_t x = 0; x < DUNGEON_X; ++x)
+		  if (objects[y][x]) {
+			  delete objects[y][x];
+			  objects[y][x] = nullptr;
+		  }
 
   empty_dungeon();
 

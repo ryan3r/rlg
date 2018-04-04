@@ -95,7 +95,8 @@ int main(int argc, char *argv[])
   std::clog.rdbuf(log_file.rdbuf());
 
   dungeon_t d(
-	  Parser::parse_file(get_default_file("monster_desc.txt"))
+	  Parser::parse_file(get_default_file("monster_desc.txt")),
+	  Parser::parse_file(get_default_file("object_desc.txt"))
   );
 
   time_t seed;

@@ -9,6 +9,7 @@
 #include <pc.hpp>
 #include <memory>
 #include <parser.hpp>
+#include <object.hpp>
 
 #ifdef __linux__
 #define SAVE_DIR               ".rlg327"
@@ -35,6 +36,7 @@ private:
    * of overhead to the memory system.                                    */
   uint8_t hardness[DUNGEON_Y][DUNGEON_X];
   character_t *character[DUNGEON_Y][DUNGEON_X];
+  Object *objects[DUNGEON_Y][DUNGEON_X];
 
   int32_t adjacent_to_room(int32_t, int32_t);
   void connect_two_rooms(const room_t*, const room_t*);
@@ -75,11 +77,20 @@ public:
   uint32_t time;
   uint32_t is_new;
   std::vector<std::shared_ptr<Builder>> monster_builders;
+  std::vector<std::shared_ptr<Builder>> object_builders;
 
-  dungeon_t(std::vector<std::shared_ptr<Builder>>);
+  dungeon_t(std::vector<std::shared_ptr<Builder>>, std::vector<std::shared_ptr<Builder>>);
 
   ~dungeon_t() {
     heap_delete(&events);
+
+	for(size_t y = 0; y < DUNGEON_Y; ++y)
+		for (size_t x = 0; x < DUNGEON_X; ++x)
+			if(objects[y][x]) {
+				delete objects[y][x];
+				objects[y][x] = nullptr;
+			}
+
   }
 
   void gen_dungeon();
@@ -103,6 +114,9 @@ public:
 
   character_t*& charpair(const pair_t &pair) { return character[pair.y][pair.x]; }
   character_t*& charxy(int32_t x, int32_t y) { return character[y][x]; }
+
+  Object*& objpair(const pair_t &pair) { return objects[pair.y][pair.x]; }
+  Object*& objxy(int32_t x, int32_t y) { return objects[y][x]; }
 };
 
 std::string get_default_file(const char *target);
