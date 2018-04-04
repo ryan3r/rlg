@@ -1,4 +1,1 @@
-Add monster and object parsing.  Both parsers are derived from a base parser class
-that implements the core parsing logic.  Each child overrides the methods that
-determine how to process each field. To parse a file run Parser::parse_file which
-will determine which type of file you have given it based on the header.
+Generate monsters and objects from monster and object descriptions.
