@@ -8,13 +8,17 @@
 #include <tuple>
 #include <dice.hpp>
 #include <functional>
+#include <parser.hpp>
 
 enum class FileType {
 	monster,
 	object
 };
 
-class ParserError : public RlgError {};
+class ParserError : public RlgError {
+public:
+	ParserError(std::string m): RlgError(m) {}
+};
 
 class Builder {
 public:

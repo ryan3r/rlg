@@ -2,7 +2,7 @@
 #include <object.hpp>
 
 void Object::gen_objects(dungeon_t *d, std::vector<std::shared_ptr<Builder>> builders) {
-	for (uint32_t i = 0; i < rand_range(10, 20); i++) {
+	for (int32_t i = 0; i < rand_range(10, 20); i++) {
 		pair_t p;
 
 		// pick a location for the object
