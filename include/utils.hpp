@@ -26,3 +26,19 @@ int makedirectory(char *dir);
 }
 
 int resolve_color(std::string);
+
+class RlgError : public std::exception {
+private:
+	std::string msg;
+
+public:
+	RlgError(const std::string s) : msg{ s } {}
+
+	const char* what() const noexcept {
+#ifdef _WIN32
+		return _strdup(msg.c_str());
+#else
+		return strdup(msg.c_str());
+#endif
+	}
+};

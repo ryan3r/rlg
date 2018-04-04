@@ -14,21 +14,7 @@ enum class FileType {
 	object
 };
 
-class ParserError: public std::exception {
-private:
-	std::string msg;
-
-public:
-	ParserError(const std::string s) : msg{ s } {}
-
-	const char* what() const noexcept {
-		#ifdef _WIN32
-		return _strdup(msg.c_str());
-		#else
-		return strdup(msg.c_str());
-		#endif
-	}
-};
+class ParserError : public RlgError {};
 
 class Builder {
 public:
