@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <path.hpp>
 
 const char *victory =
   "\n                                       o\n"
@@ -287,6 +288,21 @@ int main(int argc, char *argv[])
     d.pc->look_around();
     d.pc->render_dungeon();
     do_moves(&d);
+
+	if (d.pc->alive) {
+		pair_t next;
+		pc_t* c = d.pc;
+
+		c->next_pos(next);
+
+		// the dungeon has been regrenerated
+		if (c != d.pc) continue;
+
+		move_character(&d, c, next);
+
+		dijkstra(&d);
+		dijkstra_tunnel(&d);
+	}
   }
 
   // print the victory/defeat artwork

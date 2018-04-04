@@ -109,8 +109,6 @@ void pc_t::next_pos(pair_t &next) {
       // regenerate the entire dungeon
       d->regenerate();
 	  return;
-	
-      break;
 
     case 'm':
       list_monsters(d);

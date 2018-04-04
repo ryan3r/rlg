@@ -51,8 +51,8 @@ void move_character(dungeon_t *d, character_t *c, pair_t &next)
 void do_moves(dungeon_t *d)
 {
   pair_t next;
-  character_t *c;
-  event_t *e;
+  character_t *c = nullptr;
+  event_t *e = nullptr;
 
   while (d->pc->alive &&
          (e = (event_t*) heap_remove_min(&d->events)) &&
@@ -89,24 +89,20 @@ void do_moves(dungeon_t *d)
     }
 
     c->next_pos(next);
+
     move_character(d, c, next);
 
     heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
   }
 
-  if (d->pc->alive && e->c == d->pc) {
-    c = e->c;
-    d->time = e->time;
+  // update the pc event
+  if (e == nullptr) return;
 
-    heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
+  c = e->c;
 
-    c->next_pos(next);
+  d->time = e->time;
 
-    move_character(d, c, next);
-
-    dijkstra(d);
-    dijkstra_tunnel(d);
-  }
+  heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
 }
 
 void dir_nearest_wall(character_t *c, pair_t &dir)
