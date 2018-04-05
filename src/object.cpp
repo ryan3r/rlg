@@ -6,13 +6,15 @@ void Object::gen_objects(dungeon_t *d, std::vector<std::shared_ptr<Builder>> bui
 		pair_t p;
 
 		// pick a location for the object
-		uint32_t room = rand_range(1, d->rooms.size() - 1);
-		p.y = rand_range(d->rooms[room].position.y,
-			(d->rooms[room].position.y +
-				d->rooms[room].size.y - 1));
-		p.x = rand_range(d->rooms[room].position.x,
-			(d->rooms[room].position.x +
-				d->rooms[room].size.x - 1));
+		do {
+			uint32_t room = rand_range(1, d->rooms.size() - 1);
+			p.y = rand_range(d->rooms[room].position.y,
+				(d->rooms[room].position.y +
+					d->rooms[room].size.y - 1));
+			p.x = rand_range(d->rooms[room].position.x,
+				(d->rooms[room].position.x +
+					d->rooms[room].size.x - 1));
+		} while(d->objpair(p));
 
 		// try to create an object
 		while (builders.size() > 0) {

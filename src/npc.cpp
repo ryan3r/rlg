@@ -73,6 +73,7 @@ void npc_t::gen_monsters(dungeon_t *d, std::vector<std::shared_ptr<Builder>> bui
 		if (((npc_t*) m)->has_attr(npc_t::UNIQUE)) {
 			// already created can't recreate
 			if (unique_created.find(builder) != unique_created.end()) {
+                delete m;
 				continue;
 			}
 

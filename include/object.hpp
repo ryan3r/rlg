@@ -1,7 +1,7 @@
 #pragma once
 #include <parser.hpp>
-
 #include <algorithm>
+#include <iostream>
 
 class dungeon_t;
 
@@ -15,7 +15,8 @@ public:
 	}
 
 	static Object * from(ObjectBuilder *builder) {
-		return new Object(builder->type, builder->color);
+		Object *o = new Object(builder->type, builder->color);
+		return o;
 	}
 
 	static void gen_objects(dungeon_t*, std::vector<std::shared_ptr<Builder>>);

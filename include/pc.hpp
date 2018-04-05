@@ -19,6 +19,8 @@ public:
   pair_t teleport_target;
   // teleporting mode
   bool teleporing = false;
+  // we want to regenerate
+  bool regenerate_dungeon = false;
 
   pc_t(dungeon_t *d): character_t(d, '@', PC_SPEED, 0) {
     // initialize the fog of war map

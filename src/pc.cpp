@@ -107,7 +107,7 @@ void pc_t::next_pos(pair_t &next) {
       }
 
       // regenerate the entire dungeon
-      d->regenerate();
+	  regenerate_dungeon = true;
 	  return;
 
     case 'm':

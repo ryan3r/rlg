@@ -10,6 +10,8 @@
 #include <functional>
 #include <parser.hpp>
 
+#include <iostream>
+
 enum class FileType {
 	monster,
 	object

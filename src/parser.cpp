@@ -176,7 +176,7 @@ std::vector<std::shared_ptr<Builder>> Parser::parse_file(const std::string &file
 
 	FileType type = parse_header(file);
 
-	std::shared_ptr<Parser> parser(
+	std::unique_ptr<Parser> parser(
 		(type == FileType::monster) ?
 			(Parser*) new MonsterParser(file) :
 			(Parser*) new ObjectParser(file)

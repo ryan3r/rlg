@@ -90,7 +90,6 @@ public:
 				delete objects[y][x];
 				objects[y][x] = nullptr;
 			}
-
   }
 
   void gen_dungeon();

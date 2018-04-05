@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 		SetConsoleTitle("rlg327");
 
 		// resize the window
-		SMALL_RECT window_size = { 0, 0, 80, 24 };
+		SMALL_RECT window_size = { 0, 0, DUNGEON_X, DUNGEON_Y };
 		SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), 1, &window_size);
 #endif
 
@@ -292,19 +292,8 @@ int main(int argc, char *argv[])
 			d.pc->render_dungeon();
 			do_moves(&d);
 
-			if (d.pc->alive) {
-				pair_t next;
-				pc_t* c = d.pc;
-
-				c->next_pos(next);
-
-				// the dungeon has been regrenerated
-				if (c != d.pc) continue;
-
-				move_character(&d, c, next);
-
-				dijkstra(&d);
-				dijkstra_tunnel(&d);
+			if (d.pc->regenerate_dungeon) {
+				d.regenerate();
 			}
 		}
 
