@@ -38,154 +38,195 @@ void pc_t::config_pc() {
   dijkstra_tunnel(d);
 }
 
+// handle keys to move the character/targeting pointer
+bool pc_t::move_keys(char key, pair_t &next) {
+	switch (key) {
+		case '8': case 'k': case 'w':
+			if (d->hardnessxy(next.x, next.y - 1) < (teleporting ? 255 : 1))
+				--next.y;
+			break;
+
+		case '2': case 'j': case 's':
+			if (d->hardnessxy(next.x, next.y + 1) < (teleporting ? 255 : 1))
+				++next.y;
+			break;
+
+		case '1': case 'b':
+			if (d->hardnessxy(next.x, next.y + 1) < (teleporting ? 255 : 1))
+				++next.y;
+			if (d->hardnessxy(next.x - 1, next.y) < (teleporting ? 255 : 1))
+				--next.x;
+			break;
+
+		case '4': case 'h': case 'a':
+			if (d->hardnessxy(next.x - 1, next.y) < (teleporting ? 255 : 1))
+				--next.x;
+			break;
+
+		case '7': case 'y':
+			if (d->hardnessxy(next.x - 1, next.y) < (teleporting ? 255 : 1))
+				--next.x;
+			if (d->hardnessxy(next.x, next.y - 1) < (teleporting ? 255 : 1))
+				--next.y;
+			break;
+
+		case '6': case 'l': case 'd':
+			if (d->hardnessxy(next.x + 1, next.y) < (teleporting ? 255 : 1))
+				++next.x;
+			break;
+
+		case '3': case 'n':
+			if (d->hardnessxy(next.x + 1, next.y) < (teleporting ? 255 : 1))
+				++next.x;
+			if (d->hardnessxy(next.x, next.y + 1) < (teleporting ? 255 : 1))
+				++next.y;
+			break;
+
+		case '9': case 'u':
+			if (d->hardnessxy(next.x + 1, next.y) < (teleporting ? 255 : 1))
+				++next.x;
+			if (d->hardnessxy(next.x, next.y - 1) < (teleporting ? 255 : 1))
+				--next.y;
+			break;
+
+		case '5': case ' ':
+			break;
+
+		default:
+			return false;
+	}
+
+	return true;
+}
+
+void pc_t::target(char exit_key, std::function<uint8_t(char)> handler) {
+	bool should_render = true;
+	teleporting = true;
+	teleport_target = position;
+
+	for (;;) {
+		if(should_render) d->render_dungeon();
+		should_render = true;
+
+		char key = getch();
+
+		// move the target
+		if (!move_keys(key, teleport_target)) {
+			// finish targeting
+			if (key == exit_key) break;
+			// cancel targeting
+			else if (key == 'Q' || key == 27) {
+				teleport_target = position;
+				break;
+			}
+			// pass on the key to the handler
+			else {
+				if (handler == nullptr) {
+					mprintf("%c is not a valid command. (press ? for help)", key);
+					should_render = false;
+				}
+				else {
+					uint8_t res = handler(key);
+					
+					// exit targeting
+					if (res == 1) break;
+
+					// unknown key
+					if (res == 2) {
+						mprintf("%c is not a valid command. (press ? for help)", key);
+						should_render = false;
+					}
+				}
+			}
+		}
+	}
+
+	teleporting = false;
+	d->render_dungeon();
+}
+
 void pc_t::next_pos(pair_t &next) {
-  char key;
-  next = position;
+	char key;
+	bool __is_fogged;
+	next = position;
 
-  top:
-  switch((key = getch())) {
-    case '8': case 'k': case 'w':
-      if(d->hardnessxy(next.x, next.y - 1) < (teleporing ? 255 : 1))
-        --next.y;
-      break;
+	top:
+	key = getch();
 
-    case '2': case 'j': case 's':
-      if(d->hardnessxy(next.x, next.y + 1) < (teleporing ? 255 : 1))
-        ++next.y;
-      break;
+	if (!move_keys(key, next)) {
+		switch (key) {
+		case 'Q':
+			d->pc->alive = false;
+			break;
 
-    case '1': case 'b':
-      if(d->hardnessxy(next.x, next.y + 1) < (teleporing ? 255 : 1))
-        ++next.y;
-      if(d->hardnessxy(next.x - 1, next.y) < (teleporing ? 255 : 1))
-        --next.x;
-      break;
+		case '<':
+		case '>':
+			if (d->mappair(d->pc->position) != (key == '>' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up)) {
+				mprintf("You are not on a%s staircase.", key == '>' ? " down" : "n up");
+				goto top;
+			}
 
-    case '4': case 'h': case 'a':
-      if(d->hardnessxy(next.x - 1, next.y) < (teleporing ? 255 : 1))
-        --next.x;
-      break;
+			// regenerate the entire dungeon
+			regenerate_dungeon = true;
+			return;
 
-    case '7': case 'y':
-      if(d->hardnessxy(next.x - 1, next.y) < (teleporing ? 255 : 1))
-        --next.x;
-      if(d->hardnessxy(next.x, next.y - 1) < (teleporing ? 255 : 1))
-        --next.y;
-      break;
+		case 'm':
+			list_monsters(d);
+			d->render_dungeon();
+			goto top;
 
-    case '6': case 'l': case 'd':
-      if(d->hardnessxy(next.x + 1, next.y) < (teleporing ? 255 : 1))
-        ++next.x;
-      break;
+		case '?': case '/':
+			help();
+			d->render_dungeon();
+			goto top;
 
-    case '3': case 'n':
-      if(d->hardnessxy(next.x + 1, next.y) < (teleporing ? 255 : 1))
-        ++next.x;
-      if(d->hardnessxy(next.x, next.y + 1) < (teleporing ? 255 : 1))
-        ++next.y;
-      break;
+	#ifdef CHEETS
+		case 'f':
+			is_fogged = !is_fogged;
+			d->render_dungeon();
+			goto top;
 
-    case '9': case 'u':
-      if(d->hardnessxy(next.x + 1, next.y) < (teleporing ? 255 : 1))
-        ++next.x;
-      if(d->hardnessxy(next.x, next.y - 1) < (teleporing ? 255 : 1))
-        --next.y;
-      break;
+		case 'g':
+			d->charpair(position) = nullptr;
+			// save the fogged state
+			__is_fogged = is_fogged;
+			is_fogged = false;
 
-    case '5': case ' ':
-      break;
+			// target the teleporting location
+			target('g', [&](char key) -> uint8_t {
+				if (key == 'r') {
+					teleport_target.x = rand_range(1, DUNGEON_X - 2);
+					teleport_target.y = rand_range(1, DUNGEON_Y - 2);
+					return 1;
+				}
+				else {
+					return 2;
+				}
 
-    case 'Q':
-      endwin();
-      exit(0);
+				return 0;
+			});
 
-    case '<':
-    case '>':
-      if(d->mappair(d->pc->position) != (key == '>' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up)) {
-        mprintf("You are not on a%s staircase.", key == '>' ? " down" : "n up");
-        goto top;
-      }
+			// place the pc
+			is_fogged = __is_fogged;
+			position = next = teleport_target;
 
-      // regenerate the entire dungeon
-	  regenerate_dungeon = true;
-	  return;
+			d->charpair(position) = this;
 
-    case 'm':
-      list_monsters(d);
-      render_dungeon();
-      goto top;
+			if (d->mappair(next) <= terrain_type_t::floor) {
+				d->mappair(next) = terrain_type_t::floor_hall;
+			}
 
-#ifdef CHEETS
-    case 'f':
-      is_fogged = !is_fogged;
-      render_dungeon();
-      goto top;
-#endif
+			look_around();
+			d->render_dungeon();
+		  
+			goto top;
+	#endif
 
-    case '?': case '/':
-      help();
-      render_dungeon();
-      goto top;
-
-#ifdef CHEETS
-    case 't':
-      // enter teleporting mode
-      if(!teleporing) {
-        d->charpair(position) = nullptr;
-        teleport_target = position;
-        teleporing = true;
-      }
-      // exit teleporting mode and move the pc
-      else {
-        teleporing = false;
-        position = teleport_target;
-        d->charpair(position) = this;
-
-        if (d->mappair(position) <= terrain_type_t::floor) {
-          d->mappair(position) = terrain_type_t::floor_hall;
-        }
-
-        look_around();
-        render_dungeon();
-        goto top;
-      }
-
-      break;
-
-    case 'r':
-      if(teleporing) {
-        teleporing = false;
-
-        next.x = rand_range(1, DUNGEON_X - 2);
-        next.y = rand_range(1, DUNGEON_Y - 2);
-
-        position = next;
-
-        d->charpair(position) = this;
-
-        if (d->mappair(position) <= terrain_type_t::floor) {
-          d->mappair(position) = terrain_type_t::floor_hall;
-        }
-
-        look_around();
-        render_dungeon();
-        goto top;
-      }
-#endif
-
-    default:
-      mprintf("%c is not a valid command. (press ? for help)", key);
-      goto top;
-  }
-
-#ifdef CHEETS
-  // move the cursor and rerender
-  if(teleporing) {
-    teleport_target = next;
-    d->render_dungeon();
-    goto top;
-  }
-#endif
+		default:
+			mprintf("%c is not a valid command. (press ? for help)", key);
+			goto top;
+		}
+	}
 }
 
 bool pc_t::in_room(uint32_t room) {
@@ -215,73 +256,6 @@ void pc_t::look_around() {
     for(p.x = startX; p.x < DUNGEON_X && p.x < position.x + VISUAL_DISTANCE; ++p.x) {
       if(can_see(p)) {
         mappair(p) = d->mappair(p);
-      }
-    }
-  }
-}
-
-void pc_t::render_dungeon() {
-  if(!is_fogged) {
-    d->render_dungeon();
-    return;
-  }
-
-  erase();
-
-  pair_t p;
-
-  for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
-    for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-      if(p == teleport_target && teleporing) {
-        attron(COLOR_PAIR(1));
-        mvaddch(p.y + 1, p.x, '*');
-        attroff(COLOR_PAIR(1));
-      }
-      else if (d->charpair(p) && can_see(p) && -VISUAL_DISTANCE <= d->pc->position.x - p.x && d->pc->position.x - p.x <= VISUAL_DISTANCE &&
-            d->pc->position.y - p.y <= VISUAL_DISTANCE && d->pc->position.y - p.y >= -VISUAL_DISTANCE) {
-        int color = d->charpair(p)->symbol == '@' ?
-			1 : resolve_color(((npc_t*) d->charpair(p))->color[0]);
-
-        attron(COLOR_PAIR(color));
-        mvaddch(p.y + 1, p.x, d->charpair(p)->symbol);
-        attroff(COLOR_PAIR(color));
-      }
-	  else if (d->objpair(p) && can_see(p) && -VISUAL_DISTANCE <= d->pc->position.x - p.x && d->pc->position.x - p.x <= VISUAL_DISTANCE &&
-		  d->pc->position.y - p.y <= VISUAL_DISTANCE && d->pc->position.y - p.y >= -VISUAL_DISTANCE) {
-		  int color = resolve_color(d->objpair(p)->color[0]);
-
-		  attron(COLOR_PAIR(color));
-		  mvaddch(p.y + 1, p.x, d->objpair(p)->symbol());
-		  attroff(COLOR_PAIR(color));
-	  }
-	  else {
-        switch (mappair(p)) {
-        case terrain_type_t::staircase_down:
-          attron(COLOR_PAIR(3));
-          mvaddch(p.y + 1, p.x, '>');
-          attroff(COLOR_PAIR(3));
-          break;
-        case terrain_type_t::staircase_up:
-          attron(COLOR_PAIR(3));
-          mvaddch(p.y + 1, p.x, '<');
-          attroff(COLOR_PAIR(3));
-          break;
-        case terrain_type_t::wall:
-        case terrain_type_t::wall_immutable:
-          mvaddch(p.y + 1, p.x, ' ');
-          break;
-        case terrain_type_t::floor:
-        case terrain_type_t::floor_room:
-          mvaddch(p.y + 1, p.x, '.');
-          break;
-        case terrain_type_t::floor_hall:
-          mvaddch(p.y + 1, p.x, '#');
-          break;
-        case terrain_type_t::debug:
-          mvaddch(p.y + 1, p.x, '*');
-          mprintf("Debug character at %d, %d\n", p.y, p.x);
-          break;
-        }
       }
     }
   }

@@ -576,63 +576,66 @@ void dungeon_t::gen_dungeon()
 }
 
 void dungeon_t::render_dungeon() {
-  erase();
+	erase();
 
-  pair_t p;
+	pair_t p;
 
-  for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
-    for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-      if(p == pc->teleport_target && pc->teleporing) {
-        attron(COLOR_PAIR(1));
-        mvaddch(p.y + 1, p.x, '*');
-        attroff(COLOR_PAIR(1));
-      }
-      else if (charpair(p)) {
-		  int color = charpair(p)->symbol == '@' ?
-			  1 : resolve_color(((npc_t*)charpair(p))->color[0]);
+	for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
+		for (p.x = 0; p.x < DUNGEON_X; p.x++) {
+			bool is_visible = (pc->can_see(p) && -VISUAL_DISTANCE <= pc->position.x - p.x && pc->position.x - p.x <= VISUAL_DISTANCE &&
+				pc->position.y - p.y <= VISUAL_DISTANCE && pc->position.y - p.y >= -VISUAL_DISTANCE) || !pc->is_fogged;
 
-        attron(COLOR_PAIR(color));
-        mvaddch(p.y + 1, p.x, charpair(p)->symbol);
-        attroff(COLOR_PAIR(color));
-      }
-	  else if (objpair(p)) {
-		  int color = resolve_color(objpair(p)->color[0]);
+			if (p == pc->teleport_target && pc->teleporting) {
+				attron(COLOR_PAIR(1));
+				mvaddch(p.y + 1, p.x, '*');
+				attroff(COLOR_PAIR(1));
+			}
+			else if (charpair(p) && is_visible) {
+				int color = charpair(p)->symbol == '@' ?
+					1 : resolve_color(((npc_t*)charpair(p))->color[0]);
 
-		  attron(COLOR_PAIR(color));
-		  mvaddch(p.y + 1, p.x, objpair(p)->symbol());
-		  attroff(COLOR_PAIR(color));
-	  }
-	  else {
-        switch (mappair(p)) {
-        case terrain_type_t::staircase_down:
-          attron(COLOR_PAIR(3));
-          mvaddch(p.y + 1, p.x, '>');
-          attroff(COLOR_PAIR(3));
-          break;
-        case terrain_type_t::staircase_up:
-          attron(COLOR_PAIR(3));
-          mvaddch(p.y + 1, p.x, '<');
-          attroff(COLOR_PAIR(3));
-          break;
-        case terrain_type_t::wall:
-        case terrain_type_t::wall_immutable:
-          mvaddch(p.y + 1, p.x, ' ');
-          break;
-        case terrain_type_t::floor:
-        case terrain_type_t::floor_room:
-          mvaddch(p.y + 1, p.x, '.');
-          break;
-        case terrain_type_t::floor_hall:
-          mvaddch(p.y + 1, p.x, '#');
-          break;
-        case terrain_type_t::debug:
-          mvaddch(p.y + 1, p.x, '*');
-          mprintf("Debug character at %d, %d\n", p.y, p.x);
-          break;
-        }
-      }
-    }
-  }
+				attron(COLOR_PAIR(color));
+				mvaddch(p.y + 1, p.x, charpair(p)->symbol);
+				attroff(COLOR_PAIR(color));
+			}
+			else if (objpair(p) && is_visible) {
+				int color = resolve_color(objpair(p)->color[0]);
+
+				attron(COLOR_PAIR(color));
+				mvaddch(p.y + 1, p.x, objpair(p)->symbol());
+				attroff(COLOR_PAIR(color));
+			}
+			else {
+				switch (pc->is_fogged ? pc->mappair(p) : mappair(p)) {
+				case terrain_type_t::staircase_down:
+					attron(COLOR_PAIR(3));
+					mvaddch(p.y + 1, p.x, '>');
+					attroff(COLOR_PAIR(3));
+					break;
+				case terrain_type_t::staircase_up:
+					attron(COLOR_PAIR(3));
+					mvaddch(p.y + 1, p.x, '<');
+					attroff(COLOR_PAIR(3));
+					break;
+				case terrain_type_t::wall:
+				case terrain_type_t::wall_immutable:
+					mvaddch(p.y + 1, p.x, ' ');
+					break;
+				case terrain_type_t::floor:
+				case terrain_type_t::floor_room:
+					mvaddch(p.y + 1, p.x, '.');
+					break;
+				case terrain_type_t::floor_hall:
+					mvaddch(p.y + 1, p.x, '#');
+					break;
+				case terrain_type_t::debug:
+					mvaddch(p.y + 1, p.x, '*');
+					mprintf("Debug character at %d, %d\n", p.y, p.x);
+					break;
+				}
+			}
+		}
+	}
 }
 
 dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m, std::vector<std::shared_ptr<Builder>> o):

@@ -58,7 +58,7 @@ const char *victory =
   "                                   You win!\n\n";
 
 const char *tombstone =
-  "\n\n\n\n                /\"\"\"\"\"/\"\"\"\"\"\"\".\n"
+  "\n                /\"\"\"\"\"/\"\"\"\"\"\"\".\n"
   "               /     /         \\             __\n"
   "              /     /           \\            ||\n"
   "             /____ /   Rest in   \\           ||\n"
@@ -76,7 +76,7 @@ const char *tombstone =
   "\"^^^^\".......\"\"\"\"\"\"\"\"..\"\n"
   "            |......\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"......"
   "..\"\"\"\"\"....\"\"\"\"\"..\"\"...\"\"\".\n\n"
-  "            You're dead.  Better luck in the next life.\n\n\n";
+  "            You're dead.  Better luck in the next life.\n\n";
 
 void usage(char *name)
 {
@@ -282,14 +282,14 @@ int main(int argc, char *argv[])
 
 		if (should_show_help()) {
 			d.pc->look_around();
-			d.pc->render_dungeon();
+			d.render_dungeon();
 			refresh();
 			help();
 		}
 
 		while (d.pc->alive && d.has_npcs()) {
 			d.pc->look_around();
-			d.pc->render_dungeon();
+			d.render_dungeon();
 			do_moves(&d);
 
 			if (d.pc->regenerate_dungeon) {
