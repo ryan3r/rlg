@@ -5,7 +5,7 @@
 #include <dungeon.hpp>
 #include <pc.hpp>
 #include <npc.hpp>
-#include <string.h>
+#include <sstream>
 
 #ifdef __linux__
 #include <ncurses.h>
@@ -13,7 +13,6 @@
 #include <curses.h>
 #undef MOUSE_MOVED
 #include <windows.h>
-#define strncpy strncpy_s
 #endif
 
 #include <fstream>
@@ -22,27 +21,8 @@
 #define WINDOW_HEIGHT 22
 #define WINDOW_WIDTH 60
 
-const char *monster_names[] = {
-    "Troll",
-    "Goblin",
-    "Pixie",
-    "Wolf",
-    "Gnome",
-    "Phoenix",
-    "Satyr",
-    "Centaur",
-    "Dragon",
-    "Angry troll",
-    "Hungry wolf",
-    "Hungry gnome",
-    "Angry phoenix",
-    "Sleepy floof",
-    "Angry dragon",
-    "Hungry wolf"
-};
-
 // render the monster list to the window
-void print_list(WINDOW *win, const char *title, const char **list, size_t i, size_t length) {
+void print_list(WINDOW *win, const std::string &title, const std::vector<std::string> &list, size_t i) {
     wattron(win, COLOR_PAIR(1));
 
     // remove anything that was already in the window
@@ -50,12 +30,12 @@ void print_list(WINDOW *win, const char *title, const char **list, size_t i, siz
     box(win, 0, 0);
 
     // print the title and list
-    mvwprintw(win, 0, (WINDOW_WIDTH - strlen(title) - 4) / 2, "| %s |", title);
+    mvwprintw(win, 0, (WINDOW_WIDTH - title.size() - 4) / 2, "| %s |", title.c_str());
 
     wattroff(win, COLOR_PAIR(1));
 
-    for(size_t j = i; j - i < WINDOW_HEIGHT - 3 && j < length; ++j) {
-        mvwprintw(win, j - i + 1, 1, list[j]);
+    for(size_t j = i; j - i < WINDOW_HEIGHT - 3 && j < list.size(); ++j) {
+        mvwprintw(win, j - i + 1, 1, list[j].c_str());
     }
 
     wattron(win, COLOR_PAIR(1));
@@ -69,8 +49,8 @@ void print_list(WINDOW *win, const char *title, const char **list, size_t i, siz
     mvwprintw(win, WINDOW_HEIGHT - 2, 1, "Scroll with arrow keys. Q or ESC to close.");
 
     // print the scroll progress
-    if(length > WINDOW_HEIGHT - 3) {
-        double progress = (double) i / (length - (WINDOW_HEIGHT - 3));
+    if(list.size() > WINDOW_HEIGHT - 3) {
+        double progress = (double) i / (list.size() - (WINDOW_HEIGHT - 3));
 
         if(progress > 1) progress = 1;
 
@@ -86,21 +66,21 @@ void print_list(WINDOW *win, const char *title, const char **list, size_t i, siz
     wrefresh(win);
 }
 
-void open_list_window(const char *title, const char **list, size_t length) {
+void open_list_window(const std::string &title, const std::vector<std::string> &list) {
     WINDOW *win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, (DUNGEON_Y - WINDOW_HEIGHT) / 2, (DUNGEON_X - WINDOW_WIDTH) / 2);
 
     size_t i = 0;
 
     // listen for key presses
     for(;;) {
-        print_list(win, title, list, i, length);
+        print_list(win, title, list, i);
 
         switch(getch()) {
             case 27: case 'Q':
                 goto end;
 
             case KEY_DOWN:
-                if(length > WINDOW_HEIGHT - 3 && i < length - (WINDOW_HEIGHT - 3)) ++i;
+                if(list.size() > WINDOW_HEIGHT - 3 && i < list.size() - (WINDOW_HEIGHT - 3)) ++i;
                 break;
 
             case KEY_UP:
@@ -117,37 +97,53 @@ void open_list_window(const char *title, const char **list, size_t length) {
 // open the monster list window and enter the monster list key loop
 void list_monsters(dungeon_t *d) {
     // get the list of monsters
-    char **monster_list =  (char**) calloc(d->num_monsters, sizeof(character_t));
+	std::vector<std::string> monsters;
     size_t i = 0;
 
-    for(uint8_t y = 0; y < DUNGEON_Y && i < d->num_monsters; ++y) {
-        for(uint8_t x = 0; x < DUNGEON_X && i < d->num_monsters; ++x) {
-            character_t *monster = d->charxy(x, y);
+    for(pair_t p; p.y < DUNGEON_Y && i < d->num_monsters; ++p.y) {
+        for(p.x = 0; p.x < DUNGEON_X && i < d->num_monsters; ++p.x) {
+            npc_t *monster = dynamic_cast<npc_t*>(d->charpair(p));
 
-            if(monster != NULL && monster->symbol != '@') {
-                const char *name = monster_names[((npc_t*) monster)->attrs];
+            if(monster != nullptr) {
+				++i;
 
-                size_t size = MONSTER_INFO_SIZE + strlen(name);
-                char *monster_info = (char*) malloc(size * sizeof(char));
+				// check if the pc can even see this monster
+				if (
+					!(d->pc->can_see(p) &&
+						-VISUAL_DISTANCE <= d->pc->position.x - p.x &&
+						d->pc->position.x - p.x <= VISUAL_DISTANCE &&
+						d->pc->position.y - p.y <= VISUAL_DISTANCE &&
+						d->pc->position.y - p.y >= -VISUAL_DISTANCE) &&
+					d->pc->is_fogged) {
+					continue;
+				}
 
-                snprintf(monster_info, size, "%c: %s at (%d, %d) with a speed of %d",
-                    monster->symbol, name, monster->position.x, monster->position.y, monster->speed);
+				std::stringstream info;
 
-                monster_list[i++] = monster_info;
+				info << monster->symbol << ": " << monster->name;
+
+				// calculate the number of spaces to add so the coordinates are right justified
+				size_t len = WINDOW_WIDTH - 11 - monster->name.size() - (monster->position.x > 9)
+					- (monster->position.y > 9);
+
+				for (size_t i = 0; i < len; ++i) info << " ";
+
+				info << "(" << monster->position.x << ", " << monster->position.y << ")";
+
+				monsters.push_back(info.str());
             }
         }
     }
 
-    open_list_window("Monster list", (const char**) monster_list, d->num_monsters);
+	// add no monsters visible message
+	if (monsters.empty()) {
+		monsters.push_back("No monsters visible");
+	}
 
-    for(i = 0; i < d->num_monsters; ++i) {
-        free(monster_list[i]);
-    }
-
-    free(monster_list);
+    open_list_window("Monster list", monsters);
 }
 
-const char *help_msg[] = {
+const std::vector<std::string> help_msg = {
     "Welcome adventurer",
     "==========================================================",
     "You find your self in a dungeon with no clue how you got",
@@ -185,7 +181,7 @@ const char *help_msg[] = {
 
 // print the README
 void help() {
-    open_list_window("Help", help_msg, sizeof(help_msg) / sizeof(*help_msg));
+    open_list_window("Help", help_msg);
 }
 
 bool should_show_help() {
