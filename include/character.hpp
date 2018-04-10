@@ -3,10 +3,15 @@
 
 #include <stdint.h>
 #include <dims.hpp>
+#include <dice.hpp>
 
 class dungeon_t;
 
 class character_t {
+private:
+	uint32_t hp;
+	Dice damage;
+
 protected:
   dungeon_t *d;
 
@@ -14,7 +19,6 @@ public:
   char symbol;
   pair_t position;
   int32_t speed;
-  bool alive = true;
   /* Characters use to have a next_turn for the move queue.  Now that it is *
    * an event queue, there's no need for that here.  Instead it's in the    *
    * event.  Similarly, sequence_number was introduced in order to ensure   *
@@ -26,8 +30,8 @@ public:
   uint32_t kills_direct = 0;
   uint32_t kills_avenged = 0;
 
-  character_t(dungeon_t *du, char sy, int32_t sp, uint32_t se):
-    d{du}, symbol{sy}, speed{sp}, sequence_number{se} {}
+  character_t(dungeon_t *du, char sy, int32_t sp, uint32_t se, uint32_t h, Dice d):
+	  d{ du }, symbol{ sy }, speed{ sp }, sequence_number{ se }, hp{ h }, damage{ d } {}
 
   virtual void next_pos(pair_t &next) = 0;
 
@@ -37,5 +41,16 @@ public:
     return can_see(target->position);
   };
 
+  // deal damage to this character
+  void deal_damage(uint32_t dmg) {
+	  hp = dmg > hp ? 0 : hp - dmg;
+  }
+
+  bool alive() const { return hp > 0; }
+
+  virtual void attack(character_t&) const;
+
   virtual ~character_t() {}
+
+  uint32_t get_hp() { return hp; }
 };

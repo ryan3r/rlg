@@ -89,3 +89,7 @@ uint32_t character_t::can_see(const pair_t &target) const {
 
   return 1;
 }
+
+void character_t::attack(character_t &def) const {
+	def.deal_damage(damage.roll());
+}

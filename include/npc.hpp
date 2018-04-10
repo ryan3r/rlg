@@ -54,7 +54,8 @@ public:
 	std::string desc;
 	int32_t hp;
 
-	npc_t(dungeon_t *_d, char sym, int32_t s, int32_t a) : character_t(_d, sym, s, ++character_sequence_number), attrs{ a } {}
+	npc_t(dungeon_t *_d, char sym, int32_t s, int32_t a, uint32_t h, Dice d) :
+		character_t(_d, sym, s, ++character_sequence_number, h, d), attrs{ a } {}
 
 	// npc factory
 	static npc_t* from(dungeon_t*, MonsterBuilder*);

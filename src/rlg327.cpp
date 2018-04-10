@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
 			help();
 		}
 
-		while (d.pc->alive && d.has_npcs()) {
+		while (d.pc->alive() && d.has_npcs()) {
 			d.pc->look_around();
 			d.render_dungeon();
 			do_moves(&d);
@@ -303,9 +303,9 @@ int main(int argc, char *argv[])
 		uint32_t yPos = 0;
 
 		char *msg, *last, *orig;
-		orig = msg = last = strdup(d.pc->alive ? victory : tombstone);
+		orig = msg = last = strdup(d.pc->alive() ? victory : tombstone);
 
-		attron(COLOR_PAIR(d.pc->alive ? 5 : 2));
+		attron(COLOR_PAIR(d.pc->alive() ? 5 : 2));
 
 		for (; *msg; ++msg) {
 			if (*msg == '\n') {
@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		attroff(COLOR_PAIR(d.pc->alive ? 5 : 2));
+		attroff(COLOR_PAIR(d.pc->alive() ? 5 : 2));
 
 		free(orig);
 

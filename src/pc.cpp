@@ -146,17 +146,16 @@ void pc_t::target(char exit_key, std::function<uint8_t(char)> handler) {
 }
 
 void pc_t::next_pos(pair_t &next) {
-	char key;
 	bool __is_fogged;
 	next = position;
 
 	top:
-	key = getch();
+	char key = getch();
 
 	if (!move_keys(key, next)) {
 		switch (key) {
 		case 'Q':
-			d->pc->alive = false;
+			deal_damage(get_hp());
 			break;
 
 		case '<':

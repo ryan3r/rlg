@@ -22,13 +22,16 @@
 #include <iostream>
 
 void do_combat(dungeon_t *d, character_t *atk, character_t *def) {
-  if (def->alive) {
-    def->alive = 0;
-    if (def != d->pc) {
-      d->num_monsters--;
-    }
-    atk->kills_direct++;
-    atk->kills_avenged += (def->kills_direct + def->kills_avenged);
+  if (def->alive() && (atk == d->pc || def == d->pc)) {
+	atk->attack(*def);
+
+	if (!def->alive()) {
+		if (def != d->pc) {
+			d->num_monsters--;
+		}
+		atk->kills_direct++;
+		atk->kills_avenged += (def->kills_direct + def->kills_avenged);
+	}
   }
 }
 
@@ -54,14 +57,14 @@ void do_moves(dungeon_t *d)
   character_t *c;
   event_t *e;
 
-  while (d->pc->alive &&
+  while (d->pc->alive() &&
          (e = (event_t*) heap_remove_min(&d->events)) &&
          ((e->type != event_character_turn) || (e->c != d->pc))) {
     d->time = e->time;
     if (e->type == event_character_turn) {
       c = e->c;
     }
-    if (!c->alive) {
+    if (!c->alive()) {
       if (d->charpair(c->position) == c) {
         d->charpair(c->position) = NULL;
       }
@@ -95,7 +98,7 @@ void do_moves(dungeon_t *d)
     heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
   }
 
-  if (d->pc->alive && e->c == d->pc) {
+  if (d->pc->alive() && e->c == d->pc) {
     c = e->c;
     d->time = e->time;
 
@@ -111,46 +114,4 @@ void do_moves(dungeon_t *d)
     dijkstra(d);
     dijkstra_tunnel(d);
   }
-}
-
-void dir_nearest_wall(character_t *c, pair_t &dir)
-{
-  dir.x = dir.y = 0;
-
-  if (c->position.x != 1 && c->position.x != DUNGEON_X - 2) {
-    dir.x = (c->position.x > DUNGEON_X - c->position.x ? 1 : -1);
-  }
-  if (c->position.y != 1 && c->position.y != DUNGEON_Y - 2) {
-    dir.y = (c->position.y > DUNGEON_Y - c->position.y ? 1 : -1);
-  }
-}
-
-uint32_t against_wall(dungeon_t *d, character_t *c)
-{
-  return ((d->mapxy(c->position.x - 1,
-                 c->position.y    ) == terrain_type_t::wall_immutable) ||
-          (d->mapxy(c->position.x + 1,
-                 c->position.y    ) == terrain_type_t::wall_immutable) ||
-          (d->mapxy(c->position.x    ,
-                 c->position.y - 1) == terrain_type_t::wall_immutable) ||
-          (d->mapxy(c->position.x    ,
-                 c->position.y + 1) == terrain_type_t::wall_immutable));
-}
-
-uint32_t in_corner(dungeon_t *d, character_t *c)
-{
-  uint32_t num_immutable;
-
-  num_immutable = 0;
-
-  num_immutable += (d->mapxy(c->position.x - 1,
-                          c->position.y    ) == terrain_type_t::wall_immutable);
-  num_immutable += (d->mapxy(c->position.x + 1,
-                          c->position.y    ) == terrain_type_t::wall_immutable);
-  num_immutable += (d->mapxy(c->position.x    ,
-                          c->position.y - 1) == terrain_type_t::wall_immutable);
-  num_immutable += (d->mapxy(c->position.x    ,
-                          c->position.y + 1) == terrain_type_t::wall_immutable);
-
-  return num_immutable > 1;
 }

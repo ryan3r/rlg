@@ -552,7 +552,7 @@ npc_t* npc_t::from(dungeon_t *d, MonsterBuilder* builder) {
 		//else throw std::invalid_argument("Invalid monster ability " + attr_name);
 	}
 
-	npc_t *npc = new npc_t(d, builder->symbol, builder->speed.roll(), attrs);
+	npc_t *npc = new npc_t(d, builder->symbol, builder->speed.roll(), attrs, builder->hp.roll(), builder->damage);
 
 	npc->name = builder->name;
 	npc->color = builder->color;

@@ -25,7 +25,7 @@ public:
   // we want to regenerate
   bool regenerate_dungeon = false;
 
-  pc_t(dungeon_t *d): character_t(d, '@', PC_SPEED, 0) {
+  pc_t(dungeon_t *d): character_t(d, '@', PC_SPEED, 0, PC_HP, Dice(0, 1, 4)) {
     // initialize the fog of war map
     memset(&map, (int) terrain_type_t::wall, sizeof(map));
   }
