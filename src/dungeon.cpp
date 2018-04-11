@@ -582,8 +582,8 @@ void dungeon_t::render_dungeon() {
 
 	for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
 		for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-			bool is_visible = (pc_t::pc->can_see(p) && -VISUAL_DISTANCE <= pc_t::pc->position.x - p.x && pc_t::pc->position.x - p.x <= VISUAL_DISTANCE &&
-				pc_t::pc->position.y - p.y <= VISUAL_DISTANCE && pc_t::pc->position.y - p.y >= -VISUAL_DISTANCE) || !pc_t::pc->is_fogged;
+			bool is_visible = (pc_t::pc->can_see(p) && -pc_t::pc->visual_distance() <= pc_t::pc->position.x - p.x && pc_t::pc->position.x - p.x <= pc_t::pc->visual_distance() &&
+				pc_t::pc->position.y - p.y <= pc_t::pc->visual_distance() && pc_t::pc->position.y - p.y >= -pc_t::pc->visual_distance()) || !pc_t::pc->is_fogged;
 
 			if (p == pc_t::pc->teleport_target && pc_t::pc->teleporting) {
 				attron(COLOR_PAIR(1));

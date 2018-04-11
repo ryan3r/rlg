@@ -57,4 +57,6 @@ public:
   void defend(const character_t &atk);
 
   virtual int32_t get_speed() const;
+
+  int32_t visual_distance();
 };

@@ -108,7 +108,11 @@ void pc_t::target(int exit_key, std::function<uint8_t(char)> handler) {
 	teleport_target = position;
 
 	for (;;) {
-		if(should_render) d->render_dungeon();
+		if (should_render) {
+			d->render_dungeon();
+			mprintf("Press %c to select a target. Escape or Q to cancel.", exit_key);
+		}
+
 		should_render = true;
 
 		int key = getch();
@@ -153,6 +157,8 @@ void pc_t::next_pos(pair_t &next) {
 	size_t slot;
 	next = position;
 
+	d->render_dungeon();
+
 	top:
 	int key = getch();
 
@@ -184,7 +190,7 @@ void pc_t::next_pos(pair_t &next) {
 			goto top;
 
 		case 'Q':
-			deal_damage(get_hp());
+			deal_damage(get_hp() + 1);
 			break;
 
 		case '<':
@@ -256,6 +262,9 @@ void pc_t::next_pos(pair_t &next) {
 
 				carry[carry_slot] = equipment[slot];
 				equipment[slot] = nullptr;
+
+				look_around();
+				d->render_dungeon();
 			}
 
 			goto top;
@@ -267,21 +276,24 @@ void pc_t::next_pos(pair_t &next) {
 
 			if (slot != NOT_PICKED && carry[slot]) {
 				// can't wear this object
-				if (carry[slot]->inventory_type == ObjectType::UNKNOWN) {
+				if (carry[slot]->inventory_type == Object::UNKNOWN) {
 					mprintf("%s can't be worn", carry[slot]->name.c_str());
 					goto top;
 				}
 
-				size_t equip_slot = (size_t) carry[slot]->inventory_type;
+				size_t equip_slot = carry[slot]->inventory_type;
 
 				// use the second ring slot if the first is not empty
-				if (carry[slot]->inventory_type == ObjectType::RING && equipment[equip_slot]) {
+				if (carry[slot]->inventory_type == Object::RING && equipment[equip_slot]) {
 					++equip_slot;
 				}
 
 				std::swap(carry[slot], equipment[equip_slot]);
 
 				mprintf("Putting on %s", equipment[equip_slot]->name.c_str());
+				
+				look_around();
+				d->render_dungeon();
 			}
 
 			goto top;
@@ -311,6 +323,9 @@ void pc_t::next_pos(pair_t &next) {
 
 			if (d->charpair(teleport_target)) {
 				display_monster(dynamic_cast<npc_t*>(d->charpair(teleport_target)));
+			}
+			else if (d->objpair(teleport_target)) {
+				display_object(dynamic_cast<Object*>(d->objpair(teleport_target)));
 			}
 
 			d->render_dungeon();
@@ -389,16 +404,17 @@ bool pc_t::in_room(uint32_t room) {
 }
 
 void pc_t::look_around() {
+  int32_t visual_dist = visual_distance();
   pair_t p = position;
-  p.y -= VISUAL_DISTANCE;
+  p.y -= visual_dist;
 
-  int32_t startX = p.x - VISUAL_DISTANCE;
+  int32_t startX = p.x - visual_dist;
 
   if(startX < 0) startX = 0;
   if(p.y < 0) p.y = 0;
 
-  for(; p.y < DUNGEON_Y && p.y < position.y + VISUAL_DISTANCE; ++p.y) {
-    for(p.x = startX; p.x < DUNGEON_X && p.x < position.x + VISUAL_DISTANCE; ++p.x) {
+  for(; p.y < DUNGEON_Y && p.y < position.y + visual_dist; ++p.y) {
+    for(p.x = startX; p.x < DUNGEON_X && p.x < position.x + visual_dist; ++p.x) {
       if(can_see(p)) {
         mappair(p) = d->mappair(p);
       }
@@ -423,13 +439,27 @@ pc_t::~pc_t() {
 }
 
 void pc_t::attack(character_t &def) const {
-	uint32_t power = damage.roll();
+	int32_t power = damage.roll();
+	int32_t oPower = power;
 
-	for (int i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
+	// add the power from weapons
+	if (equipment[Object::WEAPON]) {
+		power += equipment[Object::WEAPON]->damage.roll();
+	}
+	else if (equipment[Object::OFFHAND]) {
+		power += equipment[Object::OFFHAND]->damage.roll();
+	}
+
+	// add power from rings
+	for (size_t i = Object::RING; i < Object::RING + 2; ++i) {
 		if (equipment[i]) {
 			power += equipment[i]->damage.roll();
 		}
 	}
+
+	mprintf("You attacked %s it has %d hp left.", ((npc_t&) def).name.c_str(), def.get_hp());
+
+	std::clog << "You attack with " << power << " was " << oPower << std::endl;
 
 	def.deal_damage(power);
 
@@ -441,15 +471,27 @@ void pc_t::attack(character_t &def) const {
 }
 
 void pc_t::defend(const character_t &atk) {
-	uint32_t power = atk.damage.roll();
+	int32_t power = atk.damage.roll();
+	int32_t oPower = power;
 
-	for (int i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
-		if (equipment[i]) {
-			uint32_t def_roll = equipment[i]->defense.roll();
-
-			power = power > def_roll ? power - def_roll : 0;
-		}
+	// add defense from items
+	if (equipment[Object::OFFHAND]) {
+		power -= equipment[Object::OFFHAND]->defense.roll();
 	}
+
+	if (equipment[Object::ARMOR]) {
+		power -= equipment[Object::ARMOR]->defense.roll();
+	}
+
+	if (equipment[Object::HELMET]) {
+		power -= equipment[Object::HELMET]->defense.roll();
+	}
+
+	if (power < 0) power = 0;
+
+	mprintf("You were attacked by a %s it did %d damage.", ((npc_t&)atk).name.c_str(), power);
+
+	std::clog << "You defend against " << power << " was " << oPower << std::endl;
 
 	deal_damage(power);
 }
@@ -460,8 +502,8 @@ int32_t pc_t::get_speed() const {
 
 	for (int i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
 		if (equipment[i]) {
-			sp += equipment[i]->speed.roll();
-			sp -= equipment[i]->weight.roll();
+			sp += equipment[i]->speed;
+			sp -= equipment[i]->weight;
 		}
 
 		std::clog << equipment[i] << std::endl;
@@ -470,6 +512,17 @@ int32_t pc_t::get_speed() const {
 	if (sp < 1) sp = 1;
 
 	return sp;
+}
+
+// how far the player can see
+int32_t pc_t::visual_distance() {
+	int32_t dist = VISUAL_DISTANCE;
+
+	if (equipment[Object::LIGHT]) {
+		dist += VISUAL_DISTANCE;
+	}
+
+	return dist;
 }
 
 // handle dungeon regeneration

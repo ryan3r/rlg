@@ -5,48 +5,46 @@
 
 class dungeon_t;
 
-enum class ObjectType: size_t {
-	WEAPON = 0,
-	OFFHAND = 1,
-	RANGED = 2,
-	ARMOR = 3,
-	HELMET = 4,
-	CLOAK = 5,
-	GLOVES = 6,
-	BOOTS = 7,
-	AMULET = 8,
-	LIGHT = 9,
-	RING = 10,
-	UNKNOWN = 11
-};
-
 class Object {
 public:
+	static constexpr size_t WEAPON = 0;
+	static constexpr size_t OFFHAND = 1;
+	static constexpr size_t RANGED = 2;
+	static constexpr size_t ARMOR = 3;
+	static constexpr size_t HELMET = 4;
+	static constexpr size_t CLOAK = 5;
+	static constexpr size_t GLOVES = 6;
+	static constexpr size_t BOOTS = 7;
+	static constexpr size_t AMULET = 8;
+	static constexpr size_t LIGHT = 9;
+	static constexpr size_t RING = 10;
+	static constexpr size_t UNKNOWN = 11;
+
 	std::string type;
 	std::vector<std::string> color;
 	std::string name;
 	std::string desc;
 	Dice damage;
 	Dice defense;
-	Dice speed;
-	Dice weight;
-	ObjectType inventory_type = ObjectType::UNKNOWN;
+	int32_t speed;
+	int32_t weight;
+	size_t inventory_type = UNKNOWN;
 
 	Object(std::string t, std::vector<std::string> c, std::string n, std::string d, Dice da, Dice de, Dice sp, Dice w) :
-		type{ t }, color{ c }, name{ n }, desc{ d }, damage{ da }, defense{ de }, speed{ sp }, weight{ w } {
+		type{ t }, color{ c }, name{ n }, desc{ d }, damage{ da }, defense{ de }, speed{ sp.roll() }, weight{ w.roll() } {
 		std::transform(t.begin(), t.end(), t.begin(), toupper);
 
-		if (t == "WEAPON") inventory_type = ObjectType::WEAPON;
-		if (t == "OFFHAND") inventory_type = ObjectType::OFFHAND;
-		if (t == "RANGED") inventory_type = ObjectType::RANGED;
-		if (t == "ARMOR") inventory_type = ObjectType::ARMOR;
-		if (t == "HELMET") inventory_type = ObjectType::HELMET;
-		if (t == "CLOAK") inventory_type = ObjectType::CLOAK;
-		if (t == "GLOVES") inventory_type = ObjectType::GLOVES;
-		if (t == "BOOTS") inventory_type = ObjectType::BOOTS;
-		if (t == "AMULET") inventory_type = ObjectType::AMULET;
-		if (t == "LIGHT") inventory_type = ObjectType::LIGHT;
-		if (t == "RING") inventory_type = ObjectType::RING;
+		if (t == "WEAPON") inventory_type = WEAPON;
+		if (t == "OFFHAND") inventory_type = OFFHAND;
+		if (t == "RANGED") inventory_type = RANGED;
+		if (t == "ARMOR") inventory_type = ARMOR;
+		if (t == "HELMET") inventory_type = HELMET;
+		if (t == "CLOAK") inventory_type = CLOAK;
+		if (t == "GLOVES") inventory_type = GLOVES;
+		if (t == "BOOTS") inventory_type = BOOTS;
+		if (t == "AMULET") inventory_type = AMULET;
+		if (t == "LIGHT") inventory_type = LIGHT;
+		if (t == "RING") inventory_type = RING;
 	}
 
 	static Object * from(ObjectBuilder *builder) {

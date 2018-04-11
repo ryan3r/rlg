@@ -9,7 +9,7 @@ class dungeon_t;
 
 class character_t {
 private:
-	uint32_t hp;
+	int32_t hp;
 	int32_t speed;
 
 protected:
@@ -30,7 +30,7 @@ public:
   uint32_t kills_direct = 0;
   uint32_t kills_avenged = 0;
 
-  character_t(dungeon_t *du, char sy, int32_t sp, uint32_t se, uint32_t h, Dice d):
+  character_t(dungeon_t *du, char sy, int32_t sp, uint32_t se, int32_t h, Dice d):
 	  d{ du }, symbol{ sy }, speed{ sp }, sequence_number{ se }, hp{ h }, damage{ d } {}
 
   virtual void next_pos(pair_t &next) = 0;
@@ -42,16 +42,17 @@ public:
   };
 
   // deal damage to this character
-  void deal_damage(uint32_t dmg) {
-	  hp = dmg > hp ? 0 : hp - dmg;
+  void deal_damage(int32_t dmg) {
+	  if (dmg < 0) dmg = 0;
+	  hp -= dmg;
   }
 
-  bool alive() const { return hp > 0; }
+  bool alive() const { return hp >= 0; }
 
   virtual void attack(character_t&) const;
   virtual int32_t get_speed() const;
 
   virtual ~character_t() {}
 
-  uint32_t get_hp() { return hp; }
+  int32_t get_hp() { return hp; }
 };

@@ -6,6 +6,7 @@
 #include <pc.hpp>
 #include <npc.hpp>
 #include <sstream>
+#include <map>
 
 #ifdef __linux__
 #include <ncurses.h>
@@ -102,6 +103,7 @@ void open_list_window(const std::string &title, const std::vector<std::string> &
 // open the monster list window and enter the monster list key loop
 void list_monsters(dungeon_t *d) {
 	std::vector<std::string> monsters;
+	std::map<char, npc_t*> monsters_by_symbol;
     size_t i = 0;
 
     for(pair_t p; p.y < DUNGEON_Y && i < d->num_monsters; ++p.y) {
@@ -114,10 +116,10 @@ void list_monsters(dungeon_t *d) {
 				// check if the pc can even see this monster
 				if (
 					!(pc_t::pc->can_see(p) &&
-						-VISUAL_DISTANCE <= pc_t::pc->position.x - p.x &&
-						pc_t::pc->position.x - p.x <= VISUAL_DISTANCE &&
-						pc_t::pc->position.y - p.y <= VISUAL_DISTANCE &&
-						pc_t::pc->position.y - p.y >= -VISUAL_DISTANCE) &&
+						-pc_t::pc->visual_distance() <= pc_t::pc->position.x - p.x &&
+						pc_t::pc->position.x - p.x <= pc_t::pc->visual_distance() &&
+						pc_t::pc->position.y - p.y <= pc_t::pc->visual_distance() &&
+						pc_t::pc->position.y - p.y >= -pc_t::pc->visual_distance()) &&
 					pc_t::pc->is_fogged) {
 					continue;
 				}
@@ -134,6 +136,7 @@ void list_monsters(dungeon_t *d) {
 
 				info << "(" << monster->position.x << ", " << monster->position.y << ")";
 
+				monsters_by_symbol[monster->symbol] = monster;
 				monsters.push_back(info.str());
             }
         }
@@ -143,7 +146,17 @@ void list_monsters(dungeon_t *d) {
 		monsters.push_back("No monsters visible");
 	}
 
-    open_list_window("Monster list", monsters, nullptr);
+	open_list_window("Monster list", monsters, [&monsters_by_symbol](char key) -> bool {
+		if (('a' <= key && key <= 'z') || ('A' <= key && key <= 'Z')) {
+			auto found = monsters_by_symbol.find(key);
+
+			if (found != monsters_by_symbol.end()) {
+				display_monster(found->second);
+			}
+		}
+
+		return false;
+	});
 }
 
 // convert the pc's inventory to a list
@@ -180,25 +193,51 @@ size_t inventory_prompt(const std::string &title, pc_t &pc, bool is_carry) {
 	return choice;
 }
 
+void add_description_lines(std::vector<std::string> &lines, std::string desc) {
+	size_t i = -1, j = 0;
+	while (j < desc.size()) {
+		j = desc.find("\n", ++i);
+
+		if (j == std::string::npos) {
+			j = desc.size();
+		}
+
+		lines.push_back(desc.substr(i, j - i));
+
+		i = j;
+	}
+}
+
 // display information about an object
 void display_object(Object *obj) {
 	// nothing to display
 	if (obj == nullptr) return;
 
 	std::vector<std::string> lines;
+
+	std::stringstream stat;
+
+	stat << "Speed: " << obj->speed;
+	lines.push_back(stat.str());
+
+	stat.clear();
+	stat.str(std::string());
+	stat << "Weight: " << obj->weight;
+	lines.push_back(stat.str());
+
+	stat.clear();
+	stat.str(std::string());
+	stat << "Attack: " << obj->damage;
+	lines.push_back(stat.str());
+
+	stat.clear();
+	stat.str(std::string());
+	stat << "Defense: " << obj->defense;
+	lines.push_back(stat.str());
+
+	lines.push_back("");
 	
-	size_t i = -1, j = 0;
-	while (j < obj->desc.size()) {
-		j = obj->desc.find("\n", ++i);
-
-		if (j == std::string::npos) {
-			j = obj->desc.size();
-		}
-
-		lines.push_back(obj->desc.substr(i, j - i));
-
-		i = j;
-	}
+	add_description_lines(lines, obj->desc);
 
 	open_list_window(obj->name, lines, nullptr);
 }
@@ -210,18 +249,24 @@ void display_monster(npc_t *monster) {
 
 	std::vector<std::string> lines;
 
-	size_t i = -1, j = 0;
-	while (j < monster->desc.size()) {
-		j = monster->desc.find("\n", ++i);
+	std::stringstream stat;
 
-		if (j == std::string::npos) {
-			j = monster->desc.size();
-		}
+	stat << "Speed: " << monster->get_speed();
+	lines.push_back(stat.str());
 
-		lines.push_back(monster->desc.substr(i, j - i));
+	stat.clear();
+	stat.str(std::string());
+	stat << "Attack: " << monster->damage;
+	lines.push_back(stat.str());
 
-		i = j;
-	}
+	stat.clear();
+	stat.str(std::string());
+	stat << "Hp: " << monster->get_hp();
+	lines.push_back(stat.str());
+
+	lines.push_back("");
+
+	add_description_lines(lines, monster->desc);
 
 	open_list_window(monster->name, lines, nullptr);
 }
