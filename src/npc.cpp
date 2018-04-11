@@ -19,7 +19,7 @@ uint32_t max_monster_cells(dungeon_t *d)
   uint32_t sum;
 
   for (i = sum = 0; i < d->rooms.size(); i++) {
-    if (!d->pc->in_room(i)) {
+    if (!pc_t::pc->in_room(i)) {
       sum += d->rooms[i].size.y * d->rooms[i].size.x;
     }
   }
@@ -167,8 +167,8 @@ void npc_t::next_pos_line_of_sight(pair_t &next)
 {
   pair_t dir;
 
-  dir.y = d->pc->position.y - position.y;
-  dir.x = d->pc->position.x - position.x;
+  dir.y = pc_t::pc->position.y - position.y;
+  dir.x = pc_t::pc->position.x - position.x;
   if (dir.y) {
     dir.y /= abs(dir.y);
   }
@@ -191,8 +191,8 @@ void npc_t::next_pos_line_of_sight_tunnel(pair_t &next)
 {
   pair_t dir;
 
-  dir.y = d->pc->position.y - position.y;
-  dir.x = d->pc->position.x - position.x;
+  dir.y = pc_t::pc->position.y - position.y;
+  dir.x = pc_t::pc->position.x - position.x;
   if (dir.y) {
     dir.y /= abs(dir.y);
   }
@@ -346,9 +346,9 @@ void npc_t::next_pos_gradient(pair_t &next)
 void npc_t::next_pos_00(pair_t &next)
 {
   /* not smart; not telepathic; not tunneling; not erratic */
-  if (can_see(d->pc)) {
-    pc_last_known_position.y = d->pc->position.y;
-    pc_last_known_position.x = d->pc->position.x;
+  if (can_see(pc_t::pc)) {
+    pc_last_known_position.y = pc_t::pc->position.y;
+    pc_last_known_position.x = pc_t::pc->position.x;
     next_pos_line_of_sight(next);
   } else {
     next_pos_rand(next);
@@ -358,9 +358,9 @@ void npc_t::next_pos_00(pair_t &next)
 void npc_t::next_pos_01(pair_t &next)
 {
   /*     smart; not telepathic; not tunneling; not erratic */
-  if (can_see(d->pc)) {
-    pc_last_known_position.y = d->pc->position.y;
-    pc_last_known_position.x = d->pc->position.x;
+  if (can_see(pc_t::pc)) {
+    pc_last_known_position.y = pc_t::pc->position.y;
+    pc_last_known_position.x = pc_t::pc->position.x;
     have_seen_pc = 1;
     next_pos_line_of_sight(next);
   } else if (have_seen_pc) {
@@ -376,8 +376,8 @@ void npc_t::next_pos_01(pair_t &next)
 void npc_t::next_pos_02(pair_t &next)
 {
   /* not smart;     telepathic; not tunneling; not erratic */
-  pc_last_known_position.y = d->pc->position.y;
-  pc_last_known_position.x = d->pc->position.x;
+  pc_last_known_position.y = pc_t::pc->position.y;
+  pc_last_known_position.x = pc_t::pc->position.x;
   next_pos_line_of_sight(next);
 }
 
@@ -390,9 +390,9 @@ void npc_t::next_pos_03(pair_t &next)
 void npc_t::next_pos_04(pair_t &next)
 {
   /* not smart; not telepathic;     tunneling; not erratic */
-  if (can_see(d->pc)) {
-    pc_last_known_position.y = d->pc->position.y;
-    pc_last_known_position.x = d->pc->position.x;
+  if (can_see(pc_t::pc)) {
+    pc_last_known_position.y = pc_t::pc->position.y;
+    pc_last_known_position.x = pc_t::pc->position.x;
     next_pos_line_of_sight(next);
   } else {
     next_pos_rand_tunnel(next);
@@ -402,9 +402,9 @@ void npc_t::next_pos_04(pair_t &next)
 void npc_t::next_pos_05(pair_t &next)
 {
   /*     smart; not telepathic;     tunneling; not erratic */
-  if (can_see(d->pc)) {
-    pc_last_known_position.y = d->pc->position.y;
-    pc_last_known_position.x = d->pc->position.x;
+  if (can_see(pc_t::pc)) {
+    pc_last_known_position.y = pc_t::pc->position.y;
+    pc_last_known_position.x = pc_t::pc->position.x;
     have_seen_pc = 1;
     next_pos_line_of_sight(next);
   } else if (have_seen_pc) {
@@ -420,8 +420,8 @@ void npc_t::next_pos_05(pair_t &next)
 void npc_t::next_pos_06(pair_t &next)
 {
   /* not smart;     telepathic;     tunneling; not erratic */
-  pc_last_known_position.y = d->pc->position.y;
-  pc_last_known_position.x = d->pc->position.x;
+  pc_last_known_position.y = pc_t::pc->position.y;
+  pc_last_known_position.x = pc_t::pc->position.x;
   next_pos_line_of_sight_tunnel(next);
 }
 
@@ -548,6 +548,7 @@ npc_t* npc_t::from(dungeon_t *d, MonsterBuilder* builder) {
 		else if (attr_name == "tunnel") attrs |= (1 << npc_t::TUNNEL);
 		else if (attr_name == "erratic") attrs |= (1 << npc_t::ERRATIC);
 		else if (attr_name == "uniq") attrs |= (1 << npc_t::UNIQUE);
+		else if(attr_name == "boss") attrs |= (1 << npc_t::BOSS);
 		//else std::cerr << "Invalid " << attr_name << std::endl;
 		//else throw std::invalid_argument("Invalid monster ability " + attr_name);
 	}

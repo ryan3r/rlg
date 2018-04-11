@@ -44,6 +44,7 @@ public:
 	static constexpr uint8_t TUNNEL = 2;
 	static constexpr uint8_t ERRATIC = 3;
 	static constexpr uint8_t UNIQUE = 4;
+	static constexpr uint8_t BOSS = 5;
 
 	int32_t attrs;
 	bool have_seen_pc = false;

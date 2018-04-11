@@ -582,10 +582,10 @@ void dungeon_t::render_dungeon() {
 
 	for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
 		for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-			bool is_visible = (pc->can_see(p) && -VISUAL_DISTANCE <= pc->position.x - p.x && pc->position.x - p.x <= VISUAL_DISTANCE &&
-				pc->position.y - p.y <= VISUAL_DISTANCE && pc->position.y - p.y >= -VISUAL_DISTANCE) || !pc->is_fogged;
+			bool is_visible = (pc_t::pc->can_see(p) && -VISUAL_DISTANCE <= pc_t::pc->position.x - p.x && pc_t::pc->position.x - p.x <= VISUAL_DISTANCE &&
+				pc_t::pc->position.y - p.y <= VISUAL_DISTANCE && pc_t::pc->position.y - p.y >= -VISUAL_DISTANCE) || !pc_t::pc->is_fogged;
 
-			if (p == pc->teleport_target && pc->teleporting) {
+			if (p == pc_t::pc->teleport_target && pc_t::pc->teleporting) {
 				attron(COLOR_PAIR(1));
 				mvaddch(p.y + 1, p.x, '*');
 				attroff(COLOR_PAIR(1));
@@ -606,7 +606,7 @@ void dungeon_t::render_dungeon() {
 				attroff(COLOR_PAIR(color));
 			}
 			else {
-				switch (pc->is_fogged ? pc->mappair(p) : mappair(p)) {
+				switch (pc_t::pc->is_fogged ? pc_t::pc->mappair(p) : mappair(p)) {
 				case terrain_type_t::staircase_down:
 					attron(COLOR_PAIR(3));
 					mvaddch(p.y + 1, p.x, '>');
@@ -637,7 +637,7 @@ void dungeon_t::render_dungeon() {
 		}
 	}
 
-	mvprintw(DUNGEON_Y, 0, "Hp: %d Speed: %d", pc->get_hp(), pc->get_speed());
+	mvprintw(DUNGEON_Y, 0, "Hp: %d Speed: %d", pc_t::pc->get_hp(), pc_t::pc->get_speed());
 }
 
 dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m, std::vector<std::shared_ptr<Builder>> o):
@@ -648,11 +648,10 @@ dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m, std::vector<std::s
   memset(&objects, 0, sizeof(objects));
   memset(&events, 0, sizeof (events));
   heap_init(&events, compare_events, event_delete);
-  pc = new pc_t(this);
 }
 
 void dungeon_t::init() {
-  pc->config_pc();
+  pc_t::pc->config_pc();
   npc_t::gen_monsters(this, monster_builders);
   Object::gen_objects(this, object_builders);
   place_stairs();
@@ -679,8 +678,6 @@ void dungeon_t::regenerate() {
   memset(&events, 0, sizeof (events));
 
   heap_init(&events, compare_events, event_delete);
-
-  pc = new pc_t(this);
 
   gen_dungeon();
 }
@@ -939,8 +936,8 @@ void dungeon_t::render_distance_map()
 
   for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
     for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-      if (p.x ==  pc->position.x &&
-          p.y ==  pc->position.y) {
+      if (p.x ==  pc_t::pc->position.x &&
+          p.y ==  pc_t::pc->position.y) {
         putchar('@');
       } else {
         switch (mappair(p)) {
@@ -977,8 +974,8 @@ void dungeon_t::render_tunnel_distance_map()
 
   for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
     for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-      if (p.x ==  pc->position.x &&
-          p.y ==  pc->position.y) {
+      if (p.x ==  pc_t::pc->position.x &&
+          p.y ==  pc_t::pc->position.y) {
         putchar('@');
       } else {
         switch (mappair(p)) {

@@ -113,12 +113,12 @@ void list_monsters(dungeon_t *d) {
 
 				// check if the pc can even see this monster
 				if (
-					!(d->pc->can_see(p) &&
-						-VISUAL_DISTANCE <= d->pc->position.x - p.x &&
-						d->pc->position.x - p.x <= VISUAL_DISTANCE &&
-						d->pc->position.y - p.y <= VISUAL_DISTANCE &&
-						d->pc->position.y - p.y >= -VISUAL_DISTANCE) &&
-					d->pc->is_fogged) {
+					!(pc_t::pc->can_see(p) &&
+						-VISUAL_DISTANCE <= pc_t::pc->position.x - p.x &&
+						pc_t::pc->position.x - p.x <= VISUAL_DISTANCE &&
+						pc_t::pc->position.y - p.y <= VISUAL_DISTANCE &&
+						pc_t::pc->position.y - p.y >= -VISUAL_DISTANCE) &&
+					pc_t::pc->is_fogged) {
 					continue;
 				}
 

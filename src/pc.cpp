@@ -19,6 +19,8 @@
 #include <iostream>
 #include <algorithm>
 
+pc_t *pc_t::pc = nullptr;
+
 void pc_t::place_pc() {
   position.y = rand_range(d->rooms[0].position.y,
                                      (d->rooms[0].position.y +
@@ -162,7 +164,7 @@ void pc_t::next_pos(pair_t &next) {
 
 		case '<':
 		case '>':
-			if (d->mappair(d->pc->position) != (key == '>' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up)) {
+			if (d->mappair(pc_t::pc->position) != (key == '>' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up)) {
 				mprintf("You are not on a%s staircase.", key == '>' ? " down" : "n up");
 				goto top;
 			}
@@ -261,14 +263,14 @@ void pc_t::next_pos(pair_t &next) {
 
 		// show carry slots
 		case 'i': case 'I':
-			display_inventory("Inventory", *d->pc, true);
+			display_inventory("Inventory", *pc_t::pc, true);
 			d->render_dungeon();
 
 			goto top;
 
 		// show equiped slots
 		case 'e':
-			display_inventory("Equipment", *d->pc, false);
+			display_inventory("Equipment", *pc_t::pc, false);
 			d->render_dungeon();
 
 			goto top;
@@ -397,6 +399,12 @@ void pc_t::attack(character_t &def) const {
 	}
 
 	def.deal_damage(power);
+
+	// check if we killed the boss
+	npc_t *monster;
+	if (def.get_hp() == 0 && (monster = dynamic_cast<npc_t*>(&def)) && monster->has_attr(npc_t::BOSS)) {
+		d->is_boss_dead = true;
+	}
 }
 
 void pc_t::defend(const character_t &atk) {
@@ -428,4 +436,12 @@ int32_t pc_t::get_speed() const {
 	if (sp < 0) sp = 0;
 
 	return sp;
+}
+
+// handle dungeon regeneration
+void pc_t::regenerate() {
+	memset(&map, (int)terrain_type_t::wall, sizeof(map));
+	is_fogged = true;
+	regenerate_dungeon = false;
+	teleport_target = position;
 }

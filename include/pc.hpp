@@ -21,11 +21,13 @@ private:
   terrain_type_t map[DUNGEON_Y][DUNGEON_X];
 
 public:
+	static pc_t *pc;
+
   // fog of war enabled/disabled state
   bool is_fogged = true;
-  pair_t teleport_target;
-  // teleporting mode
+  // teleport/target mode
   bool teleporting = false;
+  pair_t teleport_target;
   // we want to regenerate
   bool regenerate_dungeon = false;
 
@@ -44,6 +46,7 @@ public:
   terrain_type_t& mappair(const pair_t &pair) { return map[pair.y][pair.x]; }
 
   virtual ~pc_t();
+  void regenerate();
 
   Object *equipment[NUM_EQUIPMENT_SLOTS];
   Object *carry[NUM_CARRY_SLOTS];

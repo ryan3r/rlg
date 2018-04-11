@@ -30,11 +30,11 @@ const pair_t DIRECTIONS[] = {
 void do_combat(dungeon_t *d, character_t *atk, character_t *def) {
   if (!def->alive()) return;
 
-  if (atk == d->pc || def == d->pc) {
+  if (atk == pc_t::pc || def == pc_t::pc) {
 	atk->attack(*def);
 
 	if (!def->alive()) {
-		if (def != d->pc) {
+		if (def != pc_t::pc) {
 			d->num_monsters--;
 		}
 		atk->kills_direct++;
@@ -69,11 +69,11 @@ void move_character(dungeon_t *d, character_t *c, pair_t &next)
     d->charpair(c->position) = c;
 
 	// pick up any objects if we can
-	if (c == d->pc && d->objpair(c->position)) {
+	if (c == pc_t::pc && d->objpair(c->position)) {
 		for (size_t i = 0; i < NUM_CARRY_SLOTS; ++i) {
-			if (d->pc->carry[i] == nullptr) {
-				d->pc->carry[i] = d->objpair(d->pc->position);
-				d->objpair(d->pc->position) = nullptr;
+			if (pc_t::pc->carry[i] == nullptr) {
+				pc_t::pc->carry[i] = d->objpair(pc_t::pc->position);
+				d->objpair(pc_t::pc->position) = nullptr;
 				break;
 			}
 		}
@@ -87,9 +87,9 @@ void do_moves(dungeon_t *d)
   character_t *c;
   event_t *e;
 
-  while (d->pc->alive() &&
+  while (pc_t::pc->alive() &&
          (e = (event_t*) heap_remove_min(&d->events)) &&
-         ((e->type != event_character_turn) || (e->c != d->pc))) {
+         ((e->type != event_character_turn) || (e->c != pc_t::pc))) {
     d->time = e->time;
     if (e->type == event_character_turn) {
       c = e->c;
@@ -98,7 +98,7 @@ void do_moves(dungeon_t *d)
       if (d->charpair(c->position) == c) {
         d->charpair(c->position) = NULL;
       }
-      if (c != d->pc) {
+      if (c != pc_t::pc) {
 		npc_t* monster = (npc_t*) c;
 
 		// don't allow any more instances of this monster
@@ -128,7 +128,7 @@ void do_moves(dungeon_t *d)
     heap_insert(&d->events, update_event(d, e, 1000 / c->get_speed()));
   }
 
-  if (d->pc->alive() && e->c == d->pc) {
+  if (pc_t::pc->alive() && e->c == pc_t::pc) {
     c = e->c;
     d->time = e->time;
 
@@ -137,7 +137,7 @@ void do_moves(dungeon_t *d)
     c->next_pos(next);
 
 	// don't do anything we are regenerating
-	if (d->pc->regenerate_dungeon) return;
+	if (pc_t::pc->regenerate_dungeon) return;
 
     move_character(d, c, next);
 

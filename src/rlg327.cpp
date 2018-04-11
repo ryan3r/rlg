@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
 			Parser::parse_file(get_default_file("object_desc.txt"))
 		);
 
+		pc_t::pc = new pc_t(&d);
+
 		time_t seed;
 		int i;
 		uint32_t do_load, do_save, do_seed, do_image, do_save_seed,
@@ -222,10 +224,10 @@ int main(int argc, char *argv[])
 							(long_arg && strcmp(argv[i], "-pc"))) {
 							usage(argv[0]);
 						}
-						if ((d.pc->position.y = atoi(argv[++i])) < 1 ||
-							d.pc->position.y > DUNGEON_Y - 2 ||
-							(d.pc->position.x = atoi(argv[++i])) < 1 ||
-							d.pc->position.x > DUNGEON_X - 2) {
+						if ((pc_t::pc->position.y = atoi(argv[++i])) < 1 ||
+							pc_t::pc->position.y > DUNGEON_Y - 2 ||
+							(pc_t::pc->position.x = atoi(argv[++i])) < 1 ||
+							pc_t::pc->position.x > DUNGEON_X - 2) {
 							fprintf(stderr, "Invalid PC position.\n");
 							usage(argv[0]);
 						}
@@ -281,19 +283,20 @@ int main(int argc, char *argv[])
 		init_pair(8, COLOR_BLUE, COLOR_BLACK);
 
 		if (should_show_help()) {
-			d.pc->look_around();
+			pc_t::pc->look_around();
 			d.render_dungeon();
 			refresh();
 			help();
 		}
 
-		while (d.pc->alive() && d.has_npcs()) {
-			d.pc->look_around();
+		while (pc_t::pc->alive() && !d.is_boss_dead) {
+			pc_t::pc->look_around();
 			d.render_dungeon();
 			do_moves(&d);
 
-			if (d.pc->regenerate_dungeon) {
+			if (pc_t::pc->regenerate_dungeon) {
 				d.regenerate();
+				pc_t::pc->regenerate();
 			}
 		}
 
@@ -303,9 +306,9 @@ int main(int argc, char *argv[])
 		uint32_t yPos = 0;
 
 		char *msg, *last, *orig;
-		orig = msg = last = strdup(d.pc->alive() ? victory : tombstone);
+		orig = msg = last = strdup(pc_t::pc->alive() ? victory : tombstone);
 
-		attron(COLOR_PAIR(d.pc->alive() ? 5 : 2));
+		attron(COLOR_PAIR(pc_t::pc->alive() ? 5 : 2));
 
 		for (; *msg; ++msg) {
 			if (*msg == '\n') {
@@ -318,13 +321,13 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		attroff(COLOR_PAIR(d.pc->alive() ? 5 : 2));
+		attroff(COLOR_PAIR(pc_t::pc->alive() ? 5 : 2));
 
 		free(orig);
 
-		mvprintw(yPos++, 0, "You defended your life in the face of %u deadly beasts.", d.pc->kills_direct);
+		mvprintw(yPos++, 0, "You defended your life in the face of %u deadly beasts.", pc_t::pc->kills_direct);
 		mvprintw(yPos++, 0, "You avenged the cruel and untimely murders of %u "
-			"peaceful dungeon residents.", d.pc->kills_avenged);
+			"peaceful dungeon residents.", pc_t::pc->kills_avenged);
 
 		attron(COLOR_PAIR(1));
 		mvprintw(yPos, 0, "[Press ENTER to quit]");
@@ -360,6 +363,8 @@ int main(int argc, char *argv[])
 				free(save_file);
 			}
 		}
+
+		delete pc_t::pc;
 	}
 	catch (RlgError err) {
 		endwin();
