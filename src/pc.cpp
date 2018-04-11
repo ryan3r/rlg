@@ -427,13 +427,14 @@ int32_t pc_t::get_speed() const {
 
 	for (int i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
 		if (equipment[i]) {
-			sp -= equipment[i]->speed.roll();
+			sp += equipment[i]->speed.roll();
+			sp -= equipment[i]->weight.roll();
 		}
 
 		std::clog << equipment[i] << std::endl;
 	}
 
-	if (sp < 0) sp = 0;
+	if (sp < 1) sp = 1;
 
 	return sp;
 }

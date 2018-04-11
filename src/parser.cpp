@@ -297,7 +297,7 @@ void ObjectParser::parse_field(const std::string &name) {
 		builder->has_weight = true;
 	}
 	else if (name == "SPEED") {
-		builder->weight = parse_dice();
+		builder->speed = parse_dice();
 		builder->has_speed = true;
 	}
 	else if (name == "ATTR") {
