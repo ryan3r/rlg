@@ -91,5 +91,9 @@ uint32_t character_t::can_see(const pair_t &target) const {
 }
 
 void character_t::attack(character_t &def) const {
-	def.deal_damage(damage.roll());
+	((pc_t&) def).defend(*this);
+}
+
+int32_t character_t::get_speed() const {
+	return speed;
 }

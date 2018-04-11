@@ -636,6 +636,8 @@ void dungeon_t::render_dungeon() {
 			}
 		}
 	}
+
+	mvprintw(DUNGEON_Y, 0, "Hp: %d Speed: %d", pc->get_hp(), pc->get_speed());
 }
 
 dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m, std::vector<std::shared_ptr<Builder>> o):

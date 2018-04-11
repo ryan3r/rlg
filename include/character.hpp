@@ -10,15 +10,15 @@ class dungeon_t;
 class character_t {
 private:
 	uint32_t hp;
-	Dice damage;
+	int32_t speed;
 
 protected:
   dungeon_t *d;
 
 public:
+  Dice damage;
   char symbol;
   pair_t position;
-  int32_t speed;
   /* Characters use to have a next_turn for the move queue.  Now that it is *
    * an event queue, there's no need for that here.  Instead it's in the    *
    * event.  Similarly, sequence_number was introduced in order to ensure   *
@@ -49,6 +49,7 @@ public:
   bool alive() const { return hp > 0; }
 
   virtual void attack(character_t&) const;
+  virtual int32_t get_speed() const;
 
   virtual ~character_t() {}
 

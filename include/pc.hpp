@@ -47,4 +47,9 @@ public:
 
   Object *equipment[NUM_EQUIPMENT_SLOTS];
   Object *carry[NUM_CARRY_SLOTS];
+
+  virtual void attack(character_t&) const;
+  void defend(const character_t &atk);
+
+  virtual int32_t get_speed() const;
 };

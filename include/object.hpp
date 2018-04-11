@@ -26,10 +26,13 @@ public:
 	std::vector<std::string> color;
 	std::string name;
 	std::string desc;
+	Dice damage;
+	Dice defense;
+	Dice speed;
 	ObjectType inventory_type = ObjectType::UNKNOWN;
 
-	Object(std::string t, std::vector<std::string> c, std::string n, std::string d) :
-			type{ t }, color{ c }, name{ n }, desc{ d } {
+	Object(std::string t, std::vector<std::string> c, std::string n, std::string d, Dice da, Dice de, Dice sp) :
+		type{ t }, color{ c }, name{ n }, desc{ d }, damage{ da }, defense{ de }, speed{ sp } {
 		std::transform(t.begin(), t.end(), t.begin(), toupper);
 
 		if (t == "WEAPON") inventory_type = ObjectType::WEAPON;
@@ -46,7 +49,8 @@ public:
 	}
 
 	static Object * from(ObjectBuilder *builder) {
-		return new Object(builder->type, builder->color, builder->name, builder->desc);
+		return new Object(builder->type, builder->color, builder->name, builder->desc,
+			builder->damage, builder->defense, builder->speed);
 	}
 
 	static void gen_objects(dungeon_t*, std::vector<std::shared_ptr<Builder>>);

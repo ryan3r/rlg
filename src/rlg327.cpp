@@ -27,7 +27,7 @@
 #include <path.hpp>
 
 const char *victory =
-  "\n                                       o\n"
+  "                                       o\n"
   "                                      $\"\"$o\n"
   "                                     $\"  $$\n"
   "                                      $$$$\n"
@@ -55,7 +55,7 @@ const char *victory =
   "              $\"                                                 \"$\n"
   "              $\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\"$\""
   "$\"$\"$\"$\"$\"$\"$\"$\n"
-  "                                   You win!\n\n";
+  "                                   You win!\n";
 
 const char *tombstone =
   "\n                /\"\"\"\"\"/\"\"\"\"\"\"\".\n"

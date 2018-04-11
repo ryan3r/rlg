@@ -374,3 +374,45 @@ pc_t::~pc_t() {
 		}
 	}
 }
+
+void pc_t::attack(character_t &def) const {
+	uint32_t power = damage.roll();
+
+	for (int i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
+		if (equipment[i]) {
+			power += equipment[i]->damage.roll();
+		}
+	}
+
+	def.deal_damage(power);
+}
+
+void pc_t::defend(const character_t &atk) {
+	uint32_t power = atk.damage.roll();
+
+	for (int i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
+		if (equipment[i]) {
+			uint32_t def_roll = equipment[i]->defense.roll();
+
+			power = power > def_roll ? power - def_roll : 0;
+		}
+	}
+
+	deal_damage(power);
+}
+
+int32_t pc_t::get_speed() const {
+	int32_t sp = character_t::get_speed();
+
+	for (int i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
+		if (equipment[i]) {
+			sp -= equipment[i]->speed.roll();
+		}
+
+		std::clog << equipment[i] << std::endl;
+	}
+
+	if (sp < 0) sp = 0;
+
+	return sp;
+}

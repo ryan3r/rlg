@@ -106,14 +106,14 @@ void do_moves(dungeon_t *d)
 
     move_character(d, c, next);
 
-    heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
+    heap_insert(&d->events, update_event(d, e, 1000 / c->get_speed()));
   }
 
   if (d->pc->alive() && e->c == d->pc) {
     c = e->c;
     d->time = e->time;
 
-    heap_insert(&d->events, update_event(d, e, 1000 / c->speed));
+    heap_insert(&d->events, update_event(d, e, 1000 / c->get_speed()));
 
     c->next_pos(next);
 
