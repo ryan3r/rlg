@@ -19,7 +19,7 @@
 
 #define MONSTER_INFO_SIZE 35
 #define WINDOW_HEIGHT 22
-#define WINDOW_WIDTH 60
+#define WINDOW_WIDTH 80
 
 // render the monster list to the window
 void print_list(WINDOW *win, const std::string &title, const std::vector<std::string> &list, size_t i) {
@@ -66,7 +66,7 @@ void print_list(WINDOW *win, const std::string &title, const std::vector<std::st
     wrefresh(win);
 }
 
-void open_list_window(const std::string &title, const std::vector<std::string> &list) {
+void open_list_window(const std::string &title, const std::vector<std::string> &list, std::function<bool(char)> handler) {
     WINDOW *win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, (DUNGEON_Y - WINDOW_HEIGHT) / 2, (DUNGEON_X - WINDOW_WIDTH) / 2);
 
     size_t i = 0;
@@ -75,7 +75,8 @@ void open_list_window(const std::string &title, const std::vector<std::string> &
     for(;;) {
         print_list(win, title, list, i);
 
-        switch(getch()) {
+		char key;
+        switch((key = getch())) {
             case 27: case 'Q':
                 goto end;
 
@@ -86,6 +87,9 @@ void open_list_window(const std::string &title, const std::vector<std::string> &
             case KEY_UP:
                 if(i > 0) --i;
                 break;
+
+			default:
+				if (handler && handler(key)) goto end;
         }
     }
 
@@ -96,7 +100,6 @@ void open_list_window(const std::string &title, const std::vector<std::string> &
 
 // open the monster list window and enter the monster list key loop
 void list_monsters(dungeon_t *d) {
-    // get the list of monsters
 	std::vector<std::string> monsters;
     size_t i = 0;
 
@@ -135,12 +138,84 @@ void list_monsters(dungeon_t *d) {
         }
     }
 
-	// add no monsters visible message
 	if (monsters.empty()) {
 		monsters.push_back("No monsters visible");
 	}
 
-    open_list_window("Monster list", monsters);
+    open_list_window("Monster list", monsters, nullptr);
+}
+
+// convert the pc's inventory to a list
+std::vector<std::string> inventory_list(pc_t &pc, bool is_carry) {
+	std::vector<std::string> inventory;
+	Object **slots = is_carry ? pc.carry : pc.equipment;
+
+	for (size_t i = 0; i < (is_carry ? NUM_CARRY_SLOTS : NUM_EQUIPMENT_SLOTS); ++i) {
+		std::stringstream item;
+
+		char id = is_carry ? (i + '0') : (i + 'a');
+
+		item << id << ": " << (slots[i] ? slots[i]->name : "Empty");
+
+		inventory.push_back(item.str());
+	}
+
+	return inventory;
+}
+
+// prompt the user to pick a slot
+size_t inventory_prompt(const std::string &title, pc_t &pc, bool is_carry) {
+	size_t choice = NOT_PICKED;
+
+	open_list_window(title, inventory_list(pc, is_carry), [&choice, &is_carry](char key) -> bool {
+		if ((is_carry ? '0' : 'a') <= key && key <= (is_carry ? '9' : 'l')) {
+			choice = key - (is_carry ? '0' : 'a');
+			return true;
+		}
+
+		return false;
+	});
+
+	return choice;
+}
+
+// display information about an object
+void display_object(Object *obj) {
+	// nothing to display
+	if (obj == nullptr) return;
+
+	std::vector<std::string> lines;
+	
+	size_t i = -1, j = 0;
+	while (j < obj->desc.size()) {
+		j = obj->desc.find("\n", ++i);
+
+		if (j == std::string::npos) {
+			j = obj->desc.size();
+		}
+
+		lines.push_back(obj->desc.substr(i, j - i));
+
+		i = j;
+	}
+
+	open_list_window(obj->name, lines, nullptr);
+}
+
+// display the current inventory
+void display_inventory(const std::string &title, pc_t &pc, bool is_carry) {
+	Object **slots = is_carry ? pc.carry : pc.equipment;
+
+	open_list_window(title, inventory_list(pc, is_carry), [&slots, &is_carry](char key) -> bool {
+		// show info for the chosen item
+		if ((is_carry ? '0' : 'a') <= key && key <= (is_carry ? '9' : 'l')) {
+			size_t choice = key - (is_carry ? '0' : 'a');
+
+			display_object(slots[choice]);
+		}
+
+		return false;
+	});
 }
 
 const std::vector<std::string> help_msg = {
@@ -181,7 +256,7 @@ const std::vector<std::string> help_msg = {
 
 // print the README
 void help() {
-    open_list_window("Help", help_msg);
+    open_list_window("Help", help_msg, nullptr);
 }
 
 bool should_show_help() {

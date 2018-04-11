@@ -11,7 +11,7 @@
 #include <assert.h>
 
 #include <dungeon.hpp>
-#include<heap.h>
+#include <heap.h>
 #include <move.hpp>
 #include <npc.hpp>
 #include <pc.hpp>
@@ -48,6 +48,17 @@ void move_character(dungeon_t *d, character_t *c, pair_t &next)
     c->position.y = next.y;
     c->position.x = next.x;
     d->charpair(c->position) = c;
+
+	// pick up any objects if we can
+	if (c == d->pc && d->objpair(c->position)) {
+		for (size_t i = 0; i < NUM_CARRY_SLOTS; ++i) {
+			if (d->pc->carry[i] == nullptr) {
+				d->pc->carry[i] = d->objpair(d->pc->position);
+				d->objpair(d->pc->position) = nullptr;
+				break;
+			}
+		}
+	}
   }
 }
 

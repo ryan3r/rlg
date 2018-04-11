@@ -17,6 +17,7 @@
 #include <info.hpp>
 #include <event.hpp>
 #include <iostream>
+#include <algorithm>
 
 void pc_t::place_pc() {
   position.y = rand_range(d->rooms[0].position.y,
@@ -39,14 +40,14 @@ void pc_t::config_pc() {
 }
 
 // handle keys to move the character/targeting pointer
-bool pc_t::move_keys(char key, pair_t &next) {
+bool pc_t::move_keys(int key, pair_t &next) {
 	switch (key) {
-		case '8': case 'k': case 'w':
+		case '8': case 'k': case KEY_UP:
 			if (d->hardnessxy(next.x, next.y - 1) < (teleporting ? 255 : 1))
 				--next.y;
 			break;
 
-		case '2': case 'j': case 's':
+		case '2': case 'j': case KEY_DOWN:
 			if (d->hardnessxy(next.x, next.y + 1) < (teleporting ? 255 : 1))
 				++next.y;
 			break;
@@ -58,7 +59,7 @@ bool pc_t::move_keys(char key, pair_t &next) {
 				--next.x;
 			break;
 
-		case '4': case 'h': case 'a':
+		case '4': case 'h': case KEY_LEFT:
 			if (d->hardnessxy(next.x - 1, next.y) < (teleporting ? 255 : 1))
 				--next.x;
 			break;
@@ -70,7 +71,7 @@ bool pc_t::move_keys(char key, pair_t &next) {
 				--next.y;
 			break;
 
-		case '6': case 'l': case 'd':
+		case '6': case 'l': case KEY_RIGHT:
 			if (d->hardnessxy(next.x + 1, next.y) < (teleporting ? 255 : 1))
 				++next.x;
 			break;
@@ -99,7 +100,7 @@ bool pc_t::move_keys(char key, pair_t &next) {
 	return true;
 }
 
-void pc_t::target(char exit_key, std::function<uint8_t(char)> handler) {
+void pc_t::target(int exit_key, std::function<uint8_t(char)> handler) {
 	bool should_render = true;
 	teleporting = true;
 	teleport_target = position;
@@ -108,7 +109,7 @@ void pc_t::target(char exit_key, std::function<uint8_t(char)> handler) {
 		if(should_render) d->render_dungeon();
 		should_render = true;
 
-		char key = getch();
+		int key = getch();
 
 		// move the target
 		if (!move_keys(key, teleport_target)) {
@@ -147,10 +148,11 @@ void pc_t::target(char exit_key, std::function<uint8_t(char)> handler) {
 
 void pc_t::next_pos(pair_t &next) {
 	bool __is_fogged;
+	size_t slot;
 	next = position;
 
 	top:
-	char key = getch();
+	int key = getch();
 
 	if (!move_keys(key, next)) {
 		switch (key) {
@@ -172,6 +174,103 @@ void pc_t::next_pos(pair_t &next) {
 		case 'm':
 			list_monsters(d);
 			d->render_dungeon();
+			goto top;
+
+		// destroy an object in carry slots
+		case 'x':
+			slot = inventory_prompt("Pick an object to destroy", *this, true);
+			d->render_dungeon();
+
+			if (slot != NOT_PICKED && carry[slot]) {
+				mprintf("Destroyed %s", carry[slot]->name.c_str());
+
+				delete carry[slot];
+				carry[slot] = nullptr;
+			}
+
+			goto top;
+
+		// drop an object in carry slots
+		case 'd':
+			slot = inventory_prompt("Pick an object to drop", *this, true);
+			d->render_dungeon();
+
+			if (slot != NOT_PICKED && carry[slot]) {
+				mprintf("Dropped %s", carry[slot]->name.c_str());
+
+				// anything we are standing on gets destroied because we don't implement stacks
+				if (d->objpair(position)) {
+					delete d->objpair(position);
+				}
+
+				d->objpair(position) = carry[slot];
+				carry[slot] = nullptr;
+			}
+
+			goto top;
+
+		// take off an object
+		case 't':
+			slot = inventory_prompt("Pick an object to take off", *this, false);
+			d->render_dungeon();
+
+			if (slot != NOT_PICKED && equipment[slot]) {
+				size_t carry_slot;
+
+				// find an empty carry slot
+				for (carry_slot = 0; carry_slot < NUM_CARRY_SLOTS && carry[carry_slot] != nullptr; ++carry_slot);
+
+				if (carry_slot == NUM_CARRY_SLOTS) {
+					mprintf("No available carry slots please drop or destroy an object");
+					goto top;
+				}
+
+				mprintf("Unequipped %s", equipment[slot]->name.c_str());
+
+				carry[carry_slot] = equipment[slot];
+				equipment[slot] = nullptr;
+			}
+
+			goto top;
+
+		// put on an object
+		case 'w':
+			slot = inventory_prompt("Pick an object to wear", *this, true);
+			d->render_dungeon();
+
+			if (slot != NOT_PICKED && carry[slot]) {
+				// can't wear this object
+				if (carry[slot]->inventory_type == ObjectType::UNKNOWN) {
+					mprintf("%s can't be worn", carry[slot]->name.c_str());
+					goto top;
+				}
+
+				size_t equip_slot = (size_t) carry[slot]->inventory_type;
+
+				// use the second ring slot if the first is not empty
+				if (carry[slot]->inventory_type == ObjectType::RING && equipment[equip_slot]) {
+					++equip_slot;
+				}
+
+				std::swap(carry[slot], equipment[equip_slot]);
+
+				mprintf("Putting on %s", equipment[equip_slot]->name.c_str());
+			}
+
+			goto top;
+
+		// show carry slots
+		case 'i': case 'I':
+			display_inventory("Inventory", *d->pc, true);
+			d->render_dungeon();
+
+			goto top;
+
+		// show equiped slots
+		case 'e':
+			display_inventory("Equipment", *d->pc, false);
+			d->render_dungeon();
+
 			goto top;
 
 		case '?': case '/':
@@ -258,4 +357,20 @@ void pc_t::look_around() {
       }
     }
   }
+}
+
+pc_t::~pc_t() {
+	for (size_t i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
+		if (equipment[i]) {
+			delete equipment[i];
+			equipment[i] = nullptr;
+		}
+	}
+
+	for (size_t i = 0; i < NUM_CARRY_SLOTS; ++i) {
+		if (carry[i]) {
+			delete carry[i];
+			carry[i] = nullptr;
+		}
+	}
 }
