@@ -3,8 +3,6 @@ project(rlg)
 
 set(CMAKE_CXX_STANDARD 11)
 
-option(cheets "Game cheets" ON)
-
 # Add my headers to the include path
 include_directories(rlg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
@@ -29,11 +27,6 @@ else()
 	# Get ncurses
     find_package(Curses REQUIRED)
     include_directories(${CURSES_INCLUDE_DIR})
-endif()
-
-# Make game options available to c++
-if(cheets)
-	add_definitions(-DCHEETS)
 endif()
 
 # NOTE: I add the headers here so they are visible in visual studio

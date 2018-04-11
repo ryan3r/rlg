@@ -30,6 +30,8 @@ public:
   pair_t teleport_target;
   // we want to regenerate
   bool regenerate_dungeon = false;
+  // do we have cheets enabled
+  uint8_t cheet_level = DEFAULT_CHEET_LEVEL;
 
   pc_t(dungeon_t *d): character_t(d, '@', PC_SPEED, 0, PC_HP, Dice(0, 1, 4)) {
     // initialize the fog of war map

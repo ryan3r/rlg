@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 		SetConsoleTitle("rlg327");
 
 		// resize the window
-		SMALL_RECT window_size = { 0, 0, DUNGEON_X, DUNGEON_Y };
+		SMALL_RECT window_size = { 0, 0, DUNGEON_X, DUNGEON_Y + 2 };
 		SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), 1, &window_size);
 #endif
 

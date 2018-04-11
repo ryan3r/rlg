@@ -156,8 +156,33 @@ void pc_t::next_pos(pair_t &next) {
 	top:
 	int key = getch();
 
+	// key sequence to enable cheets
+	if (key == 'c') {
+		++cheet_level;
+
+		if (cheet_level >= CHEETS_ENABLED) {
+			mprintf("Cheets are enabled (type X to disable)", CHEETS_ENABLED - cheet_level)
+			cheet_level = CHEETS_ENABLED;
+		}
+
+		goto top;
+	}
+
+	// we miss typed reset cheets
+	if (cheet_level < CHEETS_ENABLED) {
+		cheet_level = 0;
+	}
+
 	if (!move_keys(key, next)) {
 		switch (key) {
+		case 'X':
+			cheet_level = 0;
+			is_fogged = true;
+
+			d->render_dungeon();
+			mprintf("Cheets are disabled");
+			goto top;
+
 		case 'Q':
 			deal_damage(get_hp());
 			break;
@@ -292,13 +317,22 @@ void pc_t::next_pos(pair_t &next) {
 
 			goto top;
 
-	#ifdef CHEETS
 		case 'f':
+			if (cheet_level < CHEETS_ENABLED) {
+				mprintf("Cheets are disabled");
+				goto top;
+			}
+
 			is_fogged = !is_fogged;
 			d->render_dungeon();
 			goto top;
 
 		case 'g':
+			if (cheet_level < CHEETS_ENABLED) {
+				mprintf("Cheets are disabled");
+				goto top;
+			}
+
 			d->charpair(position) = nullptr;
 			// save the fogged state
 			__is_fogged = is_fogged;
@@ -332,7 +366,6 @@ void pc_t::next_pos(pair_t &next) {
 			d->render_dungeon();
 		  
 			goto top;
-	#endif
 
 		default:
 			mprintf("%c is not a valid command. (press ? for help)", key);
@@ -442,7 +475,6 @@ int32_t pc_t::get_speed() const {
 // handle dungeon regeneration
 void pc_t::regenerate() {
 	memset(&map, (int)terrain_type_t::wall, sizeof(map));
-	is_fogged = true;
 	regenerate_dungeon = false;
 	teleport_target = position;
 }
