@@ -278,6 +278,18 @@ void pc_t::next_pos(pair_t &next) {
 			d->render_dungeon();
 			goto top;
 
+		// get information about a monster
+		case 'L':
+			target('t', [&](char key) -> uint8_t { return 0; });
+
+			if (d->charpair(teleport_target)) {
+				display_monster(dynamic_cast<npc_t*>(d->charpair(teleport_target)));
+			}
+
+			d->render_dungeon();
+
+			goto top;
+
 	#ifdef CHEETS
 		case 'f':
 			is_fogged = !is_fogged;
@@ -401,6 +413,7 @@ void pc_t::defend(const character_t &atk) {
 	deal_damage(power);
 }
 
+// TODO: Doesn't work
 int32_t pc_t::get_speed() const {
 	int32_t sp = character_t::get_speed();
 

@@ -21,8 +21,16 @@
 #include <event.hpp>
 #include <iostream>
 
+const pair_t DIRECTIONS[] = {
+	pair_t(-1, -1), pair_t(0, -1), pair_t(1, -1),
+	pair_t(-1, 0), pair_t(0, 0), pair_t(1, 0),
+	pair_t(-1, 1), pair_t(0, 1), pair_t(1, 1)
+};
+
 void do_combat(dungeon_t *d, character_t *atk, character_t *def) {
-  if (def->alive() && (atk == d->pc || def == d->pc)) {
+  if (!def->alive()) return;
+
+  if (atk == d->pc || def == d->pc) {
 	atk->attack(*def);
 
 	if (!def->alive()) {
@@ -32,6 +40,17 @@ void do_combat(dungeon_t *d, character_t *atk, character_t *def) {
 		atk->kills_direct++;
 		atk->kills_avenged += (def->kills_direct + def->kills_avenged);
 	}
+  }
+  else {
+	  // push the player to a nearby open space
+	  for (int i = rand_range(0, 8), end = i + 9; i < end; ++i) {
+		  pair_t to = def->position + DIRECTIONS[i % 9];
+
+		  if (!d->charpair(to) && d->hardnesspair(to) == 0) {
+			  move_character(d, def, to);
+			  break;
+		  }
+	  }
   }
 }
 

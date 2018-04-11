@@ -63,6 +63,7 @@ void print_list(WINDOW *win, const std::string &title, const std::vector<std::st
 
     wattroff(win, COLOR_PAIR(1));
 
+	refresh();
     wrefresh(win);
 }
 
@@ -200,6 +201,29 @@ void display_object(Object *obj) {
 	}
 
 	open_list_window(obj->name, lines, nullptr);
+}
+
+// display information about a character
+void display_monster(npc_t *monster) {
+	// nothing to display
+	if (monster == nullptr) return;
+
+	std::vector<std::string> lines;
+
+	size_t i = -1, j = 0;
+	while (j < monster->desc.size()) {
+		j = monster->desc.find("\n", ++i);
+
+		if (j == std::string::npos) {
+			j = monster->desc.size();
+		}
+
+		lines.push_back(monster->desc.substr(i, j - i));
+
+		i = j;
+	}
+
+	open_list_window(monster->name, lines, nullptr);
 }
 
 // display the current inventory
