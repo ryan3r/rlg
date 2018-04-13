@@ -39,6 +39,10 @@ void do_combat(dungeon_t *d, character_t *atk, character_t *def) {
 		}
 		atk->kills_direct++;
 		atk->kills_avenged += (def->kills_direct + def->kills_avenged);
+
+		d->charpair(def->position) = nullptr;
+
+		move_character(d, atk, def->position);
 	}
   }
   else {

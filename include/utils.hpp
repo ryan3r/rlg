@@ -37,3 +37,5 @@ public:
 #endif
 	}
 };
+
+unsigned digit_count(int number);

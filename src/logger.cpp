@@ -40,20 +40,6 @@ void Logger::scroll(int32_t direction) {
 	if (index >= messages.size()) index = messages.size() - 1;
 }
 
-// count the number of digits in an number
-unsigned digitCount(int number) {
-	unsigned count = 0;
-
-	if (number == 0) return 1;
-
-	while (number > 0) {
-		++count;
-		number /= 10;
-	}
-
-	return count;
-}
-
 // print the most recent message and the count
 void Logger::print_most_recent() {
 	move(0, 0);
@@ -64,7 +50,7 @@ void Logger::print_most_recent() {
 		mvprintw(0, 0, "%s", messages[index]->msg.c_str());
 		attroff(COLOR_PAIR(1));
 		attron(COLOR_PAIR(5));
-		mvprintw(0, DUNGEON_X - (digitCount(index + 1) + digitCount(messages.size())), "%d/%d", index + 1, messages.size());
+		mvprintw(0, DUNGEON_X - (digit_count(index + 1) + digit_count(messages.size())), "%d/%d", index + 1, messages.size());
 		attroff(COLOR_PAIR(5));
 	}
 }

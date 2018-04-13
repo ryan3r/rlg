@@ -581,7 +581,9 @@ void dungeon_t::render_dungeon() {
 
 	pair_t p;
 
-	std::stringstream npcs_hp;
+	// print the status bar
+	mvprintw(DUNGEON_Y + 2, 0, "Hp: %d Speed: %d | ", pc_t::pc->get_hp(), pc_t::pc->get_speed());
+	int32_t ch_x_offset = 15 + digit_count(pc_t::pc->get_hp()) + digit_count(pc_t::pc->get_speed());
 
 	for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
 		for (p.x = 0; p.x < DUNGEON_X; p.x++) {
@@ -607,7 +609,17 @@ void dungeon_t::render_dungeon() {
 
 				// add the npc's health to the health list
 				if (!dynamic_cast<pc_t*>(charpair(p)) && raw_is_visible) {
-					npcs_hp << charpair(p)->symbol << ": " << charpair(p)->get_hp() << " ";
+					int32_t x = ch_x_offset;
+					int32_t hp = charpair(p)->get_hp();
+					ch_x_offset += 4 + digit_count(hp);
+
+					if (ch_x_offset < DUNGEON_X) {
+						attron(COLOR_PAIR(color));
+						mvaddch(DUNGEON_Y + 2, x, charpair(p)->symbol);
+						attroff(COLOR_PAIR(color));
+
+						mvprintw(DUNGEON_Y + 2, x + 1, ": %d", hp);
+					}
 				}
 			}
 			else if (objpair(p) && is_visible) {
@@ -649,7 +661,6 @@ void dungeon_t::render_dungeon() {
 	}
 
 	Logger::inst()->print_most_recent();
-	mvprintw(DUNGEON_Y + 2, 0, "Hp: %d Speed: %d | %s", pc_t::pc->get_hp(), pc_t::pc->get_speed(), npcs_hp.str().c_str());
 }
 
 dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m, std::vector<std::shared_ptr<Builder>> o):

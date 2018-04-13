@@ -66,3 +66,17 @@ int resolve_color(std::string color) {
 
 	return 0;
 }
+
+// count the number of digits in an number
+unsigned digit_count(int number) {
+	unsigned count = 0;
+
+	if (number == 0) return 1;
+
+	while (number > 0) {
+		++count;
+		number /= 10;
+	}
+
+	return count;
+}

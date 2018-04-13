@@ -44,10 +44,11 @@ public:
   // deal damage to this character
   void deal_damage(int32_t dmg) {
 	  if (dmg < 0) dmg = 0;
+	  if (dmg > hp) dmg = hp;
 	  hp -= dmg;
   }
 
-  bool alive() const { return hp >= 0; }
+  bool alive() const { return hp > 0; }
 
   virtual void attack(character_t&) const;
   virtual int32_t get_speed() const;
