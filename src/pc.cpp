@@ -138,7 +138,7 @@ void pc_t::target(int exit_key, std::function<uint8_t(char)> handler) {
 				}
 				else {
 					uint8_t res = handler(key);
-					
+
 					// exit targeting
 					if (res == 1) break;
 
@@ -307,7 +307,7 @@ top:
 				std::swap(carry[slot], equipment[equip_slot]);
 
 				LoggerStream(Logger::inst()->life_time_key) << "Putting on " << equipment[equip_slot]->name;
-				
+
 				look_around();
 				d->render_dungeon();
 			}
@@ -395,7 +395,7 @@ top:
 
 			look_around();
 			d->render_dungeon();
-		  
+
 			goto top;
 
 		// move to the next unread message
@@ -532,8 +532,6 @@ int32_t pc_t::get_speed() const {
 			sp += equipment[i]->speed;
 			sp -= equipment[i]->weight;
 		}
-
-		std::clog << equipment[i] << std::endl;
 	}
 
 	if (sp < 1) sp = 1;

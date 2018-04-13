@@ -92,10 +92,6 @@ void usage(char *name)
 
 int main(int argc, char *argv[])
 {
-	std::ofstream log_file("rlg-log.txt");
-	std::streambuf *orig_log_rd = std::clog.rdbuf();
-	std::clog.rdbuf(log_file.rdbuf());
-
 	try {
 		dungeon_t d(
 			Parser::parse_file(get_default_file("monster_desc.txt")),
@@ -372,8 +368,6 @@ int main(int argc, char *argv[])
 
 		std::cerr << err.what() << std::endl;
 	}
-
-	std::clog.rdbuf(orig_log_rd);
 
 	Logger::del();
 
