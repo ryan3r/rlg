@@ -10,6 +10,7 @@
 #include <memory>
 #include <parser.hpp>
 #include <object.hpp>
+#include <logger.hpp>
 
 #ifdef __linux__
 #define SAVE_DIR               ".rlg327"

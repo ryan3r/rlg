@@ -6,6 +6,8 @@
 
 constexpr size_t NOT_PICKED = 100000;
 
+void open_list_window(const std::string &title, const std::vector<std::string> &list, std::function<bool(char)> handler, bool start_at_end);
+void open_list_window(const std::string &title, const std::vector<std::string> &list, std::function<bool(char)> handler);
 void display_monster(npc_t*);
 void display_object(Object*);
 void display_inventory(const std::string &title, pc_t &pc, bool is_carry);

@@ -69,15 +69,19 @@ void print_list(WINDOW *win, const std::string &title, const std::vector<std::st
 }
 
 void open_list_window(const std::string &title, const std::vector<std::string> &list, std::function<bool(char)> handler) {
+	open_list_window(title, list, handler, false);
+}
+
+void open_list_window(const std::string &title, const std::vector<std::string> &list, std::function<bool(char)> handler, bool start_at_end) {
     WINDOW *win = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, (DUNGEON_Y - WINDOW_HEIGHT) / 2, (DUNGEON_X - WINDOW_WIDTH) / 2);
 
-    size_t i = 0;
+    size_t i = start_at_end ? list.size() - (WINDOW_HEIGHT - 3) : 0;
 
     // listen for key presses
     for(;;) {
         print_list(win, title, list, i);
 
-		char key;
+		int key;
         switch((key = getch())) {
             case 27: case 'Q':
                 goto end;

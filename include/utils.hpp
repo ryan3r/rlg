@@ -20,12 +20,6 @@
 
 int makedirectory(char *dir);
 
-#define mprintf(...) {           \
-  move(0, 0);                    \
-  clrtoeol();                    \
-  mvprintw(0, 0, __VA_ARGS__);   \
-}
-
 int resolve_color(std::string);
 
 class RlgError : public std::exception {

@@ -18,6 +18,8 @@
 #include <event.hpp>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
+#include <logger.hpp>
 
 pc_t *pc_t::pc = nullptr;
 
@@ -107,14 +109,15 @@ void pc_t::target(int exit_key, std::function<uint8_t(char)> handler) {
 	teleporting = true;
 	teleport_target = position;
 
+	std::weak_ptr<LoggerMsg> msg_ref;
+	LoggerStream(msg_ref) << "Press " << (char) exit_key << " to select a target. Escape or Q to cancel.";
+
 	for (;;) {
-		if (should_render) {
-			d->render_dungeon();
-			mprintf("Press %c to select a target. Escape or Q to cancel.", exit_key);
-		}
+		if (should_render) d->render_dungeon();
 
 		should_render = true;
 
+		Logger::clear_messages(Logger::inst()->life_time_key);
 		int key = getch();
 
 		// move the target
@@ -129,7 +132,8 @@ void pc_t::target(int exit_key, std::function<uint8_t(char)> handler) {
 			// pass on the key to the handler
 			else {
 				if (handler == nullptr) {
-					mprintf("%c is not a valid command. (press ? for help)", key);
+					LoggerStream(Logger::inst()->life_time_key) << key << " is not a valid command. (press ? for help)";
+
 					should_render = false;
 				}
 				else {
@@ -140,12 +144,19 @@ void pc_t::target(int exit_key, std::function<uint8_t(char)> handler) {
 
 					// unknown key
 					if (res == 2) {
-						mprintf("%c is not a valid command. (press ? for help)", key);
+						LoggerStream(Logger::inst()->life_time_key) << key << " is not a valid command. (press ? for help)";
+
 						should_render = false;
 					}
 				}
 			}
 		}
+	}
+
+	// remove the informational message
+	if (auto ref = msg_ref.lock()) {
+		ref->hide();
+		ref->hide();
 	}
 
 	teleporting = false;
@@ -159,7 +170,10 @@ void pc_t::next_pos(pair_t &next) {
 
 	d->render_dungeon();
 
-	top:
+	Logger::clear_messages(Logger::inst()->life_time_turn);
+
+top:
+	Logger::clear_messages(Logger::inst()->life_time_key);
 	int key = getch();
 
 	// key sequence to enable cheets
@@ -167,7 +181,8 @@ void pc_t::next_pos(pair_t &next) {
 		++cheet_level;
 
 		if (cheet_level >= CHEETS_ENABLED) {
-			mprintf("Cheets are enabled (type X to disable)", CHEETS_ENABLED - cheet_level)
+			Logger::inst()->life_time_key.push(Logger::inst()->log("Cheets are enabled (type X to disable)"));
+
 			cheet_level = CHEETS_ENABLED;
 		}
 
@@ -186,7 +201,7 @@ void pc_t::next_pos(pair_t &next) {
 			is_fogged = true;
 
 			d->render_dungeon();
-			mprintf("Cheets are disabled");
+			Logger::inst()->life_time_key.push(Logger::inst()->log("Cheets are disabled"));
 			goto top;
 
 		case 'Q':
@@ -196,7 +211,7 @@ void pc_t::next_pos(pair_t &next) {
 		case '<':
 		case '>':
 			if (d->mappair(pc_t::pc->position) != (key == '>' ? terrain_type_t::staircase_down : terrain_type_t::staircase_up)) {
-				mprintf("You are not on a%s staircase.", key == '>' ? " down" : "n up");
+				LoggerStream(Logger::inst()->life_time_key) << "You are not on a" << (key == '>' ? " down" : "n up") << " staircase.";
 				goto top;
 			}
 
@@ -215,7 +230,7 @@ void pc_t::next_pos(pair_t &next) {
 			d->render_dungeon();
 
 			if (slot != NOT_PICKED && carry[slot]) {
-				mprintf("Destroyed %s", carry[slot]->name.c_str());
+				LoggerStream(Logger::inst()->life_time_key) << "Destroyed " << carry[slot]->name;
 
 				delete carry[slot];
 				carry[slot] = nullptr;
@@ -229,7 +244,7 @@ void pc_t::next_pos(pair_t &next) {
 			d->render_dungeon();
 
 			if (slot != NOT_PICKED && carry[slot]) {
-				mprintf("Dropped %s", carry[slot]->name.c_str());
+				LoggerStream(Logger::inst()->life_time_key) << "Dropped " << carry[slot]->name;
 
 				// anything we are standing on gets destroied because we don't implement stacks
 				if (d->objpair(position)) {
@@ -254,11 +269,11 @@ void pc_t::next_pos(pair_t &next) {
 				for (carry_slot = 0; carry_slot < NUM_CARRY_SLOTS && carry[carry_slot] != nullptr; ++carry_slot);
 
 				if (carry_slot == NUM_CARRY_SLOTS) {
-					mprintf("No available carry slots please drop or destroy an object");
+					Logger::inst()->life_time_key.push(Logger::inst()->log("No available carry slots please drop or destroy an object"));
 					goto top;
 				}
 
-				mprintf("Unequipped %s", equipment[slot]->name.c_str());
+				LoggerStream(Logger::inst()->life_time_key) << "Unequipped " << equipment[slot]->name;
 
 				carry[carry_slot] = equipment[slot];
 				equipment[slot] = nullptr;
@@ -277,7 +292,8 @@ void pc_t::next_pos(pair_t &next) {
 			if (slot != NOT_PICKED && carry[slot]) {
 				// can't wear this object
 				if (carry[slot]->inventory_type == Object::UNKNOWN) {
-					mprintf("%s can't be worn", carry[slot]->name.c_str());
+					LoggerStream(Logger::inst()->life_time_key) << carry[slot]->name << " can't be worn";
+
 					goto top;
 				}
 
@@ -290,7 +306,7 @@ void pc_t::next_pos(pair_t &next) {
 
 				std::swap(carry[slot], equipment[equip_slot]);
 
-				mprintf("Putting on %s", equipment[equip_slot]->name.c_str());
+				LoggerStream(Logger::inst()->life_time_key) << "Putting on " << equipment[equip_slot]->name;
 				
 				look_around();
 				d->render_dungeon();
@@ -334,7 +350,7 @@ void pc_t::next_pos(pair_t &next) {
 
 		case 'f':
 			if (cheet_level < CHEETS_ENABLED) {
-				mprintf("Cheets are disabled");
+				Logger::inst()->life_time_key.push(Logger::inst()->log("Cheets are disabled"));
 				goto top;
 			}
 
@@ -344,7 +360,7 @@ void pc_t::next_pos(pair_t &next) {
 
 		case 'g':
 			if (cheet_level < CHEETS_ENABLED) {
-				mprintf("Cheets are disabled");
+				Logger::inst()->life_time_key.push(Logger::inst()->log("Cheets are disabled"));
 				goto top;
 			}
 
@@ -382,8 +398,23 @@ void pc_t::next_pos(pair_t &next) {
 		  
 			goto top;
 
+		// move to the next unread message
+		case '=':
+			Logger::inst()->scroll(1);
+			goto top;
+
+		case '-':
+			Logger::inst()->scroll(-1);
+			goto top;
+
+		// open the log window
+		case 'p':
+			Logger::inst()->open_log_window();
+			d->render_dungeon();
+			goto top;
+
 		default:
-			mprintf("%c is not a valid command. (press ? for help)", key);
+			LoggerStream(Logger::inst()->life_time_key) << key << " is not a valid command. (press ? for help)";
 			goto top;
 		}
 	}
@@ -457,9 +488,7 @@ void pc_t::attack(character_t &def) const {
 		}
 	}
 
-	mprintf("You attacked %s it has %d hp left.", ((npc_t&) def).name.c_str(), def.get_hp());
-
-	std::clog << "You attack with " << power << " was " << oPower << std::endl;
+	LoggerStream(Logger::inst()->life_time_turn) << "You attacked " << ((npc_t&)def).name << " it has " << def.get_hp() << " hp left.";
 
 	def.deal_damage(power);
 
@@ -489,9 +518,7 @@ void pc_t::defend(const character_t &atk) {
 
 	if (power < 0) power = 0;
 
-	mprintf("You were attacked by a %s it did %d damage.", ((npc_t&)atk).name.c_str(), power);
-
-	std::clog << "You defend against " << power << " was " << oPower << std::endl;
+	LoggerStream(Logger::inst()->life_time_turn) << "You were attacked by a " << ((npc_t&)atk).name << " it did " << power << " damage.";
 
 	deal_damage(power);
 }

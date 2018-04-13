@@ -24,6 +24,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <logger.hpp>
 
 #define DUMP_HARDNESS_IMAGES 0
 
@@ -630,13 +631,13 @@ void dungeon_t::render_dungeon() {
 					break;
 				case terrain_type_t::debug:
 					mvaddch(p.y + 1, p.x, '*');
-					mprintf("Debug character at %d, %d\n", p.y, p.x);
 					break;
 				}
 			}
 		}
 	}
 
+	Logger::inst()->print_most_recent();
 	mvprintw(DUNGEON_Y + 2, 0, "Hp: %d Speed: %d", pc_t::pc->get_hp(), pc_t::pc->get_speed());
 }
 

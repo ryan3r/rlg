@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <path.hpp>
+#include <logger.hpp>
 
 const char *victory =
   "                                       o\n"
@@ -373,6 +374,8 @@ int main(int argc, char *argv[])
 	}
 
 	std::clog.rdbuf(orig_log_rd);
+
+	Logger::del();
 
 	return 0;
 }
