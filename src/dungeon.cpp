@@ -581,10 +581,16 @@ void dungeon_t::render_dungeon() {
 
 	pair_t p;
 
+	std::stringstream npcs_hp;
+
 	for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
 		for (p.x = 0; p.x < DUNGEON_X; p.x++) {
-			bool is_visible = (pc_t::pc->can_see(p) && -pc_t::pc->visual_distance() <= pc_t::pc->position.x - p.x && pc_t::pc->position.x - p.x <= pc_t::pc->visual_distance() &&
-				pc_t::pc->position.y - p.y <= pc_t::pc->visual_distance() && pc_t::pc->position.y - p.y >= -pc_t::pc->visual_distance()) || !pc_t::pc->is_fogged;
+			// all the monsters inview
+			bool raw_is_visible = pc_t::pc->can_see(p) && -pc_t::pc->visual_distance() <= pc_t::pc->position.x - p.x && pc_t::pc->position.x - p.x <= pc_t::pc->visual_distance() &&
+				pc_t::pc->position.y - p.y <= pc_t::pc->visual_distance() && pc_t::pc->position.y - p.y >= -pc_t::pc->visual_distance();
+
+			// account for the fog of war being disabled
+			bool is_visible = raw_is_visible || !pc_t::pc->is_fogged;
 
 			if (p == pc_t::pc->teleport_target && pc_t::pc->teleporting) {
 				attron(COLOR_PAIR(1));
@@ -598,6 +604,11 @@ void dungeon_t::render_dungeon() {
 				attron(COLOR_PAIR(color));
 				mvaddch(p.y + 1, p.x, charpair(p)->symbol);
 				attroff(COLOR_PAIR(color));
+
+				// add the npc's health to the health list
+				if (!dynamic_cast<pc_t*>(charpair(p)) && raw_is_visible) {
+					npcs_hp << charpair(p)->symbol << ": " << charpair(p)->get_hp() << " ";
+				}
 			}
 			else if (objpair(p) && is_visible) {
 				int color = resolve_color(objpair(p)->color[0]);
@@ -638,7 +649,7 @@ void dungeon_t::render_dungeon() {
 	}
 
 	Logger::inst()->print_most_recent();
-	mvprintw(DUNGEON_Y + 2, 0, "Hp: %d Speed: %d", pc_t::pc->get_hp(), pc_t::pc->get_speed());
+	mvprintw(DUNGEON_Y + 2, 0, "Hp: %d Speed: %d | %s", pc_t::pc->get_hp(), pc_t::pc->get_speed(), npcs_hp.str().c_str());
 }
 
 dungeon_t::dungeon_t(std::vector<std::shared_ptr<Builder>> m, std::vector<std::shared_ptr<Builder>> o):
