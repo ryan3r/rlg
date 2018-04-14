@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <utils.hpp>
 #include <algorithm>
+#include <queue>
 
 #ifdef _WIN32
 #undef MOUSE_MOVED

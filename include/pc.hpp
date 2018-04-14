@@ -17,6 +17,10 @@ private:
   void place_pc();
   bool move_keys(int, pair_t&);
   void target(int, std::function<uint8_t(char)>);
+  void destroy_object();
+  void drop_object();
+  void take_off_object();
+  void wear_object();
 
   terrain_type_t map[DUNGEON_Y][DUNGEON_X];
 

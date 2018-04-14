@@ -163,6 +163,21 @@ void list_monsters(dungeon_t *d) {
 	});
 }
 
+const std::string SLOT_NAMES[] = {
+	"Weapon",
+	"Offhand",
+	"Ranged",
+	"Armor",
+	"Helmet",
+	"Cloak",
+	"Gloves",
+	"Boots",
+	"Amulet",
+	"Light",
+	"Ring",
+	"Ring"
+};
+
 // convert the pc's inventory to a list
 std::vector<std::string> inventory_list(pc_t &pc, bool is_carry) {
 	std::vector<std::string> inventory;
@@ -174,6 +189,14 @@ std::vector<std::string> inventory_list(pc_t &pc, bool is_carry) {
 		char id = is_carry ? (i + '0') : (i + 'a');
 
 		item << id << ": " << (slots[i] ? slots[i]->name : "Empty");
+
+		if (!is_carry) {
+			size_t pad = WINDOW_WIDTH - 4 - item.str().size() - SLOT_NAMES[i].size();
+
+			while (pad-- > 0) item << " ";
+
+			item << "[" << SLOT_NAMES[i] << "]";
+		}
 
 		inventory.push_back(item.str());
 	}

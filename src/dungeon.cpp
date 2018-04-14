@@ -582,8 +582,8 @@ void dungeon_t::render_dungeon() {
 	pair_t p;
 
 	// print the status bar
-	mvprintw(DUNGEON_Y + 2, 0, "Hp: %d Speed: %d | ", pc_t::pc->get_hp(), pc_t::pc->get_speed());
-	int32_t ch_x_offset = 15 + digit_count(pc_t::pc->get_hp()) + digit_count(pc_t::pc->get_speed());
+	mvprintw(DUNGEON_Y + 2, 0, "Hp: %d Speed: %d", pc_t::pc->get_hp(), pc_t::pc->get_speed());
+	int32_t ch_x_offset = 0;
 
 	for (p.y = 0; p.y < DUNGEON_Y; p.y++) {
 		for (p.x = 0; p.x < DUNGEON_X; p.x++) {
@@ -611,14 +611,16 @@ void dungeon_t::render_dungeon() {
 				if (!dynamic_cast<pc_t*>(charpair(p)) && raw_is_visible) {
 					int32_t x = ch_x_offset;
 					int32_t hp = charpair(p)->get_hp();
-					ch_x_offset += 4 + digit_count(hp);
+					int32_t attack = ((npc_t*) charpair(p))->damage;
+
+					ch_x_offset += 6 + digit_count(hp) + digit_count(attack);
 
 					if (ch_x_offset < DUNGEON_X) {
 						attron(COLOR_PAIR(color));
-						mvaddch(DUNGEON_Y + 2, x, charpair(p)->symbol);
+						mvaddch(DUNGEON_Y + 1, x, charpair(p)->symbol);
 						attroff(COLOR_PAIR(color));
 
-						mvprintw(DUNGEON_Y + 2, x + 1, ": %d", hp);
+						mvprintw(DUNGEON_Y + 1, x + 1, ": %d(%d)", hp, attack);
 					}
 				}
 			}

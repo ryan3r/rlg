@@ -43,6 +43,91 @@ void pc_t::config_pc() {
   dijkstra_tunnel(d);
 }
 
+// prompt the user to destroy an object
+void pc_t::destroy_object() {
+	size_t slot = inventory_prompt("Pick an object to destroy", *this, true);
+	d->render_dungeon();
+
+	if (slot != NOT_PICKED && carry[slot]) {
+		LoggerStream(Logger::inst()->life_time_key) << "Destroyed " << carry[slot]->name;
+
+		delete carry[slot];
+		carry[slot] = nullptr;
+	}
+}
+
+// prompt the user to drop an object
+void pc_t::drop_object() {
+	size_t slot = inventory_prompt("Pick an object to drop", *this, true);
+	d->render_dungeon();
+
+	if (slot != NOT_PICKED && carry[slot]) {
+		LoggerStream(Logger::inst()->life_time_key) << "Dropped " << carry[slot]->name;
+
+		// anything we are standing on gets destroied because we don't implement stacks
+		if (d->objpair(position)) {
+			delete d->objpair(position);
+		}
+
+		d->objpair(position) = carry[slot];
+		carry[slot] = nullptr;
+	}
+}
+
+// take off an object
+void pc_t::take_off_object() {
+	size_t slot = inventory_prompt("Pick an object to take off", *this, false);
+	d->render_dungeon();
+
+	if (slot != NOT_PICKED && equipment[slot]) {
+		size_t carry_slot;
+
+		// find an empty carry slot
+		for (carry_slot = 0; carry_slot < NUM_CARRY_SLOTS && carry[carry_slot] != nullptr; ++carry_slot);
+
+		if (carry_slot == NUM_CARRY_SLOTS) {
+			Logger::inst()->life_time_key.push(Logger::inst()->log("No available carry slots please drop or destroy an object"));
+			return;
+		}
+
+		LoggerStream(Logger::inst()->life_time_key) << "Unequipped " << equipment[slot]->name;
+
+		carry[carry_slot] = equipment[slot];
+		equipment[slot] = nullptr;
+
+		look_around();
+		d->render_dungeon();
+	}
+}
+
+// put on an object
+void pc_t::wear_object() {
+	size_t slot = inventory_prompt("Pick an object to wear", *this, true);
+	d->render_dungeon();
+
+	if (slot != NOT_PICKED && carry[slot]) {
+		// can't wear this object
+		if (carry[slot]->inventory_type == Object::UNKNOWN) {
+			LoggerStream(Logger::inst()->life_time_key) << carry[slot]->name << " can't be worn";
+			return;
+		}
+
+		size_t equip_slot = carry[slot]->inventory_type;
+
+		// use the second ring slot if the first is not empty
+		if (carry[slot]->inventory_type == Object::RING && equipment[equip_slot]) {
+			++equip_slot;
+		}
+
+		std::swap(carry[slot], equipment[equip_slot]);
+
+		LoggerStream(Logger::inst()->life_time_key) << "Putting on " << equipment[equip_slot]->name;
+
+		look_around();
+		d->render_dungeon();
+	}
+}
+
 // handle keys to move the character/targeting pointer
 bool pc_t::move_keys(int key, pair_t &next) {
 	switch (key) {
@@ -226,92 +311,22 @@ top:
 
 		// destroy an object in carry slots
 		case 'x':
-			slot = inventory_prompt("Pick an object to destroy", *this, true);
-			d->render_dungeon();
-
-			if (slot != NOT_PICKED && carry[slot]) {
-				LoggerStream(Logger::inst()->life_time_key) << "Destroyed " << carry[slot]->name;
-
-				delete carry[slot];
-				carry[slot] = nullptr;
-			}
-
+			destroy_object();
 			goto top;
 
 		// drop an object in carry slots
 		case 'd':
-			slot = inventory_prompt("Pick an object to drop", *this, true);
-			d->render_dungeon();
-
-			if (slot != NOT_PICKED && carry[slot]) {
-				LoggerStream(Logger::inst()->life_time_key) << "Dropped " << carry[slot]->name;
-
-				// anything we are standing on gets destroied because we don't implement stacks
-				if (d->objpair(position)) {
-					delete d->objpair(position);
-				}
-
-				d->objpair(position) = carry[slot];
-				carry[slot] = nullptr;
-			}
-
+			drop_object();
 			goto top;
 
 		// take off an object
 		case 't':
-			slot = inventory_prompt("Pick an object to take off", *this, false);
-			d->render_dungeon();
-
-			if (slot != NOT_PICKED && equipment[slot]) {
-				size_t carry_slot;
-
-				// find an empty carry slot
-				for (carry_slot = 0; carry_slot < NUM_CARRY_SLOTS && carry[carry_slot] != nullptr; ++carry_slot);
-
-				if (carry_slot == NUM_CARRY_SLOTS) {
-					Logger::inst()->life_time_key.push(Logger::inst()->log("No available carry slots please drop or destroy an object"));
-					goto top;
-				}
-
-				LoggerStream(Logger::inst()->life_time_key) << "Unequipped " << equipment[slot]->name;
-
-				carry[carry_slot] = equipment[slot];
-				equipment[slot] = nullptr;
-
-				look_around();
-				d->render_dungeon();
-			}
-
+			take_off_object();
 			goto top;
 
 		// put on an object
 		case 'w':
-			slot = inventory_prompt("Pick an object to wear", *this, true);
-			d->render_dungeon();
-
-			if (slot != NOT_PICKED && carry[slot]) {
-				// can't wear this object
-				if (carry[slot]->inventory_type == Object::UNKNOWN) {
-					LoggerStream(Logger::inst()->life_time_key) << carry[slot]->name << " can't be worn";
-
-					goto top;
-				}
-
-				size_t equip_slot = carry[slot]->inventory_type;
-
-				// use the second ring slot if the first is not empty
-				if (carry[slot]->inventory_type == Object::RING && equipment[equip_slot]) {
-					++equip_slot;
-				}
-
-				std::swap(carry[slot], equipment[equip_slot]);
-
-				LoggerStream(Logger::inst()->life_time_key) << "Putting on " << equipment[equip_slot]->name;
-
-				look_around();
-				d->render_dungeon();
-			}
-
+			wear_object();
 			goto top;
 
 		// show carry slots
@@ -488,8 +503,6 @@ void pc_t::attack(character_t &def) const {
 		}
 	}
 
-	LoggerStream(Logger::inst()->life_time_turn) << "You attacked " << ((npc_t&)def).name << " it has " << def.get_hp() << " hp left.";
-
 	def.deal_damage(power);
 
 	// check if we killed the boss
@@ -517,8 +530,6 @@ void pc_t::defend(const character_t &atk) {
 	}
 
 	if (power < 0) power = 0;
-
-	LoggerStream(Logger::inst()->life_time_turn) << "You were attacked by a " << ((npc_t&)atk).name << " it did " << power << " damage.";
 
 	deal_damage(power);
 }
