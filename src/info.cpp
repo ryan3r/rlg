@@ -188,9 +188,12 @@ std::vector<std::string> inventory_list(pc_t &pc, bool is_carry) {
 
 		char id = is_carry ? (i + '0') : (i + 'a');
 
-		item << id << ": " << (slots[i] ? slots[i]->name : "Empty");
+		item << id << ": " << (slots[i] ? slots[i]->name : "");
 
-		if (!is_carry) {
+		if (is_carry && slots[i]) {
+			item << " [" << slots[i]->type << "]";
+		}
+		else if(!is_carry) {
 			size_t pad = WINDOW_WIDTH - 4 - item.str().size() - SLOT_NAMES[i].size();
 
 			while (pad-- > 0) item << " ";

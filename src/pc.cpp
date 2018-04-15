@@ -269,6 +269,7 @@ top:
 			Logger::inst()->life_time_key.push(Logger::inst()->log("Cheets are enabled (type X to disable)"));
 
 			cheet_level = CHEETS_ENABLED;
+			d->render_dungeon();
 		}
 
 		goto top;

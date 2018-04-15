@@ -594,6 +594,9 @@ void dungeon_t::render_dungeon() {
 			// account for the fog of war being disabled
 			bool is_visible = raw_is_visible || !pc_t::pc->is_fogged;
 
+			// make anything in view bold
+			if (raw_is_visible && !pc_t::pc->is_fogged) attron(A_STANDOUT);
+
 			if (p == pc_t::pc->teleport_target && pc_t::pc->teleporting) {
 				attron(COLOR_PAIR(1));
 				mvaddch(p.y + 1, p.x, '*');
@@ -659,6 +662,9 @@ void dungeon_t::render_dungeon() {
 					break;
 				}
 			}
+
+			// make anything in view bold
+			if (raw_is_visible && !pc_t::pc->is_fogged) attroff(A_STANDOUT);
 		}
 	}
 
