@@ -3,6 +3,7 @@
 #include <vector>
 #include <stack>
 #include <memory>
+#include <stdint.h>
 
 class LoggerStream;
 
@@ -40,9 +41,9 @@ public:
 
 	static void clear_messages(std::stack<std::weak_ptr<LoggerMsg>> life_time);
 	std::weak_ptr<LoggerMsg> log(std::string);
-	void print_most_recent();
-	void scroll(int32_t);
+	void _scroll_(int32_t);
 	void open_log_window();
+	void print_most_recent();
 
 	friend LoggerMsg;
 };

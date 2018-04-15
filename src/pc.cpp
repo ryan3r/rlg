@@ -416,11 +416,11 @@ top:
 
 		// move to the next unread message
 		case '=':
-			Logger::inst()->scroll(1);
+			Logger::inst()->_scroll_(1);
 			goto top;
 
 		case '-':
-			Logger::inst()->scroll(-1);
+			Logger::inst()->_scroll_(-1);
 			goto top;
 
 		// open the log window
