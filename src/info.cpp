@@ -266,7 +266,7 @@ void display_object(Object *obj) {
 	lines.push_back(stat.str());
 
 	lines.push_back("");
-	
+
 	add_description_lines(lines, obj->desc);
 
 	open_list_window(obj->name, lines, nullptr);
@@ -350,7 +350,14 @@ const std::vector<std::string> help_msg = {
     ">           | Go down stairs (only >)",
     "<           | Go down stairs (only <)",
     "5 or space  | Skip turn",
-    "m           | Display a list of monsters"
+    "m           | Display a list of monsters",
+    "w           | Wear item",
+    "i           | Display inventory",
+    "t           | Take off item",
+    "x           | Destroy an item",
+    "d           | Drop an item",
+    "e           | Display equipped items",
+    "L           | Get info about a monster or item"
 };
 
 // print the README
