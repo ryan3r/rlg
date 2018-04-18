@@ -10,7 +10,7 @@
 #define ROOM_MAX_Y             8
 #define VISUAL_RANGE           15
 #define PC_SPEED               10
-#define PC_HP                  500
+#define PC_HP                  1000
 #define MAX_MONSTERS           12
 #define DUNGEON_SAVE_FILE      "dungeon"
 #define DUNGEON_VERSION_FILE   "version"

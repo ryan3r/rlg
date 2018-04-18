@@ -568,3 +568,24 @@ void pc_t::regenerate() {
 	regenerate_dungeon = false;
 	teleport_target = position;
 }
+
+void pc_t::clean() {
+	regenerate();
+	hp = PC_HP;
+	is_fogged = true;
+	teleporting = false;
+
+	for (size_t i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
+		if (equipment[i]) {
+			delete equipment[i];
+			equipment[i] = nullptr;
+		}
+	}
+
+	for (size_t i = 0; i < NUM_CARRY_SLOTS; ++i) {
+		if (carry[i]) {
+			delete carry[i];
+			carry[i] = nullptr;
+		}
+	}
+}

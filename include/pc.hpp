@@ -53,6 +53,7 @@ public:
 
   virtual ~pc_t();
   void regenerate();
+  void clean();
 
   Object *equipment[NUM_EQUIPMENT_SLOTS];
   Object *carry[NUM_CARRY_SLOTS];

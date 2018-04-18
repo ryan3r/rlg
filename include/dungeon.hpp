@@ -63,6 +63,7 @@ private:
   }
 
 public:
+  void clean();
   bool is_boss_dead = false;
   std::vector<room_t> rooms;
   uint8_t pc_distance[DUNGEON_Y][DUNGEON_X];

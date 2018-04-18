@@ -688,29 +688,31 @@ void dungeon_t::init() {
   place_stairs();
 }
 
+void dungeon_t::clean() {
+	num_monsters = 0;
+	time = 0;
+	is_new = true;
+
+	rooms.clear();
+	heap_delete(&events);
+
+	for (size_t y = 0; y < DUNGEON_Y; ++y)
+		for (size_t x = 0; x < DUNGEON_X; ++x)
+			if (objects[y][x]) {
+				delete objects[y][x];
+				objects[y][x] = nullptr;
+			}
+
+	empty_dungeon();
+	memset(&character, 0, sizeof(character));
+	memset(&objects, 0, sizeof(objects));
+	memset(&events, 0, sizeof(events));
+	heap_init(&events, compare_events, event_delete);
+}
+
 void dungeon_t::regenerate() {
-  num_monsters = 0;
-  time = 0;
-  is_new = true;
-
-  rooms.clear();
-  heap_delete(&events);
-
-  for (size_t y = 0; y < DUNGEON_Y; ++y)
-	  for (size_t x = 0; x < DUNGEON_X; ++x)
-		  if (objects[y][x]) {
-			  delete objects[y][x];
-			  objects[y][x] = nullptr;
-		  }
-
-  empty_dungeon();
-
-  memset(&character, 0, sizeof(character));
-  memset(&events, 0, sizeof (events));
-
-  heap_init(&events, compare_events, event_delete);
-
-  gen_dungeon();
+	clean();
+	gen_dungeon();
 }
 
 void dungeon_t::write_dungeon_map(std::ostream &out) {

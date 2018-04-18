@@ -9,11 +9,11 @@ class dungeon_t;
 
 class character_t {
 private:
-	int32_t hp;
 	int32_t speed;
 
 protected:
   dungeon_t *d;
+  int32_t hp;
 
 public:
   Dice damage;
