@@ -34,9 +34,10 @@ std::weak_ptr<LoggerMsg> Logger::log(std::string msg) {
 
 // move to the next unread message
 void Logger::_scroll_(int32_t direction) {
+	if (index == 0 && direction < 0) direction = 0;
+
 	index += direction;
 
-	if (index < 0) index = 0;
 	if (index >= messages.size()) index = messages.size() - 1;
 }
 

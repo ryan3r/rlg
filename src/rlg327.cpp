@@ -79,17 +79,6 @@ const char *tombstone =
   "..\"\"\"\"\"....\"\"\"\"\"..\"\"...\"\"\".\n\n"
   "            You're dead.  Better luck in the next life.\n\n";
 
-void usage(char *name)
-{
-  fprintf(stderr,
-          "Usage: %s [-r|--rand <seed>] [-l|--load [<file>]]\n"
-          "          [-s|--save [<file>]] [-i|--image <pgm file>]\n"
-          "          [-p|--pc <y> <x>] [-n|--nummon <count>]\n",
-          name);
-
-  exit(-1);
-}
-
 int main(int argc, char *argv[])
 {
 	try {
@@ -107,6 +96,8 @@ int main(int argc, char *argv[])
 		// resize the window
 		SMALL_RECT window_size = { 0, 0, DUNGEON_X, DUNGEON_Y + 2 };
 		SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), 1, &window_size);
+#else
+        std::cout << "\x1b]0;rlg327\a" <<std::endl;
 #endif
 
 		d.max_monsters = MAX_MONSTERS;

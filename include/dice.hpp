@@ -16,7 +16,7 @@ public:
 	int32_t roll() const {
 		int32_t roll = base;
 
-		for (uint32_t rolled = 0; rolled < dice; ++rolled) {
+		for (int32_t rolled = 0; rolled < dice; ++rolled) {
 			roll += rand_range(1, sides);
 		}
 

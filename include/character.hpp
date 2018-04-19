@@ -16,9 +16,9 @@ protected:
   int32_t hp;
 
 public:
-  Dice damage;
   char symbol;
   pair_t position;
+  Dice damage;
   /* Characters use to have a next_turn for the move queue.  Now that it is *
    * an event queue, there's no need for that here.  Instead it's in the    *
    * event.  Similarly, sequence_number was introduced in order to ensure   *
@@ -31,7 +31,7 @@ public:
   uint32_t kills_avenged = 0;
 
   character_t(dungeon_t *du, char sy, int32_t sp, uint32_t se, int32_t h, Dice d):
-	  d{ du }, symbol{ sy }, speed{ sp }, sequence_number{ se }, hp{ h }, damage{ d } {}
+	  speed{ sp }, d{ du }, hp{ h }, symbol{ sy }, damage{ d }, sequence_number{ se } {}
 
   virtual void next_pos(pair_t &next) = 0;
 

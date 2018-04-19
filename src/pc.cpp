@@ -250,7 +250,6 @@ void pc_t::target(int exit_key, std::function<uint8_t(char)> handler) {
 
 void pc_t::next_pos(pair_t &next) {
 	bool __is_fogged;
-	size_t slot;
 	next = position;
 
 	d->render_dungeon();
@@ -351,7 +350,7 @@ top:
 
 		// get information about a monster
 		case 'L':
-			target('t', [&](char key) -> uint8_t { return 0; });
+			target('t', [&](int key) -> uint8_t { (void)key; return 0; });
 
 			if (d->charpair(teleport_target)) {
 				display_monster(dynamic_cast<npc_t*>(d->charpair(teleport_target)));
@@ -487,7 +486,6 @@ pc_t::~pc_t() {
 
 void pc_t::attack(character_t &def) const {
 	int32_t power = damage.roll();
-	int32_t oPower = power;
 
 	// add the power from weapons
 	if (equipment[Object::WEAPON]) {
@@ -515,7 +513,6 @@ void pc_t::attack(character_t &def) const {
 
 void pc_t::defend(const character_t &atk) {
 	int32_t power = atk.damage.roll();
-	int32_t oPower = power;
 
 	// add defense from items
 	if (equipment[Object::OFFHAND]) {
@@ -539,7 +536,7 @@ void pc_t::defend(const character_t &atk) {
 int32_t pc_t::get_speed() const {
 	int32_t sp = character_t::get_speed();
 
-	for (int i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
+	for (size_t i = 0; i < NUM_EQUIPMENT_SLOTS; ++i) {
 		if (equipment[i]) {
 			sp += equipment[i]->speed;
 			sp -= equipment[i]->weight;

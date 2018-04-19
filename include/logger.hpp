@@ -22,7 +22,7 @@ class Logger {
 private:
 	static Logger *logger;
 
-	int32_t index = -1;
+	size_t index = 0;
 	std::vector<std::shared_ptr<LoggerMsg>> messages;
 
 public:
@@ -34,7 +34,7 @@ public:
 			delete logger;
 		}
 	}
-	
+
 	// log messages to be removed at the end of this turn
 	std::stack<std::weak_ptr<LoggerMsg>> life_time_turn;
 	std::stack<std::weak_ptr<LoggerMsg>> life_time_key;
@@ -60,7 +60,7 @@ public:
 	~LoggerStream() {
 		if (str().size() > 0) {
 			auto log_msg = Logger::inst()->log(str());
-			
+
 			if (log_msg_target) {
 				*log_msg_target = log_msg;
 			}
