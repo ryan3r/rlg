@@ -39,3 +39,5 @@ public:
 };
 
 unsigned digit_count(int number);
+
+std::string resolve_config_file(std::string);

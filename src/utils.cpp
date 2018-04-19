@@ -8,6 +8,7 @@
 #include <utils.hpp>
 #include <algorithm>
 #include <queue>
+#include <dungeon.hpp>
 
 #ifdef _WIN32
 #undef MOUSE_MOVED
@@ -80,4 +81,21 @@ unsigned digit_count(int number) {
 	}
 
 	return count;
+}
+
+// try to find a config file
+std::string resolve_config_file(std::string file_name) {
+    std::string path = get_default_file(file_name.c_str());
+    #ifdef __linux__
+    struct stat buf;
+
+    // check if the user overrode this file
+    if(!stat(path.c_str(), &buf)) {
+        return path;
+    }
+
+    return std::string(ETC_CONFIG) + file_name;
+    #else
+    return path;
+    #endif
 }

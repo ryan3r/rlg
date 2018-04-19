@@ -16,6 +16,7 @@
 #define DUNGEON_VERSION_FILE   "version"
 #define RLG_VERSION            "1.05"
 #define DUNGEON_SAVE_SEMANTIC  "RLG327-S2018"
+#define ETC_CONFIG             "/etc/rlg327/"
 #define DUNGEON_SAVE_VERSION   0U
 #define VISUAL_DISTANCE        3
 #define CHEETS_ENABLED         3

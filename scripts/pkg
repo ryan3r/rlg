@@ -1,0 +1,27 @@
+# build the directory structure we'll need
+mkdir -p /tmp/rlg-release/rlg327/DEBIAN
+mkdir -p /tmp/rlg-release/rlg327/usr/local/bin
+mkdir -p /tmp/rlg-release/rlg327/etc/rlg327
+mkdir -p /tmp/rlg-release/build
+chmod 775 -R /tmp/rlg-release/
+
+# copy all the files
+cp files/manifest.txt /tmp/rlg-release/rlg327/DEBIAN/control
+cp files/monster_desc.txt /tmp/rlg-release/rlg327/etc/rlg327
+cp files/object_desc.txt /tmp/rlg-release/rlg327/etc/rlg327
+
+# build the binary
+proj=$(pwd)
+cd /tmp/rlg-release/build
+cmake $proj
+make
+cd ..
+
+# package the deb
+cp build/rlg rlg327/usr/local/bin/rlg327
+dpkg-deb --build rlg327
+mv rlg327.deb $proj
+
+# clean up
+cd ..
+rm -rf rlg-release

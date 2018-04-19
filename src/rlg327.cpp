@@ -94,8 +94,8 @@ int main(int argc, char *argv[])
 {
 	try {
 		dungeon_t d(
-			Parser::parse_file(get_default_file("monster_desc.txt")),
-			Parser::parse_file(get_default_file("object_desc.txt"))
+			Parser::parse_file(resolve_config_file("monster_desc.txt")),
+			Parser::parse_file(resolve_config_file("object_desc.txt"))
 		);
 
 		pc_t::pc = new pc_t(&d);
