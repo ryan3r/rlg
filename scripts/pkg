@@ -6,9 +6,9 @@ mkdir -p /tmp/rlg-release/build
 chmod 775 -R /tmp/rlg-release/
 
 # copy all the files
-cp files/manifest.txt /tmp/rlg-release/rlg327/DEBIAN/control
-cp files/monster_desc.txt /tmp/rlg-release/rlg327/etc/rlg327
-cp files/object_desc.txt /tmp/rlg-release/rlg327/etc/rlg327
+cp defs/manifest.txt /tmp/rlg-release/rlg327/DEBIAN/control
+cp defs/monster_desc.txt /tmp/rlg-release/rlg327/etc/rlg327
+cp defs/object_desc.txt /tmp/rlg-release/rlg327/etc/rlg327
 
 # build the binary
 proj=$(pwd)

@@ -1,5 +1,0 @@
-Package: rlg327
-Version: 1.10.0
-Maintainer: Ryan
-Architecture: all
-Description: A dungeon game

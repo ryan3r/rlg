@@ -81,6 +81,7 @@ const char *tombstone =
 
 int main(int argc, char *argv[])
 {
+	bool initialize_ncurses = false;
 	try {
 		dungeon_t d(
 			Parser::parse_file(resolve_config_file("monster_desc.txt")),
@@ -131,6 +132,8 @@ int main(int argc, char *argv[])
 		init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
 		init_pair(7, COLOR_WHITE, COLOR_BLACK);
 		init_pair(8, COLOR_BLUE, COLOR_BLACK);
+
+		initialize_ncurses = true;
 
 	game_start:
 
@@ -210,7 +213,9 @@ int main(int argc, char *argv[])
 		delete pc_t::pc;
 	}
 	catch (RlgError err) {
-		endwin();
+		if (initialize_ncurses) {
+			endwin();
+		}
 
 		std::cerr << err.what() << std::endl;
 	}

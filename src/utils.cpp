@@ -86,6 +86,7 @@ unsigned digit_count(int number) {
 // try to find a config file
 std::string resolve_config_file(std::string file_name) {
     std::string path = get_default_file(file_name.c_str());
+
     #ifdef __linux__
     struct stat buf;
 
@@ -93,7 +94,17 @@ std::string resolve_config_file(std::string file_name) {
     if(!stat(path.c_str(), &buf)) {
         return path;
     }
+	#endif
 
+	// check the current directory
+	std::string cwd = std::string("defs/") + file_name;
+	std::ifstream file(cwd);
+
+	if (file) {
+		return cwd;
+	}
+
+	#ifdef __linux__
     return std::string(ETC_CONFIG) + file_name;
     #else
     return path;
