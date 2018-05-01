@@ -1,0 +1,22 @@
+mkdir -p build_linux
+
+cd build_linux
+cmake ..
+
+if [ $? -ne 0 ]; then
+    cd ..
+    exit 1
+fi
+
+make
+
+if [ $? -ne 0 ]; then
+    cd ..
+    exit 1
+fi
+
+cd ..
+mkdir -p out/defs
+cp defs/monster_desc.txt out/defs
+cp defs/object_desc.txt out/defs
+cp build_linux/rlg out
