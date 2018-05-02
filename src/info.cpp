@@ -18,6 +18,10 @@
 
 #include <fstream>
 
+#ifdef _WIN32
+#define strncpy strncpy_s
+#endif
+
 #define MONSTER_INFO_SIZE 35
 #define WINDOW_HEIGHT 22
 #define WINDOW_WIDTH 80
@@ -31,12 +35,12 @@ void print_list(WINDOW *win, const std::string &title, const std::vector<std::st
     box(win, 0, 0);
 
     // print the title and list
-    mvwprintw(win, 0, (WINDOW_WIDTH - title.size() - 4) / 2, "| %s |", title.c_str());
+    mvwprintw(win, 0, (WINDOW_WIDTH - (int) title.size() - 4) / 2, "| %s |", title.c_str());
 
     wattroff(win, COLOR_PAIR(1));
 
     for(size_t j = i; j - i < WINDOW_HEIGHT - 3 && j < list.size(); ++j) {
-        mvwprintw(win, j - i + 1, 1, list[j].c_str());
+        mvwprintw(win, (int) (j - i + 1), 1, list[j].c_str());
     }
 
     wattron(win, COLOR_PAIR(1));
@@ -186,7 +190,7 @@ std::vector<std::string> inventory_list(pc_t &pc, bool is_carry) {
 	for (size_t i = 0; i < (is_carry ? NUM_CARRY_SLOTS : NUM_EQUIPMENT_SLOTS); ++i) {
 		std::stringstream item;
 
-		char id = is_carry ? (i + '0') : (i + 'a');
+		char id = (char) (is_carry ? (i + '0') : (i + 'a'));
 
 		item << id << ": " << (slots[i] ? slots[i]->name : "");
 

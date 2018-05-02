@@ -288,8 +288,7 @@ void dungeon_t::create_cycle()
   /* Find the (approximately) farthest two rooms, then connect *
    * them by the shortest path using inverted hardnesses.      */
 
-  int32_t max, tmp, p, q;
-  size_t i, j;
+  int32_t max, tmp, p, q, i, j;
   pair_t e1, e2;
 
   for (i = max = 0; i < rooms.size() - 1; i++) {
@@ -741,10 +740,10 @@ void dungeon_t::write_rooms(std::ostream &out) {
   }
 }
 
-uint32_t dungeon_t::calculate_dungeon_size() {
+int dungeon_t::calculate_dungeon_size() {
   return (20 /* The semantic, version, and size */     +
           (DUNGEON_X * DUNGEON_Y) /* The hardnesses */ +
-          (rooms.size() * 4) /* Four bytes per room */);
+          ((int) rooms.size() * 4) /* Four bytes per room */);
 }
 
 #ifdef _WIN32

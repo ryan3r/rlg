@@ -50,10 +50,11 @@ void Logger::print_most_recent() {
 		attron(COLOR_PAIR(1));
 		mvprintw(0, 0, "%s", messages[index]->msg.c_str());
 		attroff(COLOR_PAIR(1));
-
+		
 		if (messages.size() > 1) {
 			attron(COLOR_PAIR(5));
-			mvprintw(0, DUNGEON_X - (digit_count(index + 1) + digit_count(messages.size())), "%d/%d", index + 1, messages.size());
+			mvprintw(0, DUNGEON_X - (int) (digit_count((int) index + 1) + digit_count((int) messages.size())),
+				"%d/%d", (int) index + 1, (int) messages.size());
 			attroff(COLOR_PAIR(5));
 		}
 	}

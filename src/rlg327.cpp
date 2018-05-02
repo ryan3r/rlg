@@ -27,6 +27,10 @@
 #include <path.hpp>
 #include <logger.hpp>
 
+#ifdef _WIN32
+#define strdup _strdup
+#endif
+
 const char *victory =
   "                                       o\n"
   "                                      $\"\"$o\n"
@@ -113,7 +117,7 @@ int main(int argc, char *argv[])
 		time_t seed = time(NULL);
 #endif
 
-		srand(seed);
+		srand((int) seed);
 
 		// initiailize ncurses
 		initscr();

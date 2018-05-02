@@ -100,6 +100,28 @@ void pc_t::take_off_object() {
 	}
 }
 
+// save the current dungeon
+void pc_t::save_dungeon() {
+    int key;
+    std::string name;
+    mvprintw(DUNGEON_Y + 1, 0, "Save file: ");
+    refresh();
+
+    while((key = getch()) != 13) {
+        if(key == KEY_BACKSPACE) {
+            name = name.substr(name.size() - 1);
+        }
+        else {
+            name += (char) key;
+        }
+
+        mvprintw(DUNGEON_Y + 1, 0, "Save file: %s", name.c_str());
+        refresh();
+    }
+
+    d->write_dungeon(name);
+}
+
 // put on an object
 void pc_t::wear_object() {
 	size_t slot = inventory_prompt("Pick an object to wear", *this, true);
@@ -181,6 +203,10 @@ bool pc_t::move_keys(int key, pair_t &next) {
 
 		case '5': case ' ':
 			break;
+
+        /*case 13:
+            save_dungeon();
+            break;*/
 
 		default:
 			return false;

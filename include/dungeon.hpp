@@ -48,7 +48,7 @@ private:
   void place_rooms();
   void make_rooms();
   void write_rooms(std::ostream&);
-  uint32_t calculate_dungeon_size();
+  int calculate_dungeon_size();
   void read_dungeon_map(std::istream&);
   void write_dungeon_map(std::ostream &out);
   void read_rooms(std::istream &in, int num_rooms);

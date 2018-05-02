@@ -21,6 +21,7 @@ private:
   void drop_object();
   void take_off_object();
   void wear_object();
+  void save_dungeon();
 
   terrain_type_t map[DUNGEON_Y][DUNGEON_X];
 

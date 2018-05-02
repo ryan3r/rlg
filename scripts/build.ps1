@@ -1,7 +1,7 @@
 mkdir build_win > $null 2> $null
 cd build_win
 
-cmake ..
+cmake .. -DCMAKE_GENERATOR_PLATFORM=x64
 if(!$?) { cd ..; exit 1 }
 
 cmake --build .
